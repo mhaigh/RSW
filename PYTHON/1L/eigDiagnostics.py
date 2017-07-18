@@ -63,36 +63,91 @@ def footprint(u_full,v,PV_full,x_nd,dx_nd,dy_nd,N):
 #====================================================
 
 # eigPlot
-def eigPlots(u,v,eta,x_nd,y_nd):
+def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 	
-	u = extend(u);
-	v = extend(v);
-	eta = extend(eta);
+	u_proj = extend(u_proj);
+	v_proj = extend(v_proj);
+	eta_proj = extend(eta_proj);
 
-	plt.figure(1,figsize=[21,6]);
-	plt.subplot(131)
-	plt.contourf(x_nd,y_nd,u);
-	plt.xticks((-1./2,0,1./2));
-	plt.yticks((-1./2,0,1./2));	
-	plt.xlabel('x');
-	plt.ylabel('y');
-	plt.colorbar();
-	plt.subplot(132)
-	plt.contourf(x_nd,y_nd,v);
-	plt.xticks((-1./2,0,1./2));
-	plt.yticks((-1./2,0,1./2));	
-	plt.xlabel('x');
-	plt.ylabel('y');
-	plt.colorbar();
-	plt.subplot(133)
-	plt.contourf(x_nd,y_nd,eta);
-	plt.xticks((-1./2,0,1./2));
-	plt.yticks((-1./2,0,1./2));	
-	plt.xlabel('x');
-	plt.ylabel('y');
-	plt.colorbar();
-	plt.tight_layout();
-	plt.show();
+	if sol:
+
+		u_nd = extend(u_nd);
+		v_nd = extend(v_nd);
+		eta_nd = extend(eta_nd);
+
+		plt.figure(1,figsize=[21,6]);
+		plt.subplot(231)
+		plt.contourf(x_nd,y_nd,u_proj);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.subplot(232)
+		plt.contourf(x_nd,y_nd,v_proj);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.subplot(233)
+		plt.contourf(x_nd,y_nd,eta_proj);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+	
+		plt.subplot(234)
+		plt.contourf(x_nd,y_nd,u_nd);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.subplot(235)
+		plt.contourf(x_nd,y_nd,v_nd);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.subplot(236)
+		plt.contourf(x_nd,y_nd,eta_nd);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.tight_layout();
+		plt.show();
+
+	else:	
+
+		plt.figure(1,figsize=[21,6]);
+		plt.subplot(131)
+		plt.contourf(x_nd,y_nd,u_proj);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.subplot(132)
+		plt.contourf(x_nd,y_nd,v_proj);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.subplot(133)
+		plt.contourf(x_nd,y_nd,eta_proj);
+		plt.xticks((-1./2,0,1./2));
+		plt.yticks((-1./2,0,1./2));	
+		plt.xlabel('x');
+		plt.ylabel('y');
+		plt.colorbar();
+		plt.tight_layout();
+		plt.show();
 
 #====================================================
 

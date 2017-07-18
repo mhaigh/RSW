@@ -12,7 +12,7 @@ import diagnostics
 import eigDiagnostics
 import PV
 import eigSolver
-import output
+from output import ncSaveEigenmodes
 
 from inputFile_1L import *
 
@@ -44,7 +44,7 @@ for ii in range(k_start,k_end):
 
 	dim = np.size(val);
 	# count = number of zero-crossings by the eigenvector 
-	# i_count = 
+	# i_count = set of indices ordering modes by their count
 	count, i_count = eigDiagnostics.orderEigenmodes(vec,val,N,False);
 	
 	# Order all relevant arrays
@@ -52,11 +52,13 @@ for ii in range(k_start,k_end):
 	vec = vec[:,i_count];
 	val = val[i_count];
 
-	#np.save('count',count);
-	#np.save('vec',vec);
-	#np.save('val',val);
-			
 	u_vec = vec[0:N,:];
+	v_vec = vec[0:N,:];
+	eta_vec = vec[0:N,:];
+
+	ncSaveEigenmodes(u_vec,v_vec,eta_vec,val,y_nd,k,N,dim);
+
+	v=ee;
 	u = np.zeros((N,N),dtype=float);
 	update_i = [];		# Used to store the set of wi indices that need updating.
 	for wi in range(0,dim):
@@ -96,6 +98,7 @@ for ii in range(k_start,k_end):
 	u_vec = u_vec[0:N,i_count];
 	u = np.zeros((N,N),dtype=float);
 
+	
 	
 	# Check them
 	for wi in range(0,dim):

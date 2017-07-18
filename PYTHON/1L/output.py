@@ -26,6 +26,7 @@ def ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,
 	y_dim = RSW1L.createDimension('y_dim',N);
 	k_dim = RSW1L.createDimension('k_dim',N);
 	t_dim = RSW1L.createDimension('t_dim',Nt);
+	real_imag = RSW1L.createDimension('real_imag',2);
 
 	# Initialise dimension variables...
 	x = RSW1L.createVariable('x','f8',('x_dim',));
@@ -35,29 +36,24 @@ def ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,
 	# ...and assign the data.
 	x[:] = x_nd;
 	y[:] = y_nd;
+	k[:] = K_nd;
 	t[:] = T_nd[0:Nt];
 
 	# Initialise solution variables...
 	u = RSW1L.createVariable('u','f8',('y_dim','x_dim','t_dim',));
 	v = RSW1L.createVariable('v','f8',('y_dim','x_dim','t_dim',));
 	eta = RSW1L.createVariable('eta','f8',('y_dim','x_dim','t_dim',));
-	utilde_real = RSW1L.createVariable('utilde_real','f4',('k_dim','y_dim',));
-	vtilde_real = RSW1L.createVariable('vtilde_real','f4',('k_dim','y_dim',));
-	etatilde_real = RSW1L.createVariable('etatilde_real','f4',('k_dim','y_dim',));	
-	utilde_imag = RSW1L.createVariable('utilde_imag','f4',('k_dim','y_dim',));
-	vtilde_imag = RSW1L.createVariable('vtilde_imag','f4',('k_dim','y_dim',));
-	etatilde_imag = RSW1L.createVariable('etatilde_imag','f4',('k_dim','y_dim',));
+	utilde = RSW1L.createVariable('utilde_real','f4',('k_dim','y_dim','real_imag',));
+	vtilde = RSW1L.createVariable('vtilde_real','f4',('k_dim','y_dim','real_imag',));
+	etatilde = RSW1L.createVariable('etatilde_real','f4',('k_dim','y_dim','real_imag',));	
 	
 	# ...and assign the data to the variables
 	u[:,:,:] = u_nd;
 	v[:,:,:] = v_nd;
 	eta[:,:,:] = eta_nd;
-	utilde_real[:,:] = np.real(utilde_nd);  
-	vtilde_real[:,:] = np.real(vtilde_nd);
-	etatilde_real[:,:] = np.real(etatilde_nd);
-	utilde_imag[:,:] = np.imag(utilde_nd);  
-	vtilde_imag[:,:] = np.imag(vtilde_nd);
-	etatilde_imag[:,:] = np.imag(etatilde_nd);
+	utilde[:,:,0] = np.real(utilde_nd); utilde[:,:,1] = np.imag(utilde_nd);
+	vtilde[:,:,0] = np.real(vtilde_nd); vtilde[:,:,1] = np.imag(vtilde_nd);
+	etatilde[:,:,0] = np.real(etatilde_nd); etatilde[:,:,1] = np.imag(etatilde_nd);	
 
 	# Some variables (PV, footprint, EEF) are conditional on their existence in RSW_1L.py
 	# Here we initialise them, and assign data to them.
@@ -82,8 +78,8 @@ def ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,
 
 #=======================================================
 
-# ncSaveEigmodes
-def ncSaveEigmodes(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
+# ncSaveEigenmodes
+def ncSaveEigenmodes(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
 # A function that saves the output of RSW_1L.py in netcdf format.
 # Saves the solutions (physical and spectral by default) and depending on whether or not
 # they were calculated, also saves the PV, footprints, and EEF.
@@ -92,28 +88,29 @@ def ncSaveEigmodes(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
 	file_name = 'RSW1L_Eigmodes_k' + str(k) + '.nc';
 
 	# Initialise the nc file
-	RSW1L_Eigmodes = nc.Dataset(file_name,'w',format='NETCDF4');
+	RSW1L_Eigenmodes = nc.Dataset(file_name,'w',format='NETCDF4');
 		
 	# Create dimensions
-	y_dim = RSW1L_Eigmodes.createDimension('y_dim',N);
-	omega_dim = RSW1L_Eigmodes.createDimension('omega_dim',dim)
+	y_dim = RSW1L_Eigenmodes.createDimension('y_dim',N);
+	omega_dim = RSW1L_Eigenmodes.createDimension('omega_dim',dim);
+	real_imag = RSW1L_Eigenmodes.createDimension('real_imag',2);
 
 	# Initialise dimension variables...
-	y = RSW1L_Eigmodes.createVariable('y','f8',('y_dim',));
-	omega = RSW1L_Eigmodes.createVariable('omega','f8',('omega_dim',));
+	y = RSW1L_Eigenmodes.createVariable('y','f8',('y_dim',));
+	omega = RSW1L_Eigenmodes.createVariable('omega','f8',('omega_dim','real_imag',));
 	# ...and assign the data.
 	y[:] = y_nd;
-	omega[:] = val;
+	omega[:,0] = np.real(val); omega[:,1] = np.imag(val);
 	
 	# Initialise solution variables...
-	u_vec = RSW1L.createVariable('u_vec','f8',('y_dim','omega_dim',));
-	v_vec = RSW1L.createVariable('v_vec','f8',('y_dim','omega_dim',));
-	eta_vec = RSW1L.createVariable('eta_vec','f8',('y_dim','omega_dim',));
+	u_vec = RSW1L_Eigenmodes.createVariable('u_vec','f8',('y_dim','omega_dim','real_imag',));
+	v_vec = RSW1L_Eigenmodes.createVariable('v_vec','f8',('y_dim','omega_dim','real_imag',));
+	eta_vec = RSW1L_Eigenmodes.createVariable('eta_vec','f8',('y_dim','omega_dim','real_imag',));
 	
 	# ...and assign the data to the variables
-	u_vec[:,:] = u_modes;
-	v_vec[:,:] = v_modes;
-	eta_vec[:,:] = eta_modes;
+	u_vec[:,:,0] = np.real(u_modes); u_vec[:,:,1] = np.imag(u_modes);
+	v_vec[:,:,0] = np.real(v_modes); v_vec[:,:,1] = np.imag(v_modes);
+	eta_vec[:,:,0] = np.real(eta_modes); eta_vec[:,:,1] = np.imag(eta_modes);
 
-	RSW1L_Eigmodes.close();
+	RSW1L_Eigenmodes.close();
 

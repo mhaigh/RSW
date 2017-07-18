@@ -3,7 +3,7 @@ clear all
 
 %loc = '~/cluster/old_nc/3L/BUOY=0_5/';
 %loc = '~/cluster/old_nc/3L/REF_50yr/';
-loc = '~/cluster/gold5/';
+loc = '~/cluster/gold8/';
 %loc = '/home/mike/cluster/old_nc/3L/NoWind/12e-12/';
 
 cd(loc);
@@ -118,11 +118,11 @@ if movie == 1
 
         if ii == 1
 
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/Code/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
+            imwrite(imind,cm,'/home/mike/Documents/GulfStream/RSW/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
 
         else
 
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/Code/IMAGES/GOLD_PV.gif','WriteMode','append');
+            imwrite(imind,cm,'/home/mike/Documents/GulfStream/RSW/IMAGES/GOLD_PV.gif','WriteMode','append');
         end
 
     end
@@ -164,18 +164,24 @@ end
 %%
 % ENERGY
 
-KE = zeros(nx,ny);
-count = 0;
-%for i = 20:nf
-for i = nf-1:nf-1
-    disp(i);
-    KEnew = ncread(files(i).name,'KE');
-    KEnew = KEnew(:,:,1,:);
-    nn = size(KEnew,4);    
-    for ti = 1:nn
-        KE1(:,:,count+ti)=transpose(KEnew(:,:,ti));
-    end
-    count = count + nn;
-end
-nt = size(PV1,3);
+% files = dir('energy__*');
+% nf = size(files);
+% count = 0;
+% %for i = 20:nf
+% for i = 1:nf-1
+%     disp(i);
+%     KEnew = ncread(files(i).name,'KE');
+%     KEnew = KEnew(:,:,1,1);
+%     nn = size(KEnew,4);    
+%     for ti = 1:nn
+%         KE1(count+ti+1) =+ sum(sum(KEnew));
+%     end
+%     count = count + nn;
+% end
+% nt = size(KE1,3);
+
+TE = load('energy_d_mass');
+TE = TE(:,2);
+
+plot(TE);
 

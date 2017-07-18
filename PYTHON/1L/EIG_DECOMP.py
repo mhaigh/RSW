@@ -71,8 +71,10 @@ print('solved');
 
 VEC = 'NEW';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
-# How many modes to use in the decomposition at each wavenumber
-Nm = 6;
+
+Nm = 3;		# How many modes to use in the decomposition at each wavenumber
+Nk = Nm;	# How many positive/negative wavenumbers to perform this decomposition at,
+			# totataling 
 
 theta = np.zeros((Nm,N),dtype=complex); 		# Initialise the set of weights; these will be complex.
 proj = np.zeros((dim,N),dtype=complex);			# The projection. Sums the Nm most dominant modes, each of length dim, for N i-values.
@@ -82,8 +84,23 @@ vec = np.zeros((Nm,dim,N),dtype=complex);		# The eigenvectors
 # Define the coefficients that the solver requires
 a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 uBC, etaBC = eigSolver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
+
 # Loop over all wavenumbers
-for i in range(0,N):
+for i in range(0,Nk+1):
+	print(i);
+
+	Phi = solution[:,i];		# Assign the solution corresponding to wavenumber k=K_nd[i].
+	
+	theta_tmp, val_tmp, vec_tmp = eigSolver.eigDecomp(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,BC,VEC,Phi);
+
+	dom_index = np.argsort(-(np.abs(theta_tmp))**2);	# The indices of the modes, ordered by 'dominance'.
+	for mi in range(0,Nm):
+		val[mi,i] = val_tmp[dom_index[mi]];
+		theta[mi,i] = theta_tmp[dom_index[mi]];
+		vec[mi,:,i] = vec_tmp[:,dom_index[mi]];
+		proj[:,i] = proj[:,i] + theta[mi,i] * vec[mi,:,i];
+
+for i in range(N-Nk-1,N):
 	print(i);
 
 	Phi = solution[:,i];		# Assign the solution corresponding to wavenumber k=K_nd[i].
@@ -98,8 +115,8 @@ for i in range(0,N):
 		proj[:,i] = proj[:,i] + theta[mi,i] * vec[mi,:,i];
 
 	print(T_adv/(np.real(val[0,i]*24*3600)));
-	plt.plot(vec[0,0:N,i]);
-	plt.show();
+	#plt.plot(vec[0,0:N,i]);
+	#plt.show();
 	
 
 #====================================================
@@ -138,16 +155,18 @@ for i in range(0,N):
 
 #====================================================
 
-PV_full, PV_prime = eigDiagnostics.PV(u_proj,v_proj,eta_proj,u_full,eta_full,H0_nd,U0_nd,f_nd,dx_nd,dy_nd,N);
-P, P_xav = eigDiagnostics.footprint(u_proj,v_proj,PV_full,x_nd,dx_nd,dy_nd,N);
+eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u_nd[:,:,ts],v_nd[:,:,ts],eta_nd[:,:,ts],x_nd,y_nd,True);
 
 #====================================================
 
-eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,x_nd,y_nd);
-diagnostics.pvPlots(PV_full,PV_prime,P,x_nd,y_nd);
+#PV_full, PV_prime = eigDiagnostics.PV(u_proj,v_proj,eta_proj,u_full,eta_full,H0_nd,U0_nd,f_nd,dx_nd,dy_nd,N);
+#P, P_xav = eigDiagnostics.footprint(u_proj,v_proj,PV_full,x_nd,dx_nd,dy_nd,N);
 
-plt.plot(y_nd,P_xav);
-plt.show();
+#diagnostics.pvPlots(PV_full,PV_prime,P,x_nd,y_nd);
+
+#plt.plot(y_nd,P_xav);
+#plt.show();
+
 #====================================================
 
 	
