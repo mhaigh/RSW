@@ -78,7 +78,7 @@ Nk = Nm;	# How many positive/negative wavenumbers to perform this decomposition 
 
 theta = np.zeros((Nm,N),dtype=complex); 		# Initialise the set of weights; these will be complex.
 proj = np.zeros((dim,N),dtype=complex);			# The projection. Sums the Nm most dominant modes, each of length dim, for N i-values.
-val = np.zeros((Nm,N),dtype=complex);			# Eigenvalues, will only need to save Nm of them.
+val = np.zeros((Nm,N),dtype=complex);			# Eigenvalues, will only need to save Nm of them per wavenumber.
 vec = np.zeros((Nm,dim,N),dtype=complex);		# The eigenvectors
 
 # Define the coefficients that the solver requires
@@ -114,7 +114,7 @@ for i in range(N-Nk-1,N):
 		vec[mi,:,i] = vec_tmp[:,dom_index[mi]];
 		proj[:,i] = proj[:,i] + theta[mi,i] * vec[mi,:,i];
 
-	print(T_adv/(np.real(val[0,i]*24*3600)));
+	#print(T_adv/(np.real(val[0,i]*24*3600)));
 	#plt.plot(vec[0,0:N,i]);
 	#plt.show();
 	

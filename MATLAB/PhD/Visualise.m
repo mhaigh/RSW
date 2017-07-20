@@ -27,7 +27,7 @@ RUN = 1;    % Choose to define PV from a completed RUN (1) or a RUN in progress 
 if RUN == 1
     PV_av = zeros(nx,ny);
     count = 0;
-    %for i = 20:nf
+    %for i = 3:3
     for i = nf-1:nf-1
         disp(i);
         PVnew = ncread(files(i).name,'PV');
@@ -183,5 +183,7 @@ end
 TE = load('energy_d_mass');
 TE = TE(:,2);
 
-plot(TE);
+plot(TE); xlabel('days'); ylabel('Total Energy');...
+    saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','TE'],'png');
+    
 

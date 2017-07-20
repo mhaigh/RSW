@@ -38,7 +38,6 @@ for ii in range(k_start,k_end):
 	k = K_nd[ii];
 	if BC == 'NO-SLIP':
 		val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
-#NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 	if BC == 'FREE-SLIP':
 		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
 
@@ -56,51 +55,107 @@ for ii in range(k_start,k_end):
 	v_vec = vec[0:N,:];
 	eta_vec = vec[0:N,:];
 
-	ncSaveEigenmodes(u_vec,v_vec,eta_vec,val,y_nd,k,N,dim);
+	# ncSaveEigenmodes(u_vec,v_vec,eta_vec,val,y_nd,k,N,dim);
 
-	v=ee;
+	#====================================================
+
+	# By this point, eigenmodes have been calculated and ordered. The ordering algorithm may make mistakes,
+	# however, so the set of modes can be manually updated with the remainder of the code.
+
+	# 1. This first section runs through each mode, allowing to manually update the zero-crossings count.
+	# Use the u vector as an example.
+
 	u = np.zeros((N,N),dtype=float);
+	count_new = np.array(list(count));
 	update_i = [];		# Used to store the set of wi indices that need updating.
-	for wi in range(0,dim):
+	wii = 0;
+	while wii < dim:
+		print(wii);
 		for i in range(0,N):
 			for j in range(0,N):
-				u[j,i] = np.real(u_vec[j,wi] * np.exp(2 * np.pi * I * (k * x_nd[i])));
-		print(count[wi]);
-		u_abs = np.abs
+				u[j,i] = np.real(u_vec[j,wii] * np.exp(2 * np.pi * I * (k * x_nd[i])));
+		print(count[wii]);
 		plt.subplot(121);
 		plt.contourf(u);
 		plt.subplot(122);
-		plt.plot(np.abs(u_vec[:,wi]),y_nd);
+		plt.plot(np.abs(u_vec[:,wii]),y_nd);
 		plt.ylim(-0.5,0.5);
 		plt.show();
 
 		# Can use these plots to check any errors, and update count accordingly;
 		# comment out if not needed.
-		update_count = raw_input('-->');		# First step updates count, but i_count will no longer match.									
-		if update_count != '':				
-			count[wi] = int(update_count);	
- 			update_i.append(wi);
-	
-	update_i = np.array(update_i); 					# Convert it into a usable array
-	i_count = np.linspace(0,dim-1,dim,dtype=int); 	# Create a new set of indices, ordering the vectors.
-	for ii in range(0,len(update_i)):
-		ui = update_i[ii];
-		count_ui = count[ui];
-		i_count_ui = i_count[ui];
-		for wi in range(0,dim):
-			if count[wi] == count_ui and count[wi+1] == count_ui + 1:
-				count[wi+1:ui+1] = count[wi:ui];
-				count[wi] = count_ui;
-				i_count[wi+1:ui+1] = i_count[wi:ui];
-				i_count[wi] = i_count[ui];
-	
-	# Update the vectors
-	u_vec = u_vec[0:N,i_count];
-	u = np.zeros((N,N),dtype=float);
+		update_count = raw_input('-->');		# The first step updates count, but i_count will no longer match.									
+		if update_count != '' and update_count != 'end':	
+			print('updated');
+			count_new[wii] = int(update_count);	# Stores the new count, to be used to rearrange the vectors.
+ 			update_i.append(wii);				# Stores the indices of the vectors to be updated.
+		elif update_count == 'end':
+			wii = wii + dim; 	# End the loop, and don't update any more modes.
+		
+		wii = wii + 1;
+	print(count_new);
+	update_i = np.array(update_i); 	# Convert it into a usable array
 
+	#====================================================
+
+	# 2. According to the updated count, the vectors are reordered.
+
+	i_count_new = np.linspace(0,dim-1,dim,dtype=int); 	# Create a new set of indices, ordering the vectors.
+	for ii in range(0,len(update_i)):
+		ui = update_i[ii];				# The index to be updated/moved
+		count_new_ui = count_new[ui];		# The count at that index
+		print('ui=' + str(ui));
+		# Now need two loops: 1 for moving a vector up in the list and one for down
+		if count_new_ui < count[ui]:	# i.e. if count has been lowered...
+			wii = 0
+			while wii < ui:				# Only need to go up to ui in the loop.
+				if count[wii] == count_new_ui and count[wii+1] == count_new_ui + 1:
+					print(wii);
+					# Update the index ordering.
+					i_count_new[wii+2:ui+1] = i_count_new[wii+1:ui];
+					print(i_count_new);
+					i_count_new[wii+1] = ui;
+					print(i_count_new);
+					# And update the count
+					count[ui] = count_new_ui;
+					count = count[i_count_new];	
+					count_new = count_new[i_count_new];
+					wii = wii + ui;			# This prevents the same loop from running twice when only one update is required.
+				wii = wii + 1; 
+		elif count_new_ui > count[ui]:	# i.e. if count has been raised...
+			wii = 0
+			while wii < dim:				# Only need to go up to ui in the loop.
+				if count[wii] == count_new_ui and count[wii-1] == count_new_ui - 1:
+					print(wii);
+					# Update the index ordering.
+					i_count_new[ui:wii] = i_count_new[ui+1:wii+1];
+					print(i_count_new);
+					i_count_new[wii-1] = ui;
+					print(i_count_new);
+					# And update the count
+					count[ui] = count_new_ui;
+					count = count[i_count_new];	
+					count_new = count_new[i_count_new];
+					wii = wii + dim;			# This prevents the same loop from running twice when only one update is required.
+				wii = wii + 1;
 	
+	# Update the vectors & eigenvalues	
+	vec = vec[:,i_count_new];
+	val = val[i_count_new];
+
+	u_vec = vec[0:N,:];
+	v_vec = vec[0:N,:];
+	eta_vec = vec[0:N,:];		
+
+	# TEST TEST TEST TEST
+
+	# ncSaveEigenmodes(u_vec,v_vec,eta_vec,val,y_nd,k,N,dim);
 	
-	# Check them
+	#====================================================
+	
+	# 3. The new vectors can be checked, again using u_vec as an example.
+
+	u = np.zeros((N,N),dtype=float);
 	for wi in range(0,dim):
 		for i in range(0,N):
 			for j in range(0,N):
@@ -113,6 +168,9 @@ for ii in range(k_start,k_end):
 		plt.plot(np.abs(u_vec[:,wi]),y_nd);
 		plt.ylim(-0.5,0.5);
 		plt.show();
+
+	#====================================================
+	#====================================================
 
 	
 

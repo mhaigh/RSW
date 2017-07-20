@@ -29,7 +29,7 @@ Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 
 # Domain
 #=======================================================
 
-N = 64; 			# Number of gridpoints
+N = 32; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
