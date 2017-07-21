@@ -7,12 +7,15 @@
 
 #====================================================
 
+import sys
+
 import numpy as np
 import eigSolver
 import matplotlib.pyplot as plt
 import eigDiagnostics
 import diagnostics
 import solver
+import output_read
 
 from inputFile_1L import *
 
@@ -40,7 +43,7 @@ if SOL == 'NEW':
 		uBC, etaBC = solver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
 		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
 	else:
-		print('ERROR: choose BCs');
+		sys.exit('ERROR: choose valid BC');
 
 # Split the solution into its components
 utilde_nd = np.zeros((N,N),dtype=complex);
@@ -69,29 +72,45 @@ print('solved');
 # OPT = 2 -->
 #====================================================
 
-VEC = 'NEW';	# From FILE, requires pre-saved vectors which take up lots of memory.
-
+VEC = 'FILE';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
 Nm = 3;		# How many modes to use in the decomposition at each wavenumber
 Nk = Nm;	# How many positive/negative wavenumbers to perform this decomposition at,
-			# totataling 
+			# totataling 2 * Nk + 1 wavenumbers.
 
 theta = np.zeros((Nm,N),dtype=complex); 		# Initialise the set of weights; these will be complex.
 proj = np.zeros((dim,N),dtype=complex);			# The projection. Sums the Nm most dominant modes, each of length dim, for N i-values.
-val = np.zeros((Nm,N),dtype=complex);			# Eigenvalues, will only need to save Nm of them per wavenumber.
-vec = np.zeros((Nm,dim,N),dtype=complex);		# The eigenvectors
 
-# Define the coefficients that the solver requires
-a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
-uBC, etaBC = eigSolver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
-
-# Loop over all wavenumbers
-for i in range(0,Nk+1):
+# Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
+k_start = 2;
+k_end = k_start + 1;
+#for i in range(0,Nk+1):
+for i in range(k_start,k_end):
 	print(i);
+	# Run the solver for the current k-value.
+	k = K_nd[i];
+	if VEC == 'NEW':	# Solve the eigenmode problem anew.
+		a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
+		if BC == 'NO-SLIP':
+			val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,True);
+		if BC == 'FREE-SLIP':
+			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
+	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
+		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/';
+		ncFile = path + 'RSW1L_Eigenmodes_k2_N128.nc';
+		val, vec, count = output_read.ncReadEigenmodes(ncFile);
+	else:
+		sys.exit('VEC must be FILE or NEW');
+
+	print(count);
+
+
+
+	
 
 	Phi = solution[:,i];		# Assign the solution corresponding to wavenumber k=K_nd[i].
 	
-	theta_tmp, val_tmp, vec_tmp = eigSolver.eigDecomp(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,BC,VEC,Phi);
+	theta_tmp = np.linalg.solve(vec,Phi);
 
 	dom_index = np.argsort(-(np.abs(theta_tmp))**2);	# The indices of the modes, ordered by 'dominance'.
 	for mi in range(0,Nm):

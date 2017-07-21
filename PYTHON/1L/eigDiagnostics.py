@@ -2,6 +2,8 @@
 # File containing functions to be called by the master script EIG.py.
 #====================================================
 
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -180,14 +182,30 @@ def orderEigenmodes(vec,val,N,VECS):
 
 	return count, i_count;
 
-
-
-
-
-
-
-
 #====================================================
+
+# vec2vecs
+def vec2vecs(vec,N,dim,BC):
+# A function to take the full eigenvector, vec = (u,v,eta), and 
+# extract u, v, eta, depending on the boundary condition.
+
+	if BC == 'FREE-SLIP':
+		u_vec = vec[0:N,:];
+		v_vec = np.zeros((N,dim),dtype=complex);
+		v_vec[1:N-1,:] = vec[N:2*N-2,:];
+		eta_vec = vec[2*N-2:3*N-2,:];
+	elif BC == 'NO-SLIP':
+		u_vec = np.zeros((N,dim),dtype=complex);
+		u_vec[1:N-1,:] = vec[0:N-2,:];
+		v_vec = np.zeros((N,dim),dtype=complex);
+		v_vec[1:N-1,:] = vec[N:2*N-2,:];
+		eta_vec = vec[2*N-4:3*N-4,:];	
+		return val, u_vec, v_vec, eta_vec;		
+	else:
+		sys.exit('ERROR: choose valid BC');
+
+	
+	return u_vec, v_vec, eta_vec;
 
 
 	

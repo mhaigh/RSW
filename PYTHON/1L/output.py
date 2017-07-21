@@ -12,7 +12,7 @@ import netCDF4 as nc
 #=======================================================
 
 # ncSave
-def ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_FULL,PV_PRIME,PV_bg,Pq,EEFq,N,Nt):
+def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_FULL,PV_PRIME,PV_bg,Pq,EEFq,N,Nt):
 # A function that saves the output of RSW_1L.py in netcdf format.
 # Saves the solutions (physical and spectral by default) and depending on whether or not
 # they were calculated, also saves the PV, footprints, and EEF.
@@ -79,13 +79,56 @@ def ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,
 #=======================================================
 
 # ncSaveEigenmodes
-def ncSaveEigenmodes(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
-# A function that saves the output of RSW_1L.py in netcdf format.
+def ncSaveEigenmodes(modes,val,zero_count,y_nd,k,N,dim,BC):
+# A function that saves the output of EIG.py in netcdf format, with the u,v and eta modes under separate variable names.
 # Saves the solutions (physical and spectral by default) and depending on whether or not
 # they were calculated, also saves the PV, footprints, and EEF.
 # The last thing to be saved are the BG flow U0, forcing radius r0, kinematic viscosity nu, forcing period.
 
-	file_name = 'RSW1L_Eigmodes_k' + str(k) + '.nc';
+	file_name = 'RSW1L_Eigenmodes_k' + str(k) + '.nc';
+
+	# Initialise the nc file
+	RSW1L_Eigenmodes = nc.Dataset(file_name,'w',format='NETCDF4');
+		
+	# Create dimensions
+	y3_dim = RSW1L_Eigenmodes.createDimension('y3_dim',dim);
+	omega_dim = RSW1L_Eigenmodes.createDimension('omega_dim',dim);
+	real_imag = RSW1L_Eigenmodes.createDimension('real_imag',2);
+
+	# Initialise dimension variables...
+	y3 = RSW1L_Eigenmodes.createVariable('y3','f8',('y3_dim',)); # Here y3_dim is 3 times the domain, minus some endpoints
+	omega = RSW1L_Eigenmodes.createVariable('omega','f8',('omega_dim','real_imag',));
+	# ...and assign the data.
+	if BC == 'NO-SLIP':		
+		y3[0:N-2] = y_nd[1:N-1];
+		y3[N-2:2*N-4] = y_nd[1:N-1];
+		y3[2*N-4:3*N-4] = y_nd;
+	if BC == 'FREE-SLIP':
+		y3[0:N] = y_nd[0:N];
+		y3[N:2*N-2] = y_nd[1:N-1];
+		y3[2*N-2:3*N-2] = y_nd;		
+	omega[:,0] = np.real(val); omega[:,1] = np.imag(val);
+	
+	# Initialise solution variables...
+	vec = RSW1L_Eigenmodes.createVariable('vec','f8',('y3_dim','omega_dim','real_imag',));
+	count = RSW1L_Eigenmodes.createVariable('count','i4',('y3_dim',));
+	
+	# ...and assign the data to the variables
+	vec[:,:,0] = np.real(modes); vec[:,:,1] = np.imag(modes);
+	count[:] = zero_count;
+
+	RSW1L_Eigenmodes.close();
+
+#=======================================================
+
+# ncSaveEigenmodes_sep
+def ncSaveEigenmodes_sep(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
+# A function that saves the output of EIG.py in netcdf format, with the u,v and eta modes under separate variable names.
+# Saves the solutions (physical and spectral by default) and depending on whether or not
+# they were calculated, also saves the PV, footprints, and EEF.
+# The last thing to be saved are the BG flow U0, forcing radius r0, kinematic viscosity nu, forcing period.
+
+	file_name = 'RSW1L_Eigenmodes_k' + str(k) + '.nc';
 
 	# Initialise the nc file
 	RSW1L_Eigenmodes = nc.Dataset(file_name,'w',format='NETCDF4');

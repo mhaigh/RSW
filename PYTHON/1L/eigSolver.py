@@ -364,35 +364,9 @@ def eigDecomp(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,BC,VEC,Phi):
 # Calculated is the decomposition for a single wavenumber value, i.e. to get the full decomposition, eigDecomp must be ran N times.
 # The output depends on VEC. 
 
-	# Define the eigenvector for a given k -  can be from FILE or a NEW run.
-	if type(VEC) == str:
+	theta = np.linalg.solve(VEC,Phi);
 
-		if VEC	== 'FILE':
-
-			vec = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/EIG/vec.npy');
-
-			theta = np.linalg.solve(vec,Phi);
-
-			return theta, val, vec;
-
-		elif VEC == 'NEW':
-
-			if BC == 'NO-SLIP':
-				val, vec = NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
-			elif BC == 'FREE-SLIP':
-				val, vec = FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
-			else:
-				print('ERROR: choose BCs');
-
-			theta = np.linalg.solve(vec,Phi);
-
-			return theta, val, vec;
-		
-	else:
-		
-		theta = np.linalg.solve(VEC,Phi);
-
-		return theta;
+	return theta;
 
 
 		
