@@ -44,7 +44,8 @@ for ii in range(k_start,k_end):
 	dim = np.size(val);
 	# count = number of zero-crossings by the eigenvector 
 	# i_count = set of indices ordering modes by their count
-	count, i_count = eigDiagnostics.orderEigenmodes(vec,val,N,False);
+	#count, i_count = eigDiagnostics.orderEigenmodes(vec,val,N,False);	
+	count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False);
 	
 	# Order all relevant arrays
 	count = count[i_count];
@@ -81,17 +82,10 @@ for ii in range(k_start,k_end):
 
 		# Can use these plots to check any errors, and update count accordingly;
 		# comment out if not needed.
-		update_count = raw_input('-->');		# The first step updates count, but i_count will no longer match.									
-		if update_count != '' and update_count != 'end':	
-			print('updated');
-			count_new[wii] = int(update_count);	# Stores the new count, to be used to rearrange the vectors.
- 			update_i.append(wii);				# Stores the indices of the vectors to be updated.
-		elif update_count == 'end':
-			wii = wii + dim; 	# End the loop, and don't update any more modes.
-		
-		wii = wii + 1;
 
-	update_i = np.array(update_i); 	# Convert it into a usable array
+		count_new[wii], wii = eigDiagnostics.updateCount(count[wii],wii);	# Update the count, wii is set to high number if user wants to quit the algorithm.
+
+		wii = wii + 1;
 
 	#====================================================
 
@@ -128,9 +122,6 @@ for ii in range(k_start,k_end):
 
 	#====================================================
 	#====================================================
-
-	
-
 
 	# val is a set of dimensionless frequencies; it's easier to work in terms of dimensional periods.
 	# Here we order dimensionalise val and define the index arrays that give orderings of val.

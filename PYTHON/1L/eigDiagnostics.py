@@ -184,6 +184,61 @@ def orderEigenmodes(vec,val,N,VECS):
 
 #====================================================
 
+# orderEigenmodes2
+def orderEigenmodes2(vec,val,N,VECS):
+# A function that takes the set of eigenmodes, given by vec, and orders them according to the number of zero crossings.
+# When two or more eigenmodes cross zeros the same amount of times, they are ordered by their frequency, smallest first.
+	
+	dim = np.size(val);
+
+	if VECS:
+		vec = np.array(vec);
+		u_vec = vec[0,:,:];
+		v_vec = vec[1,:,:];
+		eta_vec = vec[2,:,:];
+
+	else:
+		u_vec = vec[0:N,:];		# Extract the eigenmodes.
+		v_vec = vec[N:2*N,:];
+		eta_vec = vec[2*N:3*N,:];		
+
+	# Initialise a counter for the number of zero crossings. 
+	count = np.zeros((dim),dtype=int);
+	for wi in range(0,dim):
+		u_abs = np.abs(u_vec[:,wi]);
+		u_av = np.mean(u_abs);
+		for j in range(1,N):
+			if (u_abs[j-1] >= u_av and u_abs[j] <= u_av) or (u_abs[j-1] <= u_av and u_abs[j] >= u_av):
+				count[wi] = count[wi] + 1;
+	
+	for wi in range(0,dim):
+		count[wi] = int(np.floor(count[wi] / 2));
+
+	i_count = np.argsort(count);
+
+	return count, i_count;
+
+#====================================================
+
+# updateCount
+def updateCount(count,wii):
+# A function that takes raw input to manually update the zero-crossings count of an eigenvector.
+# Type end to quit updating.
+
+	update_count = raw_input('-->');		# The first step updates count, but i_count will no longer match.									
+	if update_count != '' and update_count != 'end':	
+		print('updated');
+		count_new = int(update_count);	# Stores the new count, to be used to rearrange the vectors.
+ 	elif update_count == 'end':
+		count_new = count;
+		wii = wii + dim; 	# End the loop, and don't update any more modes.	
+	else:
+		count_new = count;
+
+	return count_new, wii;
+
+#====================================================
+
 # vec2vecs
 def vec2vecs(vec,N,dim,BC):
 # A function to take the full eigenvector, vec = (u,v,eta), and 
@@ -204,7 +259,6 @@ def vec2vecs(vec,N,dim,BC):
 	else:
 		sys.exit('ERROR: choose valid BC');
 
-	
 	return u_vec, v_vec, eta_vec;
 
 
