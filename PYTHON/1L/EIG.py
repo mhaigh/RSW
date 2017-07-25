@@ -5,9 +5,12 @@
 
 #====================================================
 
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 
+import itertools as it
 import diagnostics
 import eigDiagnostics
 import PV
@@ -31,9 +34,11 @@ I = np.complex(0.0,1.0);
 # Define the coefficients required by the solver
 a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-k_start = 2;
-k_end = k_start + 1;
-for ii in range(k_start,k_end):
+#k_start = 2;
+#k_end = k_start + 1;
+Nk = 6;
+loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	#range(k_start,k_end)
+for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];
 	if BC == 'NO-SLIP':
@@ -53,7 +58,15 @@ for ii in range(k_start,k_end):
 	val = val[i_count];
 
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
-	
+
+if str(raw_input('continue? y or n: ')) == 'n':
+	sys.exit();
+ 
+
+for ii in loop:
+
+	k = K_nd[ii];
+
 	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 
 	#====================================================

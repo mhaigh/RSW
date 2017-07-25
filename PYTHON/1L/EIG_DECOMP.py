@@ -75,22 +75,33 @@ print('solved');
 
 VEC = 'FILE';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
-Nm = 8;		# How many modes to use in the decomposition at each wavenumber
-Nk = Nm;	# How many positive/negative wavenumbers to perform this decomposition at,
-			# totataling 2 * Nk + 1 wavenumbers.
+Nm = 6;						# How many modes to use in the decomposition at each wavenumber.
+Nk_neg = 4; Nk_pos = 6		# How many positive/negative wavenumbers to perform this decomposition at,
+Nk = Nk_neg + Nk_pos + 1;	# totataling Nk = 2 * Nk + 1 wavenumbers.
 
-theta = np.zeros((Nm,N),dtype=complex); 		# Initialise the set of weights; these will be complex.
-proj = np.zeros((dim,N),dtype=complex);			# The projection. Sums the Nm most dominant modes, each of length dim, for N i-values.
-dom_index = np.zeros((Nm,N),dtype=int);			# To store the indices of the Nm-most dominant modes
+theta = np.zeros((Nm,Nk),dtype=complex); 	# Initialise the set of weights; these will be complex.
+proj = np.zeros((dim,Nk),dtype=complex);	# The projection. Sums the Nm most dominant modes, each of length dim, for Nk i-values.
+dom_index = np.zeros((Nm,Nk),dtype=int);	# To store the indices of the Nm-most dominant modes.
+
+scatter_k = np.zeros(Nm * Nk);		# An empty array for saving k-values, for use in the scatter plot of dominant modes.
+theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
 k_start = 2;
 k_end = k_start + 1;
-#for i in it.chain(range(0,Nk+1),range(N-Nk-1,N)):
-for i in range(k_start,k_end):
-	print(i);
+loop = it.chain(range(0,Nk_pos+1),range(N-Nk_neg,N));	#range(k_start,k_end)
+for ii in loop:	 
+	k = K_nd[ii];
+	# Determine the i-value
+	if ii in range(0,Nk_pos+1):
+		i = ii;
+	elif ii in range(N-Nk_neg,N):
+		i = int(Nk + k); 
+	
+	print('i = ' + str(i));
+	print('k = ' + str(int(k)));
+	
 	# Run the solver for the current k-value.
-	k = K_nd[i];
 	if VEC == 'NEW':	# Solve the eigenmode problem anew.
 		a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 		if BC == 'NO-SLIP':
@@ -99,11 +110,12 @@ for i in range(k_start,k_end):
 			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
 		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/';
-		ncFile = path + 'RSW1L_Eigenmodes_k2_N128.nc';
+		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N128.nc';
+		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
 	else:
 		sys.exit('VEC must be FILE or NEW');
-
+	
 	# Now we have the solution and the eigenmodes.
 	# The decomposition follows the following steps:
 	# 1. Define the solution to be decomposed as Phi.
@@ -113,21 +125,25 @@ for i in range(k_start,k_end):
 
 	Phi = solution[:,i];		# 1. Assign the solution corresponding to wavenumber k=K_nd[i].
 	
-	theta_tmp = np.linalg.solve(vec,Phi); 					# 2.
-	dom_index_tmp = np.argsort(-(np.abs(theta_tmp))**2);	# 3. The indices of the modes, ordered by 'dominance'.
-
+	theta_tmp = np.linalg.solve(vec,Phi); 				# 2.
+	theta_abs_tmp = np.abs(theta_tmp);
+	theta_abs_tot[i] = sum(theta_abs_tmp);
+	dom_index_tmp = np.argsort(-theta_abs_tmp);			# 3. The indices of the modes, ordered by 'dominance'.
+	plt.plot(theta_abs_tmp[dom_index_tmp]);
+	plt.show();
 	for mi in range(0,Nm):
-		print(dom_index_tmp[mi]);
-		print('count = ' + str(count[dom_index_tmp[mi]]));
+		#print(dom_index_tmp[mi]);
+		#print('count = ' + str(count[dom_index_tmp[mi]]));
+		#print(np.abs(theta_tmp[dom_index_tmp[mi]]));
 		dom_index[mi,i] = dom_index_tmp[mi];
 		theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
 		proj[:,i] = proj[:,i] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
-		# There may still be errors with eigenmode ordering, so theta and dom_index are temporary for now.
-		print(np.abs(theta_tmp[dom_index_tmp[mi]]));
+		scatter_k[i*Nm+mi] = k;
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
 		#plt.ylim(-0.5,0.5);
-		#plt.show();	
+		#plt.show();
 
+	#print(np.abs(theta[:,i]));	
 
 	#plt.subplot(121);
 	#plt.plot(np.real(proj[0:N,i]),y_nd);
@@ -136,42 +152,12 @@ for i in range(k_start,k_end):
 	#plt.subplot(122);
 	#plt.plot(vec[0:N,dom_index_tmp[0:Nm]],y_nd);
 	#plt.ylim(-0.5,0.5);
-	#plt.show();	
+	#plt.show();
 
-	eigDiagnostics.scatterModes(np.ones(Nm),count[dom_index[0:Nm,i]],theta[0:Nm,i]);
+eigDiagnostics.scatterModes(scatter_k,count,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos);
 
-	# We may want to update the count again here, if there are any errors.
-	update_modes = raw_input('Update modes? y or n: ') 
-	if str(update_modes) == 'y':		
-		mii = 0;
-		while mii < Nm:
-			plt.plot(vec[0:N,dom_index_tmp[mii]],y_nd);	
-			plt.ylim(-0.5,0.5);
-			plt.show();
-			count[dom_index_tmp[mii]], mii = eigDiagnostics.updateCount(count[dom_index_tmp[mii]],mii);
-			mii = mii + 1;
-
-		i_count_new = np.argsort(count);
-		count = count[i_count_new];
-	
-		# Update the vectors & eigenvalues.
-		vec = vec[:,i_count_new];
-		val = val[i_count_new];
-	
-		# Update the indices and weights.
-		theta_tmp = theta_tmp[i_count_new];
-		dom_index_tmp = np.argsort(-(np.abs(theta_tmp))**2);
-		for mi in range(0,Nm):	
-			theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
-			dom_index[mi,i] = dom_index_tmp[mi];
-
-		print(dom_index[:,i]);
-		print(count[dom_index[:,i]]);
-
-		output.ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 	
 sys.exit();
-	
 
 #====================================================
 

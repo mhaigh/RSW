@@ -85,7 +85,7 @@ def ncSaveEigenmodes(modes,val,zero_count,y_nd,k,N,dim,BC):
 # they were calculated, also saves the PV, footprints, and EEF.
 # The last thing to be saved are the BG flow U0, forcing radius r0, kinematic viscosity nu, forcing period.
 
-	file_name = 'RSW1L_Eigenmodes_k' + str(k) + '.nc';
+	file_name = 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N' + str(int(N)) + '.nc';
 
 	# Initialise the nc file
 	RSW1L_Eigenmodes = nc.Dataset(file_name,'w',format='NETCDF4');
@@ -128,7 +128,7 @@ def ncSaveEigenmodes_sep(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
 # they were calculated, also saves the PV, footprints, and EEF.
 # The last thing to be saved are the BG flow U0, forcing radius r0, kinematic viscosity nu, forcing period.
 
-	file_name = 'RSW1L_Eigenmodes_k' + str(k) + '.nc';
+	file_name = 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N' + str(int(N)) + '.nc';
 
 	# Initialise the nc file
 	RSW1L_Eigenmodes = nc.Dataset(file_name,'w',format='NETCDF4');

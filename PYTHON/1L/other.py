@@ -163,3 +163,35 @@ elif option == 3:
 	plt.show()
 
 
+#========================================================================
+	# We may want to update the count again here, if there are any errors.
+	update_modes = raw_input('Update modes? y or n: ') 
+	if str(update_modes) == 'y':		
+		mii = 0;
+		while mii < Nm:
+			plt.plot(vec[0:N,dom_index_tmp[mii]],y_nd);	
+			plt.ylim(-0.5,0.5);
+			plt.show();
+			count[dom_index_tmp[mii]], mii = eigDiagnostics.updateCount(count[dom_index_tmp[mii]],mii);
+			mii = mii + 1;
+
+		i_count_new = np.argsort(count);
+		count = count[i_count_new];
+	
+		# Update the vectors & eigenvalues.
+		vec = vec[:,i_count_new];
+		val = val[i_count_new];
+	
+		# Update the indices and weights.
+		theta_tmp = theta_tmp[i_count_new];
+		dom_index_tmp = np.argsort(-(np.abs(theta_tmp))**2);
+		for mi in range(0,Nm):	
+			theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
+			dom_index[mi,i] = dom_index_tmp[mi];
+
+		print(dom_index[:,i]);
+		print(count[dom_index[:,i]]);
+
+		output.ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
+
+
