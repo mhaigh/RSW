@@ -51,6 +51,8 @@ for ii in range(k_start,k_end):
 	count = count[i_count];
 	vec = vec[:,i_count];
 	val = val[i_count];
+
+	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 	
 	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 

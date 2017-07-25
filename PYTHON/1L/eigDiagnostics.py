@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 from diagnostics import diff
 from diagnostics import extend
 
+import plotly.graph_objs as go
+import plotly.plotly as py
+
 #====================================================
 
 # The potential vorticity (both of background state and normal modes)
@@ -151,6 +154,19 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 		plt.tight_layout();
 		plt.show();
 
+#====================================================
+
+# scatterModes
+def scatterModes(k,l,theta):
+
+	colors = np.linspace(np.max(np.abs(theta)),0,len(theta));
+	c = colors;
+
+	plt.scatter(k,l,s=50,c=colors,cmap='YlOrRd',marker='s');	
+	plt.colorbar();
+	plt.grid();
+	plt.show();	
+	
 #====================================================
 
 # orderEigenmodes

@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = 3;
+OPT = 4;
 
 N = 256;
 y = np.linspace(1,256,N);
@@ -39,6 +39,7 @@ if OPT == 2:
 	plt.plot(f,y);
 	plt.show();
 
+# Igor's wind forcing
 if OPT == 3:
 	a = 255;
 	b = 255;
@@ -65,3 +66,22 @@ if OPT == 3:
 	
 	plt.show();
 
+# Pavel's wind forcing
+if OPT == 4:
+	A = 0.9;
+	B = 0.2;
+	
+	tau0 = 0.8;
+
+	W = np.zeros((N,N));
+
+	for j in range(0,N):
+		for i in range(0,N):
+			if y[j] <= B * x[i]:
+				W[j,i] = - (np.pi * tau0 * A / N) * np.sin(np.pi * (N + y[j]) / (N + B * x[i]));
+			else:
+				W[j,i] = (np.pi * tau0 / (A * N)) * np.sin(np.pi * (y[j] - B * x[i]) / (N - B * x[i]));
+
+	plt.contourf(W);
+	plt.colorbar();
+	plt.show();

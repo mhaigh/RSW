@@ -75,7 +75,7 @@ print('solved');
 
 VEC = 'FILE';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
-Nm = 3;		# How many modes to use in the decomposition at each wavenumber
+Nm = 8;		# How many modes to use in the decomposition at each wavenumber
 Nk = Nm;	# How many positive/negative wavenumbers to perform this decomposition at,
 			# totataling 2 * Nk + 1 wavenumbers.
 
@@ -118,20 +118,30 @@ for i in range(k_start,k_end):
 
 	for mi in range(0,Nm):
 		print(dom_index_tmp[mi]);
+		print('count = ' + str(count[dom_index_tmp[mi]]));
+		dom_index[mi,i] = dom_index_tmp[mi];
+		theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
 		proj[:,i] = proj[:,i] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
 		# There may still be errors with eigenmode ordering, so theta and dom_index are temporary for now.
+		print(np.abs(theta_tmp[dom_index_tmp[mi]]));
+		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
+		#plt.ylim(-0.5,0.5);
+		#plt.show();	
 
-	plt.subplot(121);
-	plt.plot(np.real(proj[0:N,i]),y_nd);
-	plt.plot(np.real(Phi[0:N]),y_nd);
-	plt.ylim(-0.5,0.5);
-	plt.subplot(122);
-	plt.plot(vec[0:N,dom_index_tmp[0:Nm]],y_nd);
-	plt.ylim(-0.5,0.5);
-	plt.show();	
+
+	#plt.subplot(121);
+	#plt.plot(np.real(proj[0:N,i]),y_nd);
+	#plt.plot(np.real(Phi[0:N]),y_nd);
+	#plt.ylim(-0.5,0.5);
+	#plt.subplot(122);
+	#plt.plot(vec[0:N,dom_index_tmp[0:Nm]],y_nd);
+	#plt.ylim(-0.5,0.5);
+	#plt.show();	
+
+	eigDiagnostics.scatterModes(np.ones(Nm),count[dom_index[0:Nm,i]],theta[0:Nm,i]);
 
 	# We may want to update the count again here, if there are any errors.
-	update_modes = raw_input('Update modes? y or n:') 
+	update_modes = raw_input('Update modes? y or n: ') 
 	if str(update_modes) == 'y':		
 		mii = 0;
 		while mii < Nm:
