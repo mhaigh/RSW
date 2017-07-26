@@ -75,7 +75,7 @@ print('solved');
 
 VEC = 'FILE';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
-Nm = 6;						# How many modes to use in the decomposition at each wavenumber.
+Nm = 8;						# How many modes to use in the decomposition at each wavenumber.
 Nk_neg = 4; Nk_pos = 6		# How many positive/negative wavenumbers to perform this decomposition at,
 Nk = Nk_neg + Nk_pos + 1;	# totataling Nk = 2 * Nk + 1 wavenumbers.
 
@@ -84,6 +84,7 @@ proj = np.zeros((dim,Nk),dtype=complex);	# The projection. Sums the Nm most domi
 dom_index = np.zeros((Nm,Nk),dtype=int);	# To store the indices of the Nm-most dominant modes.
 
 scatter_k = np.zeros(Nm * Nk);		# An empty array for saving k-values, for use in the scatter plot of dominant modes.
+scatter_l = np.zeros(Nm * Nk);		# An empty array for storing the count, psuedo-wavenumber l.
 theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
@@ -127,10 +128,8 @@ for ii in loop:
 	
 	theta_tmp = np.linalg.solve(vec,Phi); 				# 2.
 	theta_abs_tmp = np.abs(theta_tmp);
-	theta_abs_tot[i] = sum(theta_abs_tmp);
 	dom_index_tmp = np.argsort(-theta_abs_tmp);			# 3. The indices of the modes, ordered by 'dominance'.
-	plt.plot(theta_abs_tmp[dom_index_tmp]);
-	plt.show();
+	theta_abs_tot[i] = sum(theta_abs_tmp[dom_index_tmp[0:Nm]]);
 	for mi in range(0,Nm):
 		#print(dom_index_tmp[mi]);
 		#print('count = ' + str(count[dom_index_tmp[mi]]));
@@ -138,13 +137,12 @@ for ii in loop:
 		dom_index[mi,i] = dom_index_tmp[mi];
 		theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
 		proj[:,i] = proj[:,i] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
-		scatter_k[i*Nm+mi] = k;
+		scatter_k[i*Nm+mi] = k;	
+		scatter_l[i*Nm+mi] = count[dom_index[mi,i]];
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
 		#plt.ylim(-0.5,0.5);
 		#plt.show();
-
-	#print(np.abs(theta[:,i]));	
-
+	
 	#plt.subplot(121);
 	#plt.plot(np.real(proj[0:N,i]),y_nd);
 	#plt.plot(np.real(Phi[0:N]),y_nd);
@@ -154,7 +152,7 @@ for ii in loop:
 	#plt.ylim(-0.5,0.5);
 	#plt.show();
 
-eigDiagnostics.scatterModes(scatter_k,count,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos);
+eigDiagnostics.scatterModes(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos);
 
 	
 sys.exit();

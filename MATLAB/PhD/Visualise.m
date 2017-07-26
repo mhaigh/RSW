@@ -1,10 +1,7 @@
 % visualise
 clear all
 
-%loc = '~/cluster/old_nc/3L/BUOY=0_5/';
-%loc = '~/cluster/old_nc/3L/REF_50yr/';
-loc = '~/cluster/gold8/';
-%loc = '/home/mike/cluster/old_nc/3L/NoWind/12e-12/';
+loc = '~/cluster/gold7/';
 
 cd(loc);
 

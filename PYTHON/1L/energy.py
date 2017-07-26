@@ -1,18 +1,35 @@
 # energy
 #=========================================================
 
-# Code for calculation kinetic energy and potential energy for some solution (u,v,eta), found by RSW... code.
-# When running this code, the variables in the input file must match those that are originally used to calculate (u,v,h),
-# which are pre-solved and loaded below.
+# A set of energy-related functions
+
 #=========================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from inputFile_1L import *
-from diagnostics import extend
-
 #=========================================================
+
+# energy_BG
+def energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N);
+# A function that calculates the total energy E = KE + PE of the background state - 
+# a useful quantity for when calculating the forcing induced energy or energy of eigenmodes.
+
+	# First kinetic energy, KE = 0.5 * U**2 * H (dimensionless, no v term)
+	KE = 0.5 * U**2 * H;					# KE in terms of y (uniform in x)
+	KE_full = np.trapz(KE,y_nd,dy_nd);		# Total KE in the 2D domain (x-length of domain is 1)
+	
+	# Next the potential energy, PE = 0.5 * H**2 / Ro
+	PE = 0.5 * H**2 / Ro;					# PE in terms of y
+	PE_full = np.trapz(PE,y_nd,dy_nd);		# Total PE in the 2D domain
+
+	return KE, PE
+
+
+
+
+
+
 
 u_nd = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/u_nd_' + str(Fpos) + str(N) + '.npy');
 v_nd = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/v_nd_' + str(Fpos) + str(N) + '.npy');

@@ -157,23 +157,28 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 #====================================================
 
 # scatterModes
-def scatterModes(k,count,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos):
+def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos):
 	
 	Nk = Nk_neg + Nk_pos + 1;
-	l = np.zeros(Nm * Nk);
-	theta_normalised = np.zeros((Nm,Nk),dtype=complex);
+	theta_normalised = np.zeros(Nm * Nk);
 	for i in range(0,Nk):
-		theta_normalised[:,i] = theta[:,i] / theta_abs_tot[i];
 		for j in range(0,Nm):
-			l[i*Nm+j] = count[dom_index[j,i]];
+			theta_normalised[i*Nm+j] = np.abs(theta[j,i] / theta_abs_tot[i]);
 
-	plt.contourf(np.abs(theta_normalised));
-	plt.show();
+	colors = theta_normalised;
+	c = colors; 
 
-	colors = np.linspace(np.max(np.max(np.abs(theta))),0,Nm*Nk);
-	c = colors;
+	l_max = max(l);
+	if l_max % 2 == 0:
+		y_max = l_max + 2;
+	else:
+		y_max = l_max + 1;
+	
+	y_ticks = np.linspace(0,y_max,y_max/2+1);
 
-	plt.scatter(k,l,s=50,c=colors,cmap='YlOrRd',marker='s');	
+	plt.scatter(k,l,s=50,c=colors,cmap='YlOrRd',marker='s');
+	plt.ylim([0,25]);	
+	plt.yticks(y_ticks);
 	plt.colorbar();
 	plt.grid();
 	plt.show();	
