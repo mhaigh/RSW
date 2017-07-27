@@ -15,6 +15,7 @@ import diagnostics
 import eigDiagnostics
 import PV
 import eigSolver
+import energy
 from output import ncSaveEigenmodes
 
 from inputFile_1L import *
@@ -57,7 +58,32 @@ for ii in loop:
 	vec = vec[:,i_count];
 	val = val[i_count];
 
+	# Before saving the modes, they need to be normalised by their energy.
+	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
+	KE_av_tot = np.zeros(dim);	
+	print(np.shape(u_vec[:,0]));
+	for wi in range(0,dim):
+		print(wi);		
+		KE_av_tot[wi] = energy.KE_from_spec(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],k,x_nd,y_nd,100,N,'av_tot');
+		print(KE_av_tot[wi]);
+	plt.plot(KE_av_tot);
+	plt.show();
+		
+
+
+
+
+
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
+
+
+
+
+
+
+
+
+
 
 if str(raw_input('continue? y or n: ')) == 'n':
 	sys.exit();
