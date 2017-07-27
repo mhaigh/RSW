@@ -35,10 +35,10 @@ I = np.complex(0.0,1.0);
 # Define the coefficients required by the solver
 a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-#k_start = 2;
-#k_end = k_start + 1;
+k_start = 2;
+k_end = k_start + 1;
 Nk = 6;
-loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	#range(k_start,k_end)
+loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	#
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];
@@ -60,35 +60,22 @@ for ii in loop:
 
 	# Before saving the modes, they need to be normalised by their energy.
 	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
-	KE_av_tot = np.zeros(dim);	
-	print(np.shape(u_vec[:,0]));
+	E = np.zeros(dim);	
 	for wi in range(0,dim):
-		print(wi);		
-		KE_av_tot[wi] = energy.KE_from_spec(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],k,x_nd,y_nd,100,N,'av_tot');
-		print(KE_av_tot[wi]);
-	plt.plot(KE_av_tot);
-	plt.show();
-		
+		print(str(wi+1) + ' / ' + str(dim));		
+		KE_av_tot, PE_av_tot = energy.E_from_spec(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],Ro,k,x_nd,y_nd,100,N,'av_tot');
+		E[wi] = KE_av_tot + PE_av_tot;
+		print('Energy = ' + str(E[wi]));
 
-
-
-
+	#plt.plot(E);
+	#plt.show();
 
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
-
-
-
-
-
-
-
-
 
 
 if str(raw_input('continue? y or n: ')) == 'n':
 	sys.exit();
  
-
 for ii in loop:
 
 	k = K_nd[ii];

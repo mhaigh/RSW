@@ -34,6 +34,212 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 # Because of the linearity of the system, the KE outputted from this function can be summed over all wavenumbers
 # to produce the total KE.
 # All values are dimensionless - see documentation for scaling arguments.
+
+# Options for output:
+# 1. 'av': outputs only the KE temporal average (as a function of x and y);
+# 2. 'av_tot': outputs the temporal and spatial average;
+# 2. 'full': outputs the full KE, as a function of x, y and t.
+ 
+	I = np.complex(0,1);
+	
+	# We want the KE at a discrete set of times over one forcing/solution/eigenmode period.
+	# Note that this calculation can be made independent of this period/frequency;
+	# instead we only need to sample 'times' from a interval of unit length, with Nt entries,
+	# the frequency omega cancels out with the period T.
+
+	u = np.zeros((N,N,Nt));
+	v = np.zeros((N,N,Nt));
+	eta = np.zeros((N,N,Nt));
+
+	omega_t = np.linspace(0,1,Nt);
+
+	for ti in range(0,Nt):
+		for j in range(0,N):
+			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
+			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
+			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
+	
+	# 1. Temporally averaged KE
+	if output == 'av':
+		KE_av = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
+		for ti in range(1,Nt):
+			KE_av = KE_av + 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+		KE_av = KE_av / Nt;
+		return KE_av;
+
+		# 1. Temporal and spatial average of KE
+	elif output == 'av_tot':
+		dx_nd = x_nd[1] - x_nd[0];
+		dy_nd = y_nd[1] - y_nd[0];
+		KE = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
+		KE_av_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		for ti in range(1,Nt):
+			KE = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+			KE_av_tot = KE_av_tot + np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		KE_av_tot = KE_av_tot / Nt;
+		return KE_av_tot;
+	
+	# 3. Time-dependent KE
+	elif output == 'full':
+		KE = np.zeros((N,N,Nt));
+		for ti in range(0,Nt):
+			KE[:,:,ti] = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+		return KE;
+
+	else:
+		import sys
+		sys.exit('Invalid output selection; must be "av", "av_tot" or "full".');
+
+#=========================================================
+
+# PE_from_spec
+def PE_from_spec(eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
+# A function that takes the spectral representation of the solution at only one wavenumber k, indexed by i,
+# and calculates the potential energy (PE) at that wavenumber.
+# Because of the linearity of the system, the PE outputted from this function can be summed over all wavenumbers
+# to produce the total PE.
+# All values are dimensionless - see documentation for scaling arguments.
+
+# Options for output:
+# 1. 'av': outputs only the PE temporal average (as a function of x and y);
+# 2. 'av_tot': outputs the temporal and spatial average;
+# 2. 'full': outputs the full PE, as a function of x, y and t.
+ 
+	I = np.complex(0,1);
+	
+	# We want the KE at a discrete set of times over one forcing/solution/eigenmode period.
+	# Note that this calculation can be made independent of this period/frequency;
+	# instead we only need to sample 'times' from a interval of unit length, with Nt entries,
+	# the frequency omega cancels out with the period T.
+
+	eta = np.zeros((N,N,Nt));
+
+	omega_t = np.linspace(0,1,Nt);
+
+	for ti in range(0,Nt):
+		for j in range(0,N):
+			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
+	
+	# 1. Temporally averaged PE
+	if output == 'av':
+		PE_av = 0.5 * eta[:,:,0] / Ro;
+		for ti in range(1,Nt):
+			PE_av = PE_av + 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+		PE_av = PE_av / Nt;
+		return PE_av;
+
+		# 1. Temporal and spatial average of PE
+	elif output == 'av_tot':
+		dx_nd = x_nd[1] - x_nd[0];
+		dy_nd = y_nd[1] - y_nd[0];
+		PE = 0.5 * eta[:,:,0]**2 / Ro;
+		PE_av_tot = np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		for ti in range(1,Nt):
+			PE = 0.5 * eta[:,:,ti]**2 / Ro;
+			PE_av_tot = PE_av_tot + np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		PE_av_tot = PE_av_tot / Nt;
+		return PE_av_tot;
+	
+	# 3. Time-dependent PE
+	elif output == 'full':
+		PE = np.zeros((N,N,Nt));
+		for ti in range(0,Nt):
+			PE[:,:,ti] = 0.5 * eta[:,:,ti]**2 / Ro;
+		return PE;
+
+	else:
+		import sys
+		sys.exit('Invalid output selection; must be "av", "av_tot" or "full".');
+
+#=========================================================
+
+# E_from_spec
+def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
+# A function that takes the spectral representation of the solution at only one wavenumber k, indexed by i,
+# and calculates the energy (both KE and PE) at that wavenumber.
+# Because of the linearity of the system, the energy outputted from this function can be summed over all wavenumbers
+# to produce the energy.
+# All values are dimensionless - see documentation for scaling arguments.
+
+# Options for output:
+# 1. 'av': outputs only the temporal average (as a function of x and y);
+# 2. 'av_tot': outputs the temporal and spatial average;
+# 2. 'full': outputs the full energy, as a function of x, y and t.
+ 
+	I = np.complex(0,1);
+	
+	# We want the KE at a discrete set of times over one forcing/solution/eigenmode period.
+	# Note that this calculation can be made independent of this period/frequency;
+	# instead we only need to sample 'times' from a interval of unit length, with Nt entries,
+	# the frequency omega cancels out with the period T.
+
+	u = np.zeros((N,N,Nt));
+	v = np.zeros((N,N,Nt));
+	eta = np.zeros((N,N,Nt));
+	
+	omega_t = np.linspace(0,1,Nt);
+
+	for ti in range(0,Nt):
+		for j in range(0,N):
+			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * I * (k_nd * x_nd[0:N] - omega_t[ti])));
+			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * I *(k_nd * x_nd[0:N] - omega_t[ti])));
+			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * I * (k_nd * x_nd[0:N] - omega_t[ti])));
+	
+	#plt.contourf(u[:,:,10]);
+	#plt.colorbar();
+	#plt.show();
+
+	# 1. Temporally averaged KE and PE
+	if output == 'av':
+		KE_av = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
+		PE_av = 0.5 * eta[:,:,0] / Ro;
+		for ti in range(1,Nt):
+			KE_av = KE_av + 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+			PE_av = PE_av + 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+		KE_av = KE_av / Nt;
+		PE_av = PE_av / Nt;
+		return KE_av, PE_av;
+
+		# 1. Temporal and spatial average of KE and PE
+	elif output == 'av_tot':
+		dx_nd = x_nd[1] - x_nd[0];
+		dy_nd = y_nd[1] - y_nd[0];
+		KE = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
+		KE_av_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		PE = 0.5 * eta[:,:,0]**2 / Ro;
+		PE_av_tot = np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		for ti in range(1,Nt):
+			KE = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+			KE_av_tot = KE_av_tot + np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+			PE = 0.5 * eta[:,:,ti]**2 / Ro;
+			PE_av_tot = PE_av_tot + np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
+		KE_av_tot = KE_av_tot / Nt;
+		PE_av_tot = PE_av_tot / Nt;
+		return KE_av_tot, PE_av_tot;
+	
+	# 3. Time-dependent KE and PE
+	elif output == 'full':
+		KE = np.zeros((N,N,Nt));
+		PE = np.zeros((N,N,Nt));
+		for ti in range(0,Nt):
+			KE[:,:,ti] = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
+			PE[:,:,ti] = 0.5 * eta[:,:,ti]**2 / Ro;
+		return KE, PE;
+
+	else:
+		import sys
+		sys.exit('Invalid output selection; must be "av", "av_tot" or "full".');
+
+#=========================================================
+
+# KE_from_spec
+def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
+# A function that takes the spectral representation of the solution at only one wavenumber k, indexed by i,
+# and calculates the kinetic energy (KE) at that wavenumber.
+# Because of the linearity of the system, the KE outputted from this function can be summed over all wavenumbers
+# to produce the total KE.
+# All values are dimensionless - see documentation for scaling arguments.
+
 # Options for output:
 # 1. 'av': outputs only the KE temporal average (as a function of x and y);
 # 2. 'av_tot': outputs the temporal and spatial average;
@@ -60,7 +266,7 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
 	
 	# 1. Temporally averaged KE
-	if output == 'av':
+	if av == 'av':
 		KE_av = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
 		for ti in range(1,Nt):
 			KE_av = KE_av + 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
@@ -68,7 +274,7 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 		return KE_av;
 
 		# 1. Temporal and spatial average of KE
-	if output == 'av_tot':
+	if av == 'av_tot':
 		dx_nd = x_nd[1] - x_nd[0];
 		dy_nd = y_nd[1] - y_nd[0];
 		KE = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
@@ -80,7 +286,7 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 		return KE_av_tot;
 	
 	# 3. Time-dependent KE
-	elif output == 'full':
+	elif av == 'full':
 		KE = np.zeros((N,N,Nt));
 		for ti in range(0,Nt):
 			KE[:,:,ti] = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];

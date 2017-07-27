@@ -160,27 +160,93 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos):
 	
 	Nk = Nk_neg + Nk_pos + 1;
-	theta_normalised = np.zeros(Nm * Nk);
+
+	dim = Nk * Nm;
+
+	# Produce a set of weights normalised by theta_abs_tot, which is either
+	# the total weight of all wavenumbers or just the first Nm wavenumbers.
+	theta_normalised = np.zeros(dim);
 	for i in range(0,Nk):
 		for j in range(0,Nm):
 			theta_normalised[i*Nm+j] = np.abs(theta[j,i] / theta_abs_tot[i]);
+	theta_max = max(theta_normalised);
 
-	colors = theta_normalised;
-	c = colors; 
+	# Calculate the performance of the decompisition at each wavenumber; 1 is perfect.
+	perf = np.zeros(Nk);
+	for i in range(0,Nk):
+		perf[i] = sum(theta_normalised[i*Nm:(i+1)*Nm]);
 
+	# Some points may be repeated, the next few lines allow repeated points to be plotted as different shapes.
+	# First arrange all points as list of tuples
+	L = [];
+	L_theta = [];
+	for ii in range(0,dim):
+		L.append(tuple([k[ii],l[ii]]));
+		L_theta.append(tuple([k[ii],l[ii],theta_normalised[ii]]));
+
+	# Turn this list into a set and count how many time each element in the set S appears in the list L.	
+	S = set(L);
+	S_theta = set(L_theta);
+	F = {};
+	for ii in list(S):	# Loop through each element in the set S
+		F[ii] = L.count(ii);	# And count how many times it appears in L
+
+	# We also need a dictionary containing the weights of each tuple (or maximum weight if a tuple is repeated).
+ 	F_theta = {};
+	for wi in range(0,dim):
+		ii = L[wi];
+		if ii in F_theta:							# Check if this key is already in the dictionary.
+			if theta_normalised[wi] > F_theta[ii]:	# If so, check if new theta is larger than the previous...
+				F[ii] = theta_normalised[wi];		# and if so, overwrite the old theta value.
+		else:
+			F_theta[ii] = theta_normalised[wi];		# Create a new key, with corresponding value theta
+
+	# Now loop through all the tuples (keys) in the dictionary, storing each tuple in an array depending on the number of times it is repeated.
+	k1 = []; l1 = []; theta1 = [];
+	k2 = []; l2 = []; theta2 = [];
+	k3 = []; l3 = []; theta3 = [];
+	k4 = []; l4 = []; theta4 = [];
+	for ii in list(S):
+		if F[ii] == 1:
+			k1.append(ii[0]); l1.append(ii[1]); theta1.append(F_theta[ii]);
+		elif F[ii] == 2:
+			k2.append(ii[0]); l2.append(ii[1]); theta2.append(F_theta[ii]);
+		elif F[ii] == 3:
+			k3.append(ii[0]); l3.append(ii[1]); theta3.append(F_theta[ii]);
+		else:
+			k4.append(ii[0]); l4.append(ii[1]); theta4.append(F_theta[ii]);
+		
+	k1 = np.array(k1); l1 = np.array(l1); theta1 = np.array(theta1);
+	k2 = np.array(k2); l2 = np.array(l2); theta2 = np.array(theta2);
+	k3 = np.array(k3); l3 = np.array(l3); theta3 = np.array(theta3);
+	k4 = np.array(k4); l4 = np.array(l4); theta4 = np.array(theta4);
+
+	colors1 = theta1; colors2 = theta2;
+	colors3 = theta3; colors4 = theta4;
+	
 	l_max = max(l);
 	if l_max % 2 == 0:
 		y_max = l_max + 2;
 	else:
 		y_max = l_max + 1;
+
+	print(colors2);
 	
 	y_ticks = np.linspace(0,y_max,y_max/2+1);
 
-	plt.scatter(k,l,s=50,c=colors,cmap='YlOrRd',marker='s');
-	plt.ylim([0,25]);	
+	plt.scatter(k1,l1,c=colors1,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='s',s=50);
+	plt.scatter(k2,l2,c=colors2,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='o',s=50);
+	plt.scatter(k3,l3,c=colors3,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='^',s=50);
+	plt.scatter(k4,l4,c=colors4,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='*',s=50);
+	plt.ylim([0,y_max+4]);	
 	plt.yticks(y_ticks);
-	plt.colorbar();
+	plt.colorbar();#ticks=np.linspace(0,theta_max,10)
 	plt.grid();
+	for i in range(-Nk_neg,Nk_pos+1):
+		plt.text(i-0.25,y_max+0.8,str(round(perf[i],2)),fontsize=14,rotation=90);
+	plt.title('Eigenmode decomposition',fontsize=22);
+	plt.xlabel('k',fontsize=22);
+	plt.ylabel('l',fontsize=22);
 	plt.show();	
 	
 #====================================================

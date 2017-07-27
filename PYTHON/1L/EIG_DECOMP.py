@@ -75,7 +75,7 @@ print('solved');
 
 VEC = 'FILE';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
-Nm = 8;						# How many modes to use in the decomposition at each wavenumber.
+Nm = 16;						# How many modes to use in the decomposition at each wavenumber.
 Nk_neg = 4; Nk_pos = 6		# How many positive/negative wavenumbers to perform this decomposition at,
 Nk = Nk_neg + Nk_pos + 1;	# totataling Nk = 2 * Nk + 1 wavenumbers.
 
@@ -129,7 +129,7 @@ for ii in loop:
 	theta_tmp = np.linalg.solve(vec,Phi); 				# 2.
 	theta_abs_tmp = np.abs(theta_tmp);
 	dom_index_tmp = np.argsort(-theta_abs_tmp);			# 3. The indices of the modes, ordered by 'dominance'.
-	theta_abs_tot[i] = sum(theta_abs_tmp[dom_index_tmp[0:Nm]]);
+	theta_abs_tot[i] = sum(theta_abs_tmp[dom_index_tmp[0:dim]]);	# Change dim to Nm if necessary
 	for mi in range(0,Nm):
 		#print(dom_index_tmp[mi]);
 		#print('count = ' + str(count[dom_index_tmp[mi]]));
