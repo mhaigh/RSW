@@ -24,7 +24,7 @@ GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'SOUTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 
 # Domain
 #=======================================================

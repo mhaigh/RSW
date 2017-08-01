@@ -157,7 +157,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 #====================================================
 
 # scatterModes
-def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos):
+def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	
 	Nk = Nk_neg + Nk_pos + 1;
 
@@ -244,7 +244,7 @@ def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos):
 	plt.grid();
 	for i in range(-Nk_neg,Nk_pos+1):
 		plt.text(i-0.25,y_max+0.8,str(round(perf[i],2)),fontsize=14,rotation=90);
-	plt.title('Eigenmode decomposition',fontsize=22);
+	plt.title('Eigenmode decomposition - ' + str(Fpos),fontsize=22);
 	plt.xlabel('k',fontsize=22);
 	plt.ylabel('l',fontsize=22);
 	plt.show();	

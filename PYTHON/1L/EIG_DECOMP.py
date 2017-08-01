@@ -75,12 +75,12 @@ print('solved');
 
 VEC = 'FILE';	# From FILE, requires pre-saved vectors which take up lots of memory.
 
-Nm = 16;						# How many modes to use in the decomposition at each wavenumber.
-Nk_neg = 4; Nk_pos = 6		# How many positive/negative wavenumbers to perform this decomposition at,
+Nm = 40;						# How many modes to use in the decomposition at each wavenumber.
+Nk_neg = 9; Nk_pos = 40;		# How many positive/negative wavenumbers to perform this decomposition at,
 Nk = Nk_neg + Nk_pos + 1;	# totataling Nk = 2 * Nk + 1 wavenumbers.
 
 theta = np.zeros((Nm,Nk),dtype=complex); 	# Initialise the set of weights; these will be complex.
-proj = np.zeros((dim,Nk),dtype=complex);	# The projection. Sums the Nm most dominant modes, each of length dim, for Nk i-values.
+proj = np.zeros((dim,N),dtype=complex);	# The projection. Sums the Nm most dominant modes, each of length dim, for Nk i-values.
 dom_index = np.zeros((Nm,Nk),dtype=int);	# To store the indices of the Nm-most dominant modes.
 
 scatter_k = np.zeros(Nm * Nk);		# An empty array for saving k-values, for use in the scatter plot of dominant modes.
@@ -110,7 +110,7 @@ for ii in loop:
 		if BC == 'FREE-SLIP':
 			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
-		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/';
+		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/';
 		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N128.nc';
 		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
@@ -136,7 +136,7 @@ for ii in loop:
 		#print(np.abs(theta_tmp[dom_index_tmp[mi]]));
 		dom_index[mi,i] = dom_index_tmp[mi];
 		theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
-		proj[:,i] = proj[:,i] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
+		proj[:,ii] = proj[:,i] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
 		scatter_k[i*Nm+mi] = k;	
 		scatter_l[i*Nm+mi] = count[dom_index[mi,i]];
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
@@ -152,10 +152,9 @@ for ii in loop:
 	#plt.ylim(-0.5,0.5);
 	#plt.show();
 
-eigDiagnostics.scatterModes(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos);
+eigDiagnostics.scatterModes(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);
 
 	
-sys.exit();
 
 #====================================================
 
@@ -181,9 +180,9 @@ if BC == 'NO-SLIP':
 
 u_proj, v_proj, eta_proj = solver.SPEC_TO_PHYS(utilde_proj,vtilde_proj,etatilde_proj,T_nd,dx_nd,omega_nd,N);
 
-u_proj = u_proj[:,:,ts];
-v_proj = v_proj[:,:,ts];
-eta_proj = eta_proj[:,:,ts];
+u_proj = np.real(u_proj[:,:,ts]);
+v_proj = np.real(v_proj[:,:,ts]);
+eta_proj = np.real(eta_proj[:,:,ts]);
 
 u_full = np.zeros((N,N));
 eta_full = np.zeros((N,N));

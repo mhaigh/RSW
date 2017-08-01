@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold4/';
+loc = '~/cluster/gold6/';
 
 cd(loc);
 
@@ -25,7 +25,7 @@ if RUN == 1
     PV_av = zeros(nx,ny);
     count = 0;
     %for i = 3:3
-    for i = nf-1:nf-1
+    for i = nf-20:nf-1
         disp(i);
         PVnew = ncread(files(i).name,'PV');
         unew = ncread(files(i).name,'u');
