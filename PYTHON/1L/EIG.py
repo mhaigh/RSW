@@ -35,8 +35,8 @@ I = np.complex(0.0,1.0);
 # Define the coefficients required by the solver
 a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-k_start = -40;
-k_end = -19;
+k_start = -20;
+k_end = -9;
 Nk = 6;
 loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
 for ii in loop:

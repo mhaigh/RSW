@@ -19,7 +19,12 @@ i = nf-1;
 b_new = ncread(files(i).name,'buoy')
 b = transpose(squeeze(b_new(:,:,1))); 
 
-surf(b,'edgecolor','none'); view(0,90); colorbar; colormap(jet);
+
+surf(b,'edgecolor','none'); view(0,90); colorbar; colormap(jet); axis image;
+
+pause
+
+plot(b(:,1));
 
 pause
 
