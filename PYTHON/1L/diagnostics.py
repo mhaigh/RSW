@@ -48,7 +48,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 
 	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/Code/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
 	plt.show();
 
 	#cmap='coolwarm'
@@ -86,7 +86,7 @@ def solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N):
 	plt.colorbar();
 
 	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/Code/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
 	plt.show();
 
 
@@ -313,7 +313,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 	plt.ylim(-0.5,0.5)
 	plt.xlim(-1.1*np.max(abs(P_xav)),1.1*np.max(abs(P_xav)));
 	plt.tight_layout()
-	plt.savefig('/home/mike/Documents/GulfStream/Code/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_nu=' + str(nu) + '.png');
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_nu=' + str(nu) + '.png');
 	plt.show()	
 	
 	# These if loops are for constantly altering depending on the test being done.
@@ -334,7 +334,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 		plt.xlabel('x');
 		plt.ylabel('y');
 		plt.tight_layout()
-		#plt.savefig('/home/mike/Documents/GulfStream/Code/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/TEST/FOOTPRINT_' + str(GAUSS) + '.png');
+		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/TEST/FOOTPRINT_' + str(GAUSS) + '.png');
 		
 	if BG == 'UNIFORM':
 		plt.figure(2)
@@ -345,7 +345,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
 		plt.grid(b=True, which='both', color='0.65',linestyle='--');
 		plt.tight_layout()
-		#plt.savefig('/home/mike/Documents/GulfStream/Code/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_U0=' + str(U*U0_nd[0]) + '.png');
+		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_U0=' + str(U*U0_nd[0]) + '.png');
 
 #====================================================
 
@@ -592,7 +592,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 #====================================================
 
 # specError
-def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,K_nd,H0_nd,dy_nd,N,i):
+def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,K_nd,H0_nd,y_nd,dy_nd,N,i):
 # An alternative error metric. Calculates the error associated with the three 1-D spectral equations for a given wavenumber K_nd[i].
 
 	# Need relevant derivatives
@@ -601,12 +601,30 @@ def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a
 	vtilde_y = diff(vtilde_nd[:,i],2,0,dy_nd);
 	vtilde_yy = diff(vtilde_y,2,0,dy_nd);
 	etatilde_y = diff(etatilde_nd[:,i],2,0,dy_nd);
+
+	plt.subplot(221);
+	plt.plot(utilde_nd[:,i],y_nd);
+	plt.title('u');
+	plt.subplot(222);
+	plt.plot(utilde_y,y_nd);
+	plt.title('u_y')
+	plt.subplot(223);
+	plt.plot(utilde_yy,y_nd);
+	plt.title('u_yy');
+	plt.subplot(224);
+	plt.plot(Ftilde1_nd[:,1]);
+	plt.show();
 	
-	error1 = a1[:,i] * utilde_nd[:,i] + a2 * utilde_yy + a3 * vtilde_nd[:,i] + a4[i] * etatilde_nd[:,i];# - Ftilde3_nd[:,i];
-	plt.plot(error1);
+	error1 = a1[:,i] * utilde_nd[:,i] + a2 * utilde_yy + a3 * vtilde_nd[:,i] + a4[i] * etatilde_nd[:,i] - Ftilde1_nd[:,i];
+	plt.subplot(121);
+	plt.plot(np.real(error1),y_nd);
+	#plt.contourf(etatilde_nd);	
+	plt.ylabel('y');
+	plt.subplot(122);
+	plt.plot(Ftilde1_nd[:,i],y_nd);
 	plt.show();
 
-	error1 = np.sqrt((np.real(error1)**2).mean());
+	error1 = np.sqrt((np.absolute(error1)**2).mean());
 
 	return error1;
 	

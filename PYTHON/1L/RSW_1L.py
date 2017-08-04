@@ -33,6 +33,7 @@ from inputFile_1L import *
 
 # Forcing
 F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+#forcing_1L.forcingDiff(Ftilde3_nd,y_nd,dy_nd,N,1);
 
 # Coefficients
 a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
@@ -53,7 +54,7 @@ if errorPhys:
 	e1, e2, e3 = diagnostics.error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
 	print 'ERROR: ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
 if errorSpec:
-	e1_spec = diagnostics.specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,K_nd,H0_nd,dy_nd,N,10);
+	e1_spec = diagnostics.specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,K_nd,H0_nd,y_nd,dy_nd,N,1);
 	print e1_spec;
 
 #====================================================

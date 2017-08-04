@@ -42,9 +42,7 @@ def Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 		mass = mass / (N*(N+1) - count);
 		for i in range(0,N+1):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r >= r0:
-					F3[j,i] = - mass;
+				F3[j,i] = F3[j,i] - mass;
 		#F3x = diff(F3,1,1,dx);
 		#F3y = diff(F3,0,0,dy);
 		#for j in range(0,N):
@@ -180,4 +178,31 @@ def forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N):
 	plt.colorbar()
 
 	plt.show();
+
+#=======================================================
+
+# forcingDiff
+def forcingDiff(Ftilde_nd,y_nd,dy_nd,N,i):
+# Plots the y-derivatives of the 1D forcing at a given wavenumber.
+# A function used to test the diff algortithm, improve it, and resolve the error issue.
+
+	Ftilde_y = diff(Ftilde_nd[:,i],2,0,dy_nd);
+	Ftilde_yy = diff(Ftilde_y,2,0,dy_nd);
+
+	plt.subplot(131);
+	plt.plot(Ftilde_nd[:,i],y_nd);
+	plt.subplot(132);
+	plt.plot(Ftilde_y,y_nd);
+	plt.subplot(133);
+	plt.plot(Ftilde_yy,y_nd);
+	plt.show();
+
+	import sys
+	sys.exit();
+
+
+
+
+
+
 

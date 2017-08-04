@@ -2,7 +2,7 @@
 
 clear all
 
-loc = '~/cluster/gold4/';
+loc = '~/cluster/gold/';
 
 cd(loc);
 
@@ -14,17 +14,22 @@ nf = size(files);
 nf = nf(1);
 
 
-i = nf-1;
+i = nf-2;
 
 b_new = ncread(files(i).name,'buoy')
 b = transpose(squeeze(b_new(:,:,1))); 
 
-
+%%
 surf(b,'edgecolor','none'); view(0,90); colorbar; colormap(jet); axis image;
 
 pause
 
+subplot(131);
 plot(b(:,1));
+subplot(132);
+plot(b(:,100));
+subplot(133);
+plot(b(:,200));
 
 pause
 

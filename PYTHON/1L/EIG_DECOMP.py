@@ -73,11 +73,19 @@ print('solved');
 # The eigmodes, eigenvalues, and count (all ordered)
 #====================================================
 
-VEC = 'NEW';	# From FILE, requires pre-saved vectors which take up lots of memory.
+VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
+LOOP = 'PART';		# FULL, PART
 
-Nm = dim;						# How many modes to use in the decomposition at each wavenumber.
-Nk_neg = 8; Nk_pos = 8;		# How many positive/negative wavenumbers to perform this decomposition at,
-Nk = Nk_neg + Nk_pos + 1;		# totataling Nk = 2 * Nk + 1 wavenumbers.
+Nm = 6;						# How many modes to use in the decomposition at each wavenumber.
+if LOOP == 'FULL':
+	loop = range(0,N);
+	Nk = N;
+elif LOOP == 'PART':
+	Nk_neg = 8; Nk_pos = 8;		# How many positive/negative wavenumbers to perform this decomposition at.
+	loop = it.chain(range(0,Nk_pos+1),range(N-Nk_neg,N));
+	Nk = Nk_neg + Nk_pos + 1;
+else:
+	sys.exit('ERROR: LOOP must be FULL or FILE.');
 
 theta = np.zeros((Nm,Nk),dtype=complex); 	# Initialise the set of weights; these will be complex.
 proj = np.zeros((dim,N),dtype=complex);		# The projection. Sums the Nm most dominant modes, each of length dim, for Nk i-values.
@@ -88,16 +96,10 @@ scatter_l = np.zeros(Nm * Nk);		# An empty array for storing the count, psuedo-w
 theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
-k_start = 2;
-k_end = k_start + 1;
-loop = range(0,N);#it.chain(range(0,Nk_pos+1),range(N-Nk_neg,N));	#range(k_start,k_end)
 for ii in loop:	 
 	k = K_nd[ii];
-	# Determine the i-value
-	if ii in range(0,Nk_pos+1):
-		i = ii;
-	elif ii in range(N-Nk_neg,N):
-		i = int(Nk + k); 
+
+	i = int(k % N);
 		
 	print('i = ' + str(i));
 	print('k = ' + str(int(k)));

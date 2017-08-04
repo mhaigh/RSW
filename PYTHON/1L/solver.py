@@ -19,8 +19,13 @@ def SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N):
 
 	I = np.complex(0,1);		# Define I = sqrt(-1)
 
+	if Re == None:
+		Ro_Re = 0;
+	else:
+		Ro_Re = Ro / Re;
+
 	# Coefficients with no k- or y-dependence
-	a2 = - (Ro / Re) / (dy_nd**2);	# Note: b3=a2, so instead of defining b3, we just use a2 in its place, saving time.
+	a2 = - Ro_Re / (dy_nd**2);	# Note: b3=a2, so instead of defining b3, we just use a2 in its place, saving time.
 	b4 = 1. / (2. * dy_nd);
 
 	# Coefficients with k-dependence only
@@ -48,7 +53,7 @@ def SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N):
 	for i in range(0,N):
 		for j in range(0,N):
 			delta[j,i] = 2. * np.pi * (omega_nd + U0_nd[j] * K_nd[i]);
-			a1[j,i] = I * delta[j,i] * Ro + 4. * np.pi**2 * K_nd[i]**2 * Ro / Re + gamma_nd;
+			a1[j,i] = I * delta[j,i] * Ro + 4. * np.pi**2 * K_nd[i]**2 * Ro_Re + gamma_nd;
 			c1[j,i] = 2. * np.pi * I * K_nd[i] * H0_nd[j];
 
 	c4 = I * delta;
@@ -63,11 +68,17 @@ def BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N):
 # Some extra coefficients that are required by the free-slip solver in order to impose
 # the du/dy=0 boundary conditions. These terms are not needed in the no-slip solver.
 
-	uBC = 2 * Ro / (Re * dy_nd**2);		# The extra term required for the u equation BCs.
+	if Re == None:
+		Ro_Re = 0;
+	else:
+		Ro_Re = Ro / Re;
+
+	uBC = 2 * Ro_Re / dy_nd**2;		# The extra term required for the u equation BCs.
 	
 	etaBC = np.zeros(2);
-	etaBC[0] = f_nd[0] * H0_nd[0] * dy_nd * Re / (2 * Ro);		# The extra term required for the eta equation BCs.
-	etaBC[1] = f_nd[N-1] * H0_nd[N-1] * dy_nd * Re / (2 * Ro);	
+	if Re != None:
+		etaBC[0] = f_nd[0] * H0_nd[0] * dy_nd * Re / (2 * Ro);		# The extra term required for the eta equation BCs.
+		etaBC[1] = f_nd[N-1] * H0_nd[N-1] * dy_nd * Re / (2 * Ro);	
 
 	return uBC, etaBC;
 

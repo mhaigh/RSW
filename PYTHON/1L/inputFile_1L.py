@@ -24,12 +24,12 @@ GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-Fpos = 'SOUTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 
 # Domain
 #=======================================================
 
-N = 64; 			# Number of gridpoints
+N = 400; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -72,7 +72,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4e-8;	# Frictional coefficient (s-1)
-nu = 10;		# Kinematic viscosity (m2 s-1)
+nu = 0.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -222,7 +222,10 @@ AmpF_nd = AmpF * g / (f0 * U**2);
 #=======================================================
 
 Ro = U / (f0 * Ly); 			# Rossby number: measures inertial forces relative to rotational ones.
-Re = Ly * U / nu;				# Reynolds number: measures inertial forces relative to viscous ones.
+if nu != 0:
+	Re = Ly * U / nu;			# Reynolds number: measures inertial forces relative to viscous ones.
+else:
+	Re = None;					# Instead of defining it as infinity, define it as None.
 Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
 
 # Output
@@ -231,7 +234,7 @@ Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
 outputPath = '/home/mike/Documents/GulfStream/Code/DATA/1L/';
 
 errorPhys = False;     	# Print error of full solutions 
-errorSpec = False;		# Print error of spectral solutions
+errorSpec = True;		# Print error of spectral solutions
 
 doPV = False;				# Calculate potential vorticity
 doFootprints = False;		# Calculate footprints, requires findPV = True.
