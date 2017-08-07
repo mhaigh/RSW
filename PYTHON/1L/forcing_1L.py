@@ -143,8 +143,8 @@ def forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 						F1[j,i] = 0;
 						F2[j,i] = 0;						
 					else:	
-						F1[j,i] = 0.25 * AmpF * np.pi * g * (y[j]-y0) / (r0 * f[j] * r) * np.sin(np.pi * r / r0);
-						F2[j,i] = - 0.25 * AmpF * np.pi * g * x[i] / (r0 * f[j] * r) * np.sin(np.pi * r / r0);
+						F1[j,i] = 0.5 * AmpF * np.pi * g * (y[j]-y0) / (r0 * f[j] * r) * np.sin(np.pi * r / r0);
+						F2[j,i] = - 0.5 * AmpF * np.pi * g * x[i] / (r0 * f[j] * r) * np.sin(np.pi * r / r0);
 					F3[j,i] = 0.5 * AmpF * (1 + np.cos(np.pi * r / r0));
 					mass = mass + F3[j,i];
 		mass = mass / (N*(N+1) - count);
@@ -221,12 +221,12 @@ def forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 	# Nondimensionalise forcing terms
 	#=======================================================
 
-	F1_nd = F1 / (f0 * U);
-	F2_nd = F2 / (f0 * U);
+	F1_nd = F1 * L / U**2;
+	F2_nd = F2 * L / U**2;
 	F3_nd = F3 * g / (f0 * U**2); 
 
-	Ftilde1_nd = Ftilde1 / (f0 * U * L);
-	Ftilde2_nd = Ftilde2 / (f0 * U * L);
+	Ftilde1_nd = Ftilde1 / U**2;
+	Ftilde2_nd = Ftilde2 / U**2;
 	Ftilde3_nd = Ftilde3 * g / (f0 * U**2 * L);
 
 	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
@@ -309,9 +309,33 @@ def forcingDiff(Ftilde_nd,y_nd,dy_nd,N,i):
 	import sys
 	sys.exit();
 
+#=======================================================
 
+# F12_from_F3
+def F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N):
+# Finds F1 and F3 numerically from F3.
 
+	F1_nd = np.zeros((N,N+1));
+	F2_nd = np.zeros((N,N+1));
+	for i in range(0,N+1):
+		F1_nd[:,i] = - diff(F3_nd[:,i],2,0,dy_nd)/f_nd[:];
+	for j in range(0,N):
+		F2_nd[j,:] = diff(F3_nd[j,:],2,0,dx_nd)/(f_nd[j]);
 
+	return F1_nd, F2_nd;
+
+#=======================================================
+
+# F3_from_F1
+def F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N):
+# Numerically integrates F1_nd to find F3_nd
+	import scipy.integrate as integrate
+
+	F3_nd = np.zeros((N,N+1));
+	for i in range(0,N+1):
+		F3_nd[:,i] = integrate(F1_nd[:,i]*f_nd[:],y_nd,dy_nd,0);
+
+	return F3_nd;
 
 
 

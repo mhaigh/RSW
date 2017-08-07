@@ -40,27 +40,22 @@ elif FORCE_TYPE == 'DCTS':
 	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
 else:
 	sys.exit('ERROR: Invalid forcing option selected.');
-diagnostics.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
-for i in range(0,N):
-	F1_nd[:,i] = - diagnostics.diff(F3_nd[:,i],2,0,dy_nd)/f_nd[:];
-for j in range(0,N):
-	F2_nd[j,:] = diagnostics.diff(F3_nd[j,:],2,0,dx_nd)/f_nd[j];
-	F3_nd[j,:] = diagnostics.diff(np.cos(2*np.pi*x_nd),2,0,dx_nd)/(2*np.pi);
+#F1_nd, F2_nd = forcing_1L.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
+#F3_nd = forcing_1L.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
+#diagnostics.forcingPlots(x_nd,y_nd,Ro*F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
-diagnostics.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
-forcing_1L.forcingDiff(Ftilde3_nd,y_nd,dy_nd,N,1);
 
 # Coefficients
 a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 # Solver
 if BC == 'NO-SLIP':
-	solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
+	solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 if BC == 'FREE-SLIP':
 	uBC, etaBC = solver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
-	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
-utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
+	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 
+utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
 #====================================================
@@ -70,7 +65,7 @@ if errorPhys:
 	e1, e2, e3 = diagnostics.error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
 	print 'ERROR: ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
 if errorSpec:
-	e1_spec = diagnostics.specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,K_nd,H0_nd,y_nd,dy_nd,N,1);
+	e1_spec = diagnostics.specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,Ro,K_nd,H0_nd,y_nd,dy_nd,N,1);
 	print e1_spec;
 
 #====================================================

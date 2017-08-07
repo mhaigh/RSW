@@ -459,6 +459,11 @@ def ddt(f,delta):
 def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N):
 # This function calculates the error of the 1L SW solutions, and is to be used in the main code RSW_visc_1L.py.
 
+	if Re == None:
+		Ro_Re = 0;
+	else:
+		Ro_Re = Ro / Re;
+	
 	I = np.complex(0,1);
 	ts = 12;
 	# Now we calculate all the relevant x and y derivatives
@@ -494,7 +499,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 		for j in range(0,N):
 			e11[j,i] = Ro * (u_t[j,i,ts] + U0_nd[j] * u_x[j,i]);
 			e12[j,i] = gamma_nd * u_nd[j,i,ts];
-			e13[j,i] = - Ro * (u_xx[j,i] + u_yy[j,i]) / Re;
+			e13[j,i] = - Ro_Re * (u_xx[j,i] + u_yy[j,i]);
 			e14[j,i] = (Ro * U0_y[j] - f_nd[j]) * v_nd[j,i,ts];
 			e15[j,i] = eta_x[j,i];
 			e16[j,i] = - F1_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
@@ -505,7 +510,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 		for j in range(0,N):
 			e11[j,i] = Ro * (v_t[j,i,ts] + U0_nd[j] * v_x[j,i]);
 			e12[j,i] = gamma_nd * v_nd[j,i,ts];
-			e13[j,i] = - Ro * (v_xx[j,i] + v_yy[j,i]) / Re;
+			e13[j,i] = - Ro_Re * (v_xx[j,i] + v_yy[j,i]);
 			e14[j,i] = f_nd[j] * u_nd[j,i,ts];
 			e15[j,i] = eta_y[j,i];
 			e16[j,i] = - F2_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
@@ -596,7 +601,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 #====================================================
 
 # specError
-def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,K_nd,H0_nd,y_nd,dy_nd,N,i):
+def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,Ro,K_nd,H0_nd,y_nd,dy_nd,N,i):
 # An alternative error metric. Calculates the error associated with the three 1-D spectral equations for a given wavenumber K_nd[i].
 
 	# Need relevant derivatives
@@ -619,7 +624,7 @@ def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a
 	plt.plot(Ftilde1_nd[:,1]);
 	plt.show();
 	
-	error1 = a1[:,i] * utilde_nd[:,i] + a2 * utilde_yy + a3 * vtilde_nd[:,i] + a4[i] * etatilde_nd[:,i] - Ftilde1_nd[:,i];
+	error1 = a1[:,i] * utilde_nd[:,i] + a2 * utilde_yy + a3 * vtilde_nd[:,i] + a4[i] * etatilde_nd[:,i] - Ro * Ftilde1_nd[:,i];
 	plt.subplot(121);
 	plt.plot(np.real(error1),y_nd);
 	#plt.contourf(etatilde_nd);	
@@ -628,7 +633,7 @@ def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a
 	plt.plot(Ftilde1_nd[:,i],y_nd);
 	plt.show();
 
-	error1 = np.sqrt((np.absolute(error1)**2).mean());
+	error1 = np.sqrt((np.real(error1)**2).mean());
 
 	return error1;
 	

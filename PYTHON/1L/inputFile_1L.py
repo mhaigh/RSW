@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 256; 			# Number of gridpoints
+N = 200; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -238,7 +238,7 @@ Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
 
 outputPath = '/home/mike/Documents/GulfStream/Code/DATA/1L/';
 
-errorPhys = False;     	# Print error of full solutions 
+errorPhys = True;     	# Print error of full solutions 
 errorSpec = True;		# Print error of spectral solutions
 
 doPV = False;				# Calculate potential vorticity
