@@ -16,6 +16,8 @@
 
 #====================================================
 
+import sys
+
 import numpy as np
 
 import diagnostics
@@ -32,8 +34,22 @@ from inputFile_1L import *
 #====================================================
 
 # Forcing
-F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
-#forcing_1L.forcingDiff(Ftilde3_nd,y_nd,dy_nd,N,1);
+if FORCE_TYPE == 'CTS':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+elif FORCE_TYPE == 'DCTS':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+else:
+	sys.exit('ERROR: Invalid forcing option selected.');
+diagnostics.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
+
+for i in range(0,N):
+	F1_nd[:,i] = - diagnostics.diff(F3_nd[:,i],2,0,dy_nd)/f_nd[:];
+for j in range(0,N):
+	F2_nd[j,:] = diagnostics.diff(F3_nd[j,:],2,0,dx_nd)/f_nd[j];
+	F3_nd[j,:] = diagnostics.diff(np.cos(2*np.pi*x_nd),2,0,dx_nd)/(2*np.pi);
+
+diagnostics.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
+forcing_1L.forcingDiff(Ftilde3_nd,y_nd,dy_nd,N,1);
 
 # Coefficients
 a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);

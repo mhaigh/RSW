@@ -15,6 +15,13 @@ import matplotlib.pyplot as plt
 FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing, 
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
+
+FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
+							# so that F1 and F2 are discontinous.
+							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
+							# while still retaining the essential properties of the forcing. 
+
+Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
 BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
@@ -24,12 +31,10 @@ GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
-
 # Domain
 #=======================================================
 
-N = 400; 			# Number of gridpoints
+N = 256; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	

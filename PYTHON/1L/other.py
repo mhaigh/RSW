@@ -4,10 +4,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import diagnostics
+
 from inputFile_1L import *
 
 #========================================
-option = 3;
+option = 0;
+
+if option == 0:
+	cos = np.cos(2*np.pi*x_nd/(x_nd[N]-x_nd[0]));
+	cos_y = diagnostics.diff(cos,2,1,dy_nd) / (2*np.pi);
+	cos_yy = diagnostics.diff(cos_y,2,1,dy_nd)  / (2*np.pi);
+
+	dim = len(cos);
+	print(cos[0],cos[dim-1]);
+	plt.subplot(131);
+	plt.plot(cos);
+	plt.grid();
+	plt.subplot(132);
+	plt.plot(cos_y);
+	plt.grid();
+	plt.subplot(133);
+	plt.plot(cos_yy);
+	plt.grid();
+	plt.show();
 
 # Plots a selection of Gaussian profiles
 if option == 1:

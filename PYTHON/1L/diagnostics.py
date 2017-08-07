@@ -359,6 +359,7 @@ def diff(f,d,p,delta):
 # d=2 for a 1D vector
 # p is a periodic switch:
 # p=1 calculates periodic derivative.
+# Need to be careful with periodic derivatives, output depends on whether f[0]=f[dim-1] or =f[dim].
 	
 	if d != 2:
 		dimx = np.shape(f)[1];		# Finds the number of gridpoints in the x and y directions
@@ -366,7 +367,7 @@ def diff(f,d,p,delta):
 		df = np.zeros((dimy,dimx),dtype=f.dtype);
 	else:
 		dimy = np.shape(f)[0];
-		df = np.zeros(dimy,dtype=f.dtype);	
+		df = np.zeros(dimy,dtype=f.dtype);
 	
 	if p == 0:
 		# Solid boundary derivative.
@@ -415,10 +416,13 @@ def diff(f,d,p,delta):
 
 		elif d == 2:
 
-			df[1:dimy-1]=f[2:dimy] - f[0:dimy-2];
+			df[1:dimy-1] = f[2:dimy] - f[0:dimy-2];
 
-			df[0] = f[1] - f[0];
-			df[dimy-1] = f[0] - f[dimy-2];
+			df[0] = f[1] - f[dimy-2];
+			df[dimy-1] = f[1] - f[dimy-2];
+			
+			#print(str(df[0])+'='+str(f[1])+'+'+str(f[dimy-1]));
+			#print(str(df[dimy-1])+'='+str(f[0])+'+'+str(f[dimy-2]));
 		
 		else:
 			print('error')
