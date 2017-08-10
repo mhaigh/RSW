@@ -65,8 +65,13 @@ if errorPhys:
 	e1, e2, e3 = diagnostics.error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
 	print 'ERROR: ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
 if errorSpec:
-	e1_spec = diagnostics.specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,Ro,K_nd,H0_nd,y_nd,dy_nd,N,1);
-	print e1_spec;
+	error_spec = np.zeros((3,N));	# An array to save the spectral error at each wavenumber for each equation.
+	for i in range(0,N):
+		error_spec[:,i] = diagnostics.specError(utilde_nd[:,i],vtilde_nd[:,i],etatilde_nd[:,i],Ftilde1_nd[:,i],Ftilde2_nd[:,i],Ftilde3_nd[:,i],a1[:,i],a2,a3,a4[i],\
+b4,c1[:,i],c2,c3,c4[:,i],f_nd,Ro,K_nd[i],H0_nd,y_nd,dy_nd,N);
+	for eq in range(0,3):
+		error = sum(error_spec[eq,:]) / N;
+		print('Error' + str(int(eq+1)) + '=' + str(error));
 
 #====================================================
 
@@ -94,12 +99,17 @@ eta = eta_nd * chi;
 # Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
 if doPV:
 	PV_prime, PV_full, PV_BG = PV.vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
-	if doFootprints: 
-		P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS); 
-		#PV.footprintComponents_1L(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS); # For diagnostic purposes
+	if doFootprints:
+		if footprintComponents: 
+			uq_av, uQ_av, Uq_av UQ, vq_av, vQ_av, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,x_nd,dx_nd,dy_nd,N,Nt);
+		else: 
+			P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
 		if doEEFs:
-			EEFq_total, EEFq_north, EEFq_south = PV.equivEddyFlux(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
-			EEFq = np.array([EEFq_total,EEFq_north,EEFq_south]);
+			if footprintComponents:
+				PV.EEF
+			else:
+				EEFq_total, EEFq_north, EEFq_south = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+				EEFq = np.array([EEFq_total,EEFq_north,EEFq_south]);
 			print(EEFq_total, EEFq_north, EEFq_south);
 
 			

@@ -601,41 +601,58 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 #====================================================
 
 # specError
-def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,Ro,K_nd,H0_nd,y_nd,dy_nd,N,i):
+def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,f_nd,Ro,K_nd,H0_nd,y_nd,dy_nd,N):
 # An alternative error metric. Calculates the error associated with the three 1-D spectral equations for a given wavenumber K_nd[i].
 
 	# Need relevant derivatives
-	utilde_y = diff(utilde_nd[:,i],2,0,dy_nd);
+	utilde_y = diff(utilde_nd,2,0,dy_nd);
 	utilde_yy = diff(utilde_y,2,0,dy_nd);
-	vtilde_y = diff(vtilde_nd[:,i],2,0,dy_nd);
+	vtilde_y = diff(vtilde_nd,2,0,dy_nd);
 	vtilde_yy = diff(vtilde_y,2,0,dy_nd);
-	etatilde_y = diff(etatilde_nd[:,i],2,0,dy_nd);
+	etatilde_y = diff(etatilde_nd,2,0,dy_nd);
 
-	plt.subplot(221);
-	plt.plot(utilde_nd[:,i],y_nd);
-	plt.title('u');
-	plt.subplot(222);
-	plt.plot(utilde_y,y_nd);
-	plt.title('u_y')
-	plt.subplot(223);
-	plt.plot(utilde_yy,y_nd);
-	plt.title('u_yy');
-	plt.subplot(224);
-	plt.plot(Ftilde1_nd[:,1]);
-	plt.show();
+	# Some coefficients need to be multiplied by dy_nd.
+	a2 = a2 * dy_nd**2;
+	b4 = b4 * 2 * dy_nd;
+	c3 = c3 * 2 * dy_nd;
 	
-	error1 = a1[:,i] * utilde_nd[:,i] + a2 * utilde_yy + a3 * vtilde_nd[:,i] + a4[i] * etatilde_nd[:,i] - Ro * Ftilde1_nd[:,i];
-	plt.subplot(121);
-	plt.plot(np.real(error1),y_nd);
-	#plt.contourf(etatilde_nd);	
-	plt.ylabel('y');
-	plt.subplot(122);
-	plt.plot(Ftilde1_nd[:,i],y_nd);
-	plt.show();
+	error1 = a1 * utilde_nd + a2 * utilde_yy + a3 * vtilde_nd + a4 * etatilde_nd - Ro * Ftilde1_nd;
+	
+	error2 = f_nd * utilde_nd + a1 * vtilde_nd + a2 * vtilde_yy + b4 * etatilde_y - Ro * Ftilde2_nd;
 
-	error1 = np.sqrt((np.real(error1)**2).mean());
+	error3 = c1 * utilde_nd + c2 * vtilde_nd + c3 * vtilde_y + c4 * etatilde_nd - Ftilde3_nd
 
-	return error1;
+	PLOT1 = False;
+	if PLOT1:
+		plt.subplot(221);
+		plt.plot(utilde_nd,y_nd);
+		plt.title('u');
+		plt.subplot(222);
+		plt.plot(utilde_y,y_nd);
+		plt.title('u_y')
+		plt.subplot(223);
+		plt.plot(utilde_yy,y_nd);
+		plt.title('u_yy');
+		plt.subplot(224);
+		plt.plot(Ftilde1_nd);
+		plt.show();
+	
+	PLOT2 = False;
+	if PLOT2:
+		plt.subplot(121);
+		plt.plot(np.real(error2),y_nd);
+		#plt.contourf(etatilde_nd);	
+		plt.ylabel('y');
+		plt.subplot(122);
+		plt.plot(np.real(Ftilde2_nd),y_nd);
+		plt.show();
+
+	error1 = np.sqrt((np.real(error1[2:N-3])**2).mean());
+	error2 = np.sqrt((np.real(error2[2:N-3])**2).mean());
+	error3 = np.sqrt((np.real(error3[2:N-3])**2).mean());
+	print(error3);
+
+	return error1,error2,error1;
 	
 
 #====================================================

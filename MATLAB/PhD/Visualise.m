@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold/';
+loc = '~/cluster/gold3/';
 
 cd(loc);
 

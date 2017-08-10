@@ -98,7 +98,7 @@ for pi in range(0,3):
 		P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS); 
 
 		# Equivalent eddy fluxes
-		EEF, EEF_north, EEF_south = PV.equivEddyFlux(P_xav,y_nd,y0_nd,dy_nd,ts,omega_nd,N);
+		EEF, EEF_north, EEF_south = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,ts,omega_nd,N);
 
 		E[ii,pi] = EEF;
 		print(EEF);

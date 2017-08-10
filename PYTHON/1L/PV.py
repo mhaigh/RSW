@@ -78,9 +78,12 @@ def footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,
 
 #====================================================
 
-# footprint_1L
+# footprintComponents
+def footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,x_nd,dx_nd,dy_nd,N,Nt):
 # A function that calculates the PV footprint of the 1L SW solution in terms of its components, allowing for analysis.
-def footprintComponents_1L(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS):
+# The function calculates the following terms: (1) uq, (2) Uq, (3) uQ, (4) UQ, (5) vq and (6) vQ. (UQ has zero zonal derivative.)
+# The zonal/meridional derivative of the zonal/meridional PV flux is taken, averaged over one forcing period.
+# Lastly, the zonal averages are calculated and everything useful returned.
 
 	uq = u_nd * PV_prime;
 	vq = v_nd * PV_prime;
@@ -95,6 +98,40 @@ def footprintComponents_1L(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,U,Umag,x_nd,y_n
 			Uq[:,i,ti] = U0_nd[:] * PV_prime[:,i,ti];
 			vQ[:,i,ti] = v_nd[:,i,ti] * PV_BG[:];
 
+	# Derivatives (no need to edit operate on UQ) and time-averaging
+	uq_av = diff(uq[:,:,0],1,1,dx_nd);
+	uQ_av = diff(uQ[:,:,0],1,1,dx_nd);
+	Uq_av = diff(Uq[:,:,0],1,1,dx_nd);
+	vQ_av = diff(vQ[:,:,0],0,0,dy_nd);
+	vq_av = diff(vq[:,:,0],0,0,dy_nd)
+
+	for ti in range(1,Nt):
+		uq_av = uq_av + diff(uq[:,:,ti],1,1,dx_nd);
+		uQ_av = uQ_av + diff(uQ[:,:,ti],1,1,dx_nd);
+		Uq_av = Uq_av + diff(Uq[:,:,ti],1,1,dx_nd);
+		vQ_av = vQ_av + diff(vQ[:,:,ti],0,0,dy_nd);
+		vq_av = vq_av + diff(vq[:,:,ti],0,0,dy_nd);
+
+	uq_av = uq_av / Nt;
+	uQ_av = uQ_av / Nt;
+	Uq_av = Uq_av / Nt;
+	vq_av = vq_av / Nt;
+	vQ_av = vQ_av / Nt;
+
+	# Zonal averaging
+	uq_xav = np.trapz(uq_av,x_nd[:N],dx_nd,axis=1);
+	uQ_xav = np.trapz(uQ_av,x_nd[:N],dx_nd,axis=1);
+	Uq_xav = np.trapz(Uq_av,x_nd[:N],dx_nd,axis=1);
+	vq_xav = np.trapz(vq_av,x_nd[:N],dx_nd,axis=1);
+	vQ_xav = np.trapz(vQ_av,x_nd[:N],dx_nd,axis=1);
+
+	return uq_av, uQ_av, Uq_av, UQ, vq_av, vQ_av, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav;
+
+#====================================================
+
+# footprintComponentsPlot
+# A function that plots the footprint components.
+def footprintComponentsPlot(P,P_xav,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt):
 
 	plt.subplot(121);
 	plt.contourf(v_nd[:,:,ts]);
@@ -224,7 +261,7 @@ def footprintComponents_1L(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,U,Umag,x_nd,y_n
 
 # equivEddyFlux
 # A function that calculates the equivalent eddy flux, given a zonally averaged footprint
-def equivEddyFlux(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
+def EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
 # The code works by calculating six integrals (three each side of the forcing) that make up each component of the equivalent eddy flux:
 # int1_north/south = int_{y > / < y0} P_xav dy;
 # int2_north/south = int_{y > / < y0} |y| |P_xav| dy;

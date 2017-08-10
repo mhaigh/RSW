@@ -9,7 +9,7 @@ import diagnostics
 from inputFile_1L import *
 
 #========================================
-option = 0;
+option = 4;
 
 if option == 0:
 	cos = np.cos(2*np.pi*x_nd/(x_nd[N]-x_nd[0]));
@@ -182,36 +182,18 @@ elif option == 3:
 	plt.tight_layout();
 	plt.show()
 
-
-#========================================================================
-	# We may want to update the count again here, if there are any errors.
-	update_modes = raw_input('Update modes? y or n: ') 
-	if str(update_modes) == 'y':		
-		mii = 0;
-		while mii < Nm:
-			plt.plot(vec[0:N,dom_index_tmp[mii]],y_nd);	
-			plt.ylim(-0.5,0.5);
-			plt.show();
-			count[dom_index_tmp[mii]], mii = eigDiagnostics.updateCount(count[dom_index_tmp[mii]],mii);
-			mii = mii + 1;
-
-		i_count_new = np.argsort(count);
-		count = count[i_count_new];
+elif option == 4:
 	
-		# Update the vectors & eigenvalues.
-		vec = vec[:,i_count_new];
-		val = val[i_count_new];
-	
-		# Update the indices and weights.
-		theta_tmp = theta_tmp[i_count_new];
-		dom_index_tmp = np.argsort(-(np.abs(theta_tmp))**2);
-		for mi in range(0,Nm):	
-			theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
-			dom_index[mi,i] = dom_index_tmp[mi];
+	N_set = [32,64,128,256,512,1024];
+	p_set = [5,6,7,8,9,10];
 
-		print(dom_index[:,i]);
-		print(count[dom_index[:,i]]);
+	error1 = [1.16981294267e-19,1.45815391948e-19,1.46022581344e-19,1.10596154905e-19,8.14040437205e-20];
+	error2 = [6.70739732654e-20,7.4529325698e-20,5.18529854606e-20,4.16850431505e-20,4.2138040004e-20];
+	error3 = [1.16981294267e-19,1.45815391948e-19,1.46022581344e-19,1.10596154905e-19,8.14040437205e-20];
 
-		output.ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
+	plt.plot(N_set,error1);
+	plt.show();
+
+
 
 
