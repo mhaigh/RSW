@@ -28,6 +28,22 @@ def ncReadEigenmodes(ncFile):
 	count = Eigenmodes.variables['count'][:];
 
 	return val, vec, count
+
+
+#=======================================================
+
+def ncReadEEF_y0_components(ncFile):
+
+	dataset = nc.Dataset(ncFile);	# Read the NETCDF file
+
+	EEF = dataset.variables['EEF'][:,:];
+	uq = dataset.variables['uq'][:,:];
+	Uq = dataset.variables['Uq'][:,:];
+	uQ = dataset.variables['uQ'][:,:];
+	vq = dataset.variables['vq'][:,:];
+	vQ = dataset.variables['vQ'][:,:];
+
+	return EEF, uq, Uq,uQ, vq, vQ;
 	
 
 	

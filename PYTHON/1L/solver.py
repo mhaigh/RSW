@@ -300,9 +300,8 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftilde
 
 # FREE_SLIP_SOLVER
 #=======================================================
-def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2):
+def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2):
 # Called by RSW_1L.py if BC = 'FREE-SLIP'.
-
 
 	dim = N2 + 2 * N;
 	#print(dim);

@@ -52,8 +52,7 @@ a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0
 if BC == 'NO-SLIP':
 	solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 if BC == 'FREE-SLIP':
-	uBC, etaBC = solver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
-	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 
 utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
@@ -101,17 +100,19 @@ if doPV:
 	PV_prime, PV_full, PV_BG = PV.vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
 	if doFootprints:
 		if footprintComponents: 
-			uq_av, uQ_av, Uq_av UQ, vq_av, vQ_av, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,x_nd,dx_nd,dy_nd,N,Nt);
+			P, uq, uQ, Uq, UQ, vq, vQ, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd,dy_nd,N,Nt);
 		else: 
 			P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
 		if doEEFs:
 			if footprintComponents:
-				PV.EEF
+				EEF_array = PV.EEF_components(P_xav,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+				# This returns EEF_array, an array with the following structure:
+				# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
+				EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
 			else:
-				EEFq_total, EEFq_north, EEFq_south = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
-				EEFq = np.array([EEFq_total,EEFq_north,EEFq_south]);
-			print(EEFq_total, EEFq_north, EEFq_south);
-
+				EEF_array = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+				EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
+			print(EEF_north, EEF_south);
 			
 # Buoyancy footprints
 #====================================================

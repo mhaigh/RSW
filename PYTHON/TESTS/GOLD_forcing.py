@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = 4;
+OPT = 0;
 
 N = 256;
 y = np.linspace(1,256,N);
@@ -16,6 +16,21 @@ jNo = int((y[N-1] - j2)/ 2) + j2;
 
 
 f = np.zeros(N);
+
+#==========================================================================
+
+if OPT == 0:
+	h_restore1 = np.zeros(N);
+	h_restore2 = np.zeros(N);
+	for j in range(0,N):
+		h_restore1[j] = 500 - 1 * np.tanh((j-N/2));
+		h_restore2[j] = 500 - 1 * np.tanh((j-N/2)/10.0);
+
+	plt.subplot(121);
+	plt.plot(y,h_restore1);
+	plt.subplot(122);
+	plt.plot(y,h_restore2);
+	plt.show();
 
 if OPT == 1:
 	for j in range(0,jSo+1):

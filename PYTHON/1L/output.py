@@ -12,7 +12,7 @@ import netCDF4 as nc
 #=======================================================
 
 # ncSave
-def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_FULL,PV_PRIME,PV_bg,Pq,EEFq,N,Nt):
+def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_FULL,PV_PRIME,PV_bg,P,EEF,N,Nt):
 # A function that saves the output of RSW_1L.py in netcdf format.
 # Saves the solutions (physical and spectral by default) and depending on whether or not
 # they were calculated, also saves the PV, footprints, and EEF.
@@ -65,11 +65,11 @@ def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T
 		PV_full[:,:,:] = PV_FULL;
 		PV_prime[:,:,:] = PV_prime;
 		PV_BG[:] = PV_bg;
-	if Pq != None:
+	if P != None:
 		P = RSW1L.createVariable('P','f4',('x_dim','y_dim',));
 		#==
 		P[:,:] = Pq;		
-	if EEFq != None:
+	if EEF != None:
 		EEF = RSW1L.createVariable('EEF','f4');
 		#==
 		EEF[:] = EEFq;
@@ -113,7 +113,7 @@ def ncSaveEigenmodes(modes,val,zero_count,y_nd,k,N,dim,BC):
 	vec = RSW1L_Eigenmodes.createVariable('vec','f8',('y3_dim','omega_dim','real_imag',));
 	count = RSW1L_Eigenmodes.createVariable('count','i4',('y3_dim',));
 	
-	# ...and assign the data to the variables
+	# ...and assign the data to the variables.
 	vec[:,:,0] = np.real(modes); vec[:,:,1] = np.imag(modes);
 	count[:] = zero_count;
 
@@ -150,10 +150,52 @@ def ncSaveEigenmodes_sep(u_modes,v_modes,eta_modes,val,y_nd,k,N,dim):
 	v_vec = RSW1L_Eigenmodes.createVariable('v_vec','f8',('y_dim','omega_dim','real_imag',));
 	eta_vec = RSW1L_Eigenmodes.createVariable('eta_vec','f8',('y_dim','omega_dim','real_imag',));
 	
-	# ...and assign the data to the variables
+	# ...and assign the data to the variables.
 	u_vec[:,:,0] = np.real(u_modes); u_vec[:,:,1] = np.imag(u_modes);
 	v_vec[:,:,0] = np.real(v_modes); v_vec[:,:,1] = np.imag(v_modes);
 	eta_vec[:,:,0] = np.real(eta_modes); eta_vec[:,:,1] = np.imag(eta_modes);
 
 	RSW1L_Eigenmodes.close();
+
+#=======================================================
+
+# ncSaveEEF_y0_components
+def ncSaveEEF_y0_components(EEF_array,y0_set,period_days,nn):
+# A function that saves the output of EQUIV_EDDY_FLUXES.py in NETCDF format.
+
+	file_name = 'EEF_y0_comp_' + str(int(period_days)) + '.nc';
+
+	# Initialise the nc file
+	EEF_y0_comp = nc.Dataset(file_name,'w',format='NETCDF4');
+		
+	# Create dimensions
+	y0_dim = EEF_y0_comp.createDimension('y0_dim',nn);
+	north_south_dim = EEF_y0_comp.createDimension('north_south_dim',2);
+
+	# Initialise dimension variables...
+	y0 = EEF_y0_comp.createVariable('y0','f8',('y0_dim',));
+	north_south = EEF_y0_comp.createVariable('north_south','i1',('north_south_dim',))
+	# ...and assign the data.
+	y0[:] = y0_set;
+	north_south[0] = 0; north_south[1] = 1;
+
+	# Initialise solution variables...
+	EEF = EEF_y0_comp.createVariable('EEF','f8',('y0_dim','north_south_dim',));
+	uq = EEF_y0_comp.createVariable('uq','f8',('y0_dim','north_south_dim',));
+	Uq = EEF_y0_comp.createVariable('Uq','f8',('y0_dim','north_south_dim',));
+	uQ = EEF_y0_comp.createVariable('uQ','f8',('y0_dim','north_south_dim',));
+	vq = EEF_y0_comp.createVariable('vq','f8',('y0_dim','north_south_dim',));
+	vQ = EEF_y0_comp.createVariable('vQ','f8',('y0_dim','north_south_dim',));
+	 
+	# ...and assign the data to the variables.
+	EEF[:,:] = EEF_array[:,0,:]; 
+	uq[:,:] = EEF_array[:,1,:];
+	Uq[:,:] = EEF_array[:,2,:];
+	uQ[:,:] = EEF_array[:,3,:];
+	vq[:,:] = EEF_array[:,4,:];
+	vQ[:,:] = EEF_array[:,5,:];
+
+	EEF_y0_comp.close();
+
+
 
