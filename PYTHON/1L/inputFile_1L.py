@@ -21,7 +21,7 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
 BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
@@ -244,7 +244,7 @@ errorSpec = False;		# Print error of spectral solutions
 doPV = True;			# Calculate potential vorticity
 doFootprints = True;	# Calculate footprints, requires findPV = True.
 doEEFs = True;			# Calculate equivalent eddy fluxes, require findFootprints = True.
-footprintComponents = False;	# If true, calculates the footprint in terms of its components.
+footprintComponents = True;	# If true, calculates the footprint in terms of its components.
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;

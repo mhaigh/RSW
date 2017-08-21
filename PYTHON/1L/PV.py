@@ -87,6 +87,8 @@ def footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd
 
 	uq = u_nd * PV_prime;
 	vq = v_nd * PV_prime;
+	#plt.contourf(vq[:,:,10]);
+	#plt.show();
 	UQ = U0_nd * PV_BG;
 	# Other components need to be defined in a loop
 	uQ = np.zeros((N,N,Nt));
@@ -138,28 +140,22 @@ def footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd
 
 # footprintComponentsPlot
 # A function that plots the footprint components.
-def footprintComponentsPlot(P,P_xav,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt):
-
-	plt.subplot(121);
-	plt.contourf(v_nd[:,:,ts]);
-	plt.subplot(122);
-	plt.contourf(PV_prime[:,:,ts]);
-	plt.show();		
+def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,PV_prime,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt):
 
 	plt.figure(1);
 
 	plt.subplot(321);
-	plt.contourf(uq[:,:,ts]);
+	plt.contourf(uq[:,:]);
 	plt.title('uq');
 	plt.colorbar();
 
 	plt.subplot(322);
-	plt.contourf(uQ[:,:,ts]);
+	plt.contourf(uQ[:,:]);
 	plt.title('uQ');
 	plt.colorbar();
 
 	plt.subplot(323);
-	plt.contourf(Uq[:,:,ts]);
+	plt.contourf(Uq[:,:]);
 	plt.title('Uq');
 	plt.colorbar();
 
@@ -168,25 +164,24 @@ def footprintComponentsPlot(P,P_xav,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt):
 	plt.title('UQ');
 
 	plt.subplot(325);
-	plt.contourf(vq[:,:,ts]);
+	plt.contourf(vq[:,:]);
 	plt.title('vq');
 	plt.colorbar();
 
 	plt.subplot(326);
-	plt.contourf(vQ[:,:,ts]);
+	plt.contourf(vQ[:,:]);
 	plt.title('vQ');
 	plt.colorbar();
 
 	plt.show();
 
 	# Now overwrite the values with their derivatives
-	uq = diff(uq[:,:,ts],1,1,dx_nd);
-	uQ = diff(uQ[:,:,ts],1,1,dx_nd);
-	Uq = diff(Uq[:,:,ts],1,1,dx_nd);
-	vQ = diff(vQ[:,:,ts],0,0,dy_nd);
+	uq = diff(uq,1,1,dx_nd);
+	uQ = diff(uQ,1,1,dx_nd);
+	Uq = diff(Uq,1,1,dx_nd);
+	vQ = diff(vQ,0,0,dy_nd);
 	vq = np.zeros((N,N,Nt));
-	for ti in range(0,Nt):
-			vq[:,:,ti] = diff(vq[:,:,ti],0,0,dy_nd);	
+	vq = diff(vq,0,0,dy_nd);	
 
 	plt.figure(2);
 
@@ -206,7 +201,7 @@ def footprintComponentsPlot(P,P_xav,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt):
 	plt.colorbar();
 
 	plt.subplot(324);
-	plt.contourf(vq[:,:,ts]);
+	plt.contourf(vq);
 	plt.title('vq');
 	plt.colorbar();
 

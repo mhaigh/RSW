@@ -10,7 +10,7 @@ import diagnostics
 import PV
 import forcing_1L
 import solver
-import output
+#import output
 
 from inputFile_1L import *
 
@@ -92,6 +92,7 @@ for ii in range(0,nn):
 	# Calculate PV fields.
 	PV_prime, PV_full, PV_BG = PV.vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
 
+	# Do footprints
 	if footprintComponents:
 		P, uq, uQ, Uq, UQ, vq, vQ, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd,dy_nd,N,Nt);
 		EEF_array[ii,:,:] = PV.EEF_components(P_xav,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
@@ -100,7 +101,9 @@ for ii in range(0,nn):
 		EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
 
 if footprintComponents:
-	output.ncSaveEEF_y0_components(EEF_array,y0_set,period_days,nn);
+	#output.ncSaveEEF_y0_components(EEF_array,y0_set,period_days,nn);
+	filename = 'EEF_' + str(int(period_days));
+	np.save(filename,EEF_array);
 else:
 	# not written this nc function yet.
 	a=1;

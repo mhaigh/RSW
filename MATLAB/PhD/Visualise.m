@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold/';
+loc = '~/cluster/gold2/';
 
 cd(loc);
 
@@ -144,8 +144,8 @@ h3lim1 = min(min(min(h3)));
 h3lim2 = max(max(max(h3)));
 
 
-surf(transpose(h1(:,:,1,nt)),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
-    saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','h_snapshot'],'png');
+surf(transpose(h1(:,:,1,nt)),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;
+    %saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','h_snapshot'],'png');
 pause
 
 for ii=1:nt
