@@ -194,6 +194,89 @@ elif option == 4:
 	plt.plot(N_set,error1);
 	plt.show();
 
+elif option == 10000:
+	# Now overwrite the values with their derivatives
+	uq = diff(uq,1,1,dx_nd);
+	uQ = diff(uQ,1,1,dx_nd);
+	Uq = diff(Uq,1,1,dx_nd);
+	vQ = diff(vQ,0,0,dy_nd);
+	vq = np.zeros((N,N,Nt));
+	vq = diff(vq,0,0,dy_nd);	
+
+	plt.figure(2);
+
+	plt.subplot(321);
+	plt.contourf(uq);
+	plt.title('uq');
+	plt.colorbar();
+
+	plt.subplot(322);
+	plt.contourf(uQ);
+	plt.title('uQ');
+	plt.colorbar();
+
+	plt.subplot(323);
+	plt.contourf(Uq);
+	plt.title('Uq');
+	plt.colorbar();
+
+	plt.subplot(324);
+	plt.contourf(vq);
+	plt.title('vq');
+	plt.colorbar();
+
+	plt.subplot(325);
+	plt.contourf(vQ);
+	plt.title('vQ');
+	plt.colorbar();
+
+	plt.show();
+
+	# It can be seen that vQ and uQ are relatively small. Let's look at zonal averages instead.
+	uq_av = np.trapz(uq,x_nd[:N],dx_nd,axis=1);
+	vQ_av = np.trapz(vQ,x_nd[:N],dx_nd,axis=1);
+	uQ_av = np.trapz(uQ,x_nd[:N],dx_nd,axis=1);
+	Uq_av = np.trapz(Uq,x_nd[:N],dx_nd,axis=1);
+	vq_av = np.zeros((N,Nt));
+	for ti in range(0,Nt):
+		vq_av[:,ti] = np.trapz(vq[:,:,ti],x_nd[:N],dx_nd,axis=1);
+		
+	
+	plt.figure(3);
+
+	plt.subplot(321);
+	plt.contourf(uq);
+	plt.title('uq');
+	plt.colorbar();
+	plt.subplot(322);	
+	plt.plot(uq_av,y_nd);
+
+	plt.subplot(323);
+	plt.contourf(vq[:,:,ts]);
+	plt.title('vq');
+	plt.colorbar();
+	plt.subplot(324);	
+	plt.plot(vq_av,y_nd);
+
+	plt.subplot(325);
+	plt.contourf(Uq);
+	plt.title('Uq');
+	plt.colorbar();
+	plt.subplot(326);	
+	plt.plot(Uq_av,y_nd);
+	
+	plt.show()
+
+	plt.figure(4);
+	plt.subplot(221);
+	plt.contourf(vq[:,:,20]);
+	plt.subplot(222);
+	plt.contourf(vq[:,:,40]);
+	plt.subplot(223);
+	plt.contourf(vq[:,:,60]);
+	plt.subplot(224);
+	plt.contourf(vq[:,:,100]);
+	plt.show()
 
 
 

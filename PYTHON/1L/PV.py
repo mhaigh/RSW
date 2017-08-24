@@ -67,7 +67,7 @@ def footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,
 	#P_av = np.trapz(P,T_nd[:Nt],dt_nd,axis=2) / T_nd[Nt-1];
 	
 	# Normalisation
-	P = P / AmpF_nd**2;
+	#P = P / AmpF_nd**2;
 	
 	# We are interested in the zonal average of the footprint
 	P_xav = np.trapz(P,x_nd[:N],dx_nd,axis=1);
@@ -115,11 +115,13 @@ def footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd
 		vq_tav = vq_tav + diff(vq[:,:,ti],0,0,dy_nd);
 
 	# Divide by the number of time samples and simultaneously normalise by forcing amplitude and apply the negation
-	uq_tav = - uq_tav / (Nt * AmpF_nd**2);
-	uQ_tav = - uQ_tav / (Nt * AmpF_nd**2);
-	Uq_tav = - Uq_tav / (Nt * AmpF_nd**2);
-	vq_tav = - vq_tav / (Nt * AmpF_nd**2);
-	vQ_tav = - vQ_tav / (Nt * AmpF_nd**2);
+	uq_tav = - uq_tav / Nt;
+	uQ_tav = - uQ_tav / Nt;
+	Uq_tav = - Uq_tav / Nt;
+	vq_tav = - vq_tav / Nt;
+	vQ_tav = - vQ_tav / Nt;
+
+	# Normalisation by AmpF_nd not needed if normalised quanities are passed into the function.
 
 	P_tav = uq_tav + uQ_tav + Uq_tav + vq_tav + vQ_tav;
 
@@ -136,129 +138,6 @@ def footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd
 
 	return P_tav, uq_tav, uQ_tav, Uq_tav, UQ, vq_tav, vQ_tav, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav;
 
-#====================================================
-
-# footprintComponentsPlot
-# A function that plots the footprint components.
-def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,PV_prime,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt):
-
-	plt.figure(1);
-
-	plt.subplot(321);
-	plt.contourf(uq[:,:]);
-	plt.title('uq');
-	plt.colorbar();
-
-	plt.subplot(322);
-	plt.contourf(uQ[:,:]);
-	plt.title('uQ');
-	plt.colorbar();
-
-	plt.subplot(323);
-	plt.contourf(Uq[:,:]);
-	plt.title('Uq');
-	plt.colorbar();
-
-	plt.subplot(324);
-	plt.plot(UQ,y_nd);
-	plt.title('UQ');
-
-	plt.subplot(325);
-	plt.contourf(vq[:,:]);
-	plt.title('vq');
-	plt.colorbar();
-
-	plt.subplot(326);
-	plt.contourf(vQ[:,:]);
-	plt.title('vQ');
-	plt.colorbar();
-
-	plt.show();
-
-	# Now overwrite the values with their derivatives
-	uq = diff(uq,1,1,dx_nd);
-	uQ = diff(uQ,1,1,dx_nd);
-	Uq = diff(Uq,1,1,dx_nd);
-	vQ = diff(vQ,0,0,dy_nd);
-	vq = np.zeros((N,N,Nt));
-	vq = diff(vq,0,0,dy_nd);	
-
-	plt.figure(2);
-
-	plt.subplot(321);
-	plt.contourf(uq);
-	plt.title('uq');
-	plt.colorbar();
-
-	plt.subplot(322);
-	plt.contourf(uQ);
-	plt.title('uQ');
-	plt.colorbar();
-
-	plt.subplot(323);
-	plt.contourf(Uq);
-	plt.title('Uq');
-	plt.colorbar();
-
-	plt.subplot(324);
-	plt.contourf(vq);
-	plt.title('vq');
-	plt.colorbar();
-
-	plt.subplot(325);
-	plt.contourf(vQ);
-	plt.title('vQ');
-	plt.colorbar();
-
-	plt.show();
-
-	# It can be seen that vQ and uQ are relatively small. Let's look at zonal averages instead.
-	uq_av = np.trapz(uq,x_nd[:N],dx_nd,axis=1);
-	vQ_av = np.trapz(vQ,x_nd[:N],dx_nd,axis=1);
-	uQ_av = np.trapz(uQ,x_nd[:N],dx_nd,axis=1);
-	Uq_av = np.trapz(Uq,x_nd[:N],dx_nd,axis=1);
-	vq_av = np.zeros((N,Nt));
-	for ti in range(0,Nt):
-		vq_av[:,ti] = np.trapz(vq[:,:,ti],x_nd[:N],dx_nd,axis=1);
-		
-	
-	plt.figure(3);
-
-	plt.subplot(321);
-	plt.contourf(uq);
-	plt.title('uq');
-	plt.colorbar();
-	plt.subplot(322);	
-	plt.plot(uq_av,y_nd);
-
-	plt.subplot(323);
-	plt.contourf(vq[:,:,ts]);
-	plt.title('vq');
-	plt.colorbar();
-	plt.subplot(324);	
-	plt.plot(vq_av,y_nd);
-
-	plt.subplot(325);
-	plt.contourf(Uq);
-	plt.title('Uq');
-	plt.colorbar();
-	plt.subplot(326);	
-	plt.plot(Uq_av,y_nd);
-	
-	plt.show()
-
-	plt.figure(4);
-	plt.subplot(221);
-	plt.contourf(vq[:,:,20]);
-	plt.subplot(222);
-	plt.contourf(vq[:,:,40]);
-	plt.subplot(223);
-	plt.contourf(vq[:,:,60]);
-	plt.subplot(224);
-	plt.contourf(vq[:,:,100]);
-	plt.show()
-	
-	
 #====================================================
 
 # EEF

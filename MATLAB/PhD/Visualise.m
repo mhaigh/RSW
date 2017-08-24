@@ -1,8 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold2/';
-
+loc = '~/cluster/gold/';
 cd(loc);
 
 %T = ncread('timestats.nc','Time');
@@ -13,6 +12,7 @@ y = ncread(files(1).name,'yq');
 %nt = size(T,1);
 nx = size(x,1);
 ny = size(y,1);
+
 nf = size(files);
 nf = nf(1);
 
@@ -20,12 +20,14 @@ f0 = 0.44e-4;
 beta = 2e-11;
 f = f0 + beta * y;
 
+loop_start = nf-1; 
+loop_end = nf-1;
 RUN = 1;    % Choose to define PV from a completed RUN (1) or a RUN in progress (2)
 if RUN == 1
     PV_av = zeros(nx,ny);
     count = 0;
     %for i = 3:3
-    for i = nf-1:nf-1
+    for i = loop_start:loop_end
         disp(i);
         PVnew = ncread(files(i).name,'PV');
         unew = ncread(files(i).name,'u');
@@ -41,18 +43,6 @@ if RUN == 1
     nt = size(PV1,3);
 end
 
-% Use these lines to define PV from output in progress
-if RUN == 2
-    PV = ncread(strcat(loc,'prog__0005_002.nc'),'PV');
-    PV1 = PV(:,:,1,:);
-    h = ncread(strcat(loc,'prog__0005_002.nc'),'h');
-    h1 = h(:,:,1,:);
-    nt = 73;
-    for ti = 1:nt
-        PV1(:,:,ti) = transpose(PV1(:,:,ti));
-        h1(:,:,ti) = transpose(h1(:,:,ti));
-    end
-end
 
 %%
 
@@ -129,13 +119,39 @@ pause
 
 %%
 % 
+
+loc = '~/cluster/gold2/';
+
+cd(loc);
+
+%T = ncread('timestats.nc','Time');
+files = dir('prog__*');
+x = ncread(files(1).name,'xq');
+y = ncread(files(1).name,'yq');
+
+%nt = size(T,1);
+nx = size(x,1);
+ny = size(y,1);
+
+nf = size(files);
+nf = nf(1);
+
 h = ncread(files(nf-1).name,'h');
 
-h1 = h(:,:,1,:);
-h2 = h(:,:,2,:);
-h3 = h(:,:,3,:);
+h1 = squeeze(h(:,:,1,:));
+h2 = squeeze(h(:,:,2,:));
+h3 = squeeze(h(:,:,3,:));
 
-nt = size(h1,4);
+%nt = nt / (loop_end - loop_start);
+nt = 73
+for ti = 1:nt
+    h1(:,:,ti) = transpose(h1(:,:,ti));
+    h2(:,:,ti) = transpose(h2(:,:,ti));
+    h3(:,:,ti) = transpose(h3(:,:,ti));
+end
+
+
+
 h1lim1 = min(min(min(h1)));
 h1lim2 = max(max(max(h1)));
 h2lim1 = min(min(min(h2))); 
@@ -144,8 +160,8 @@ h3lim1 = min(min(min(h3)));
 h3lim2 = max(max(max(h3)));
 
 
-surf(transpose(h1(:,:,1,nt)),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;
-    %saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','h_snapshot'],'png');
+surf(h1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;
+    saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','h_snapshot'],'png');
 pause
 
 for ii=1:nt

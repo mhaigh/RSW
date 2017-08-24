@@ -78,6 +78,11 @@ u_nd = np.real(u_nd);
 v_nd = np.real(v_nd);
 eta_nd = np.real(eta_nd);
 
+# Normalise all solutions by the (non-dimensional) forcing amplitude. 
+u_nd = u_nd / AmpF_nd;
+v_nd = v_nd / AmpF_nd;
+eta_nd = eta_nd / AmpF_nd;
+
 # In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta
 eta_full = np.zeros((N,N,Nt));
 u_full = np.zeros((N,N,Nt));
@@ -101,7 +106,7 @@ if doPV:
 	if doFootprints:
 		if footprintComponents: 
 			P, uq, uQ, Uq, UQ, vq, vQ, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd,dy_nd,N,Nt);
-			PV.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,PV_prime,x_nd,y_nd,ts,T_nd,dx_nd,dy_nd,N,Nt)
+			diagnostics.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,x_nd,y_nd,N);
 		else: 
 			P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
 		if doEEFs:
@@ -122,13 +127,6 @@ if doPV:
 #Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);
 
 #====================================================
-
-# Last step: normalise all solutions by the (non-dimensional) forcing amplitude. 
-u_nd = u_nd / AmpF_nd;
-v_nd = v_nd / AmpF_nd;
-eta_nd = eta_nd / AmpF_nd;
-if doPV:
-	PV_prime = PV_prime / AmpF_nd;
 
 u_nd = diagnostics.extend(u_nd);
 v_nd = diagnostics.extend(v_nd);
@@ -159,7 +157,8 @@ if plotSol:
 
 # Plots of PV and zonally averaged PV
 if plotPV:
-	pvPlots(PV_full,PV_prime,P,x_nd,y_nd);
+	diagnostics.pvPlots(PV_full,PV_prime,x_nd,y_nd);
+	diagnostics.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N);
 if plotPV_av:
 	diagnostics.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 

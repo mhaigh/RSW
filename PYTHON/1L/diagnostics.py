@@ -65,7 +65,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 
 	plt.figure(1)
 	plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
-	plt.text(0.3,0.45,'u',fontsize=22);
+	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 	plt.xlabel('x',fontsize=18);
@@ -78,7 +78,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 
 	plt.figure(2)
 	plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
-	plt.text(0.3,0.45,'v',fontsize=22);
+	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
 	plt.xlabel('x',fontsize=18);
@@ -91,7 +91,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 
 	plt.figure(3)
 	plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
-	plt.text(0.3,0.45,'eta',fontsize=22);
+	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
 	plt.xlabel('x',fontsize=18);
@@ -101,19 +101,6 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout();
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_' + str(Fpos) + '_'  + str(N) + '.png');
-
-	plt.figure(4)
-	plt.contourf(x_nd[0:N],y_nd,PV_prime[:,:,ts]);
-	plt.text(0.3,0.45,'PV',fontsize=22);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
-	plt.xlabel('x',fontsize=18);
-	plt.ylabel('y',fontsize=18);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-qlim,qlim);
-	plt.colorbar();
-	plt.tight_layout();	
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_' + str(Fpos) + '_'  + str(N) + '.png');
 
 	#cmap='coolwarm'
 
@@ -261,32 +248,24 @@ def bgPlots(y_nd,H0_nd,U0_nd,PV_BG):
 
 # pvPlots
 # Plots of PV and footprint
-def pvPlots(PV_full,PV_prime,P,x_nd,y_nd):
+def pvPlots(PV_full,PV_prime,x_nd,y_nd):
 
 	PV_full = extend(PV_full);
 	PV_prime = extend(PV_prime);
 	
-	plt.figure(1,figsize=[21,6]);
+	plt.figure(1,figsize=[13,6]);
 
-	plt.subplot(131);
-	plt.contourf(x_nd,y_nd,PV_full);
+	plt.subplot(121);
+	plt.contourf(x_nd,y_nd,PV_full[:,:,1]);
 	plt.text(0.05,0.4,'PV FULL',color='k',fontsize=22);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 	plt.colorbar();
 
-	plt.subplot(132);
-	plt.contourf(x_nd,y_nd,PV_prime);
+	plt.subplot(122);
+	plt.contourf(x_nd,y_nd,PV_prime[:,:,1]);
 	plt.text(0.05,0.4,'PV PRIME',color='k',fontsize=22);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-
-	plt.subplot(133);
-	plt.contourf(x_nd,y_nd,P);
-	plt.text(0.05,0.4,'P',color='k',fontsize=22);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
@@ -294,6 +273,75 @@ def pvPlots(PV_full,PV_prime,P,x_nd,y_nd):
 
 	plt.tight_layout()
 	plt.show()
+
+#====================================================
+
+# pvPlots_save
+def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N):
+
+	PV_full = extend(PV_full);
+	PV_prime = extend(PV_prime);
+	P = extend(P);
+	
+	PV_full_lim = np.max(abs(PV_full[:,:,ts]));
+	PV_prime_lim = np.max(abs(PV_prime[:,:,ts]));
+	Plim = np.max(abs(P));
+
+	plt.figure(1);
+	plt.contourf(x_nd,y_nd,PV_full[:,:,ts]);
+	plt.text(0.4,0.4,r'$q$',color='k',fontsize=26);
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xlabel('x',fontsize=18);
+	plt.ylabel('y',fontsize=18);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.clim(-PV_full_lim,PV_full_lim);
+	plt.colorbar();
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_full_' + str(Fpos) + '_'  + str(N) + '.png');
+
+	plt.figure(2);
+	plt.contourf(x_nd,y_nd,PV_prime[:,:,ts]);
+	plt.text(0.4,0.4,r'$q^{\prime}$',color='k',fontsize=26);
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xlabel('x',fontsize=18);
+	plt.ylabel('y',fontsize=18);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.clim(-PV_prime_lim,PV_prime_lim);
+	plt.colorbar();
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_prime_' + str(Fpos) + '_'  + str(N) + '.png');
+
+	
+	plt.figure(3);
+	plt.contourf(x_nd,y_nd,P);
+	plt.text(0.4,0.4,r'$P$',fontsize=26);
+	#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
+	#plt.text(0.15,0.4,'r0 = '+str(r0/1000) + ' km' ,fontsize=18);	
+	#plt.text(0.25,0.4,str(int(period_days))+' days',fontsize=18)
+	#plt.text(0.25,0.4,'U0 = ' + str(U*U0_nd[0]),fontsize=18);
+	#plt.text(0.25,0.4,r'$\nu$ = ' + str(int(nu)),fontsize=18);
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.xlabel('x',fontsize=18);
+	plt.ylabel('y',fontsize=18);
+	plt.clim(-Plim,Plim);
+	plt.colorbar();
+	plt.tight_layout()
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_' + str(Fpos) + '_'  + str(N) + '.png');
+
+	plt.figure(4);
+	plt.plot(P_xav,y_nd,linewidth=2)
+	#plt.text(10,0.40,r'$\langle P\rangle$',fontsize=26)
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.ylim(-0.5,0.5);
+	plt.ylabel('y',fontsize=18);
+	plt.xlim(-1.1*np.max(abs(P_xav)),1.1*np.max(abs(P_xav)));
+	plt.xlabel(r'$\langle P\rangle$',fontsize=26);
+	plt.tight_layout()
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_xav_' + str(Fpos) + '_'  + str(N) + '.png');
 
 #====================================================
 
@@ -378,7 +426,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 	plt.xlim(-1.1*np.max(abs(P_xav)),1.1*np.max(abs(P_xav)));
 	plt.tight_layout()
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_nu=' + str(nu) + '.png');
-	plt.show()	
+	plt.show();
 	
 	# These if loops are for constantly altering depending on the test being done.
 	if BG == 'GAUSSIAN':
@@ -410,6 +458,73 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 		plt.grid(b=True, which='both', color='0.65',linestyle='--');
 		plt.tight_layout()
 		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_U0=' + str(U*U0_nd[0]) + '.png');
+
+#====================================================
+
+# footprintComponentsPlot
+# A function that plots the footprint components.
+def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,x_nd,y_nd,N):
+
+	plt.figure(1);
+
+	plt.subplot(231);
+	plt.contourf(uq);
+	plt.title('uq');
+	plt.colorbar();
+
+	plt.subplot(232);
+	plt.contourf(uQ);
+	plt.title('uQ');
+	plt.colorbar();
+
+	plt.subplot(233);
+	plt.contourf(Uq);
+	plt.title('Uq');
+	plt.colorbar();
+
+	plt.subplot(234);
+	plt.contourf(vq);
+	plt.title('vq');
+	plt.colorbar();
+
+	plt.subplot(235);
+	plt.contourf(vQ);
+	plt.title('vQ');
+	plt.colorbar();
+
+	plt.tight_layout();
+	plt.show();
+
+	#==
+	P_xav = uq_xav + Uq_xav + uQ_xav + vq_xav + vQ_xav
+	plt.figure(2);
+
+	plt.subplot(231);
+	plt.plot(uq_xav,y_nd,linewidth=2);
+	plt.title('uq');
+
+	plt.subplot(232);
+	plt.plot(uQ_xav,y_nd,linewidth=2);
+	plt.title('uQ');
+
+	plt.subplot(233);
+	plt.plot(Uq_xav,y_nd,linewidth=2);
+	plt.title('Uq');
+
+	plt.subplot(234);
+	plt.plot(vq_xav,y_nd,linewidth=2);
+	plt.title('vq');
+
+	plt.subplot(235);
+	plt.plot(vQ_xav,y_nd,linewidth=2);
+	plt.title('vQ');
+
+	plt.subplot(235);
+	plt.plot(P_xav,y_nd,linewidth=2);
+	plt.title('P_xav');
+
+	plt.tight_layout()
+	plt.show();
 
 #====================================================
 

@@ -68,7 +68,7 @@ K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 # Rotation
 #=======================================================
 
-f0 = 0.0001214; #0.83e-4;      		# Base value of Coriolis parameter (s-1)
+f0 = 0.83e-4;      		# Base value of Coriolis parameter (s-1)
 beta = 2e-11;     		# Planetary vorticity gradient (m-1 s-1)
 f = f0 + beta * y;      # Coriolis frequency (s-1)
 
@@ -77,7 +77,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4e-8;	# Frictional coefficient (s-1)
-nu = 0.0;		# Kinematic viscosity (m2 s-1)
+nu = 10.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -146,7 +146,7 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 #=======================================================
 
 # Instead of defining the forcing amplitude in the forcing module, we define it here as other codes require this value for normalisation
-r0 = 180 * 1000;  
+r0 = 120.0 * 1000;  
 AmpF = 1e-7; 
 if Fpos == 'NORTH':
 	y0 = Ly / 4;
@@ -168,7 +168,7 @@ omega = 1. / (period);          		# Frequency of plunger, once every 50 days (e-
 Nt = 200;								# Number of time samples
 T = np.linspace(0,period,Nt+1);			# Array of time samples across one forcing period (s)
 dt = T[1] - T[0];						# Size of the timestep (s)
-ts = Nt-50; 							# index at which the time-snapshot is taken
+ts = Nt-1; 								# index at which the time-snapshot is taken
 t = T[ts];								# Time of the snapshot
 
 #=======================================================
@@ -211,9 +211,9 @@ U0_nd = U0 / U;
 f0_nd = 1;						# =f0/f0      		 
 beta_nd = beta * Ly / f0;
 f_nd = f / f0;					# The same as: f_nd = f0_nd + beta_nd * y_nd      
-
+print(beta_nd);
 gamma_nd = gamma / f0;			# Simply scaled by the base Coriolis frequency
-
+print(gamma_nd);
 omega_nd = omega * T_adv;      	# All time variables scale advectively, i.e. T_adv~L/U
 t_nd = t / T_adv;
 T_nd = T / T_adv;
@@ -253,9 +253,9 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 #=======================================================
 
 plotForcing = False;
-plotBG = False;
+plotBG = True;
 plotSol = True;
-plotPV = False;
+plotPV = True;
 plotPV_av = False;
 plotFootprint = False;
 plotPhaseAmp = False;

@@ -1,7 +1,7 @@
 import output_read
 import matplotlib.pyplot as plt
 
-EEF, uq, Uq,uQ, vq, vQ = output_read.npyReadEEF_y0_components('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/EEF_components_70.npy');
+EEF, uq, Uq,uQ, vq, vQ = output_read.npyReadEEF_y0_components('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/EEF_60_components.npy');
 
 plt.subplot(321);
 plt.plot(EEF);

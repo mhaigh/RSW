@@ -2,7 +2,7 @@
 
 clear all
 
-loc = '~/cluster/gold3/';
+loc = '~/cluster/gold3';
 
 cd(loc);
 
@@ -26,7 +26,7 @@ mass2 = [0];
 mass3 = [0];
 count = 0;
 %for i = 3:3
-for i = nf-1:nf-1
+for i = nf-4:nf-1
     disp(i);
     h_new = ncread(files(i).name,'h');
     h1_new = h_new(:,:,1,:);
