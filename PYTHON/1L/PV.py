@@ -17,11 +17,10 @@ def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,d
 	RV_prime = np.zeros((N,N,Nt));
 	for ti in range(0,Nt):
 		# Define the relative vorticities (RV_full=RV_BG+RV_prime, can always check this numerically)
-		RV_full[:,:,ti] = diff(v_nd[:,:,ti],1,1,dx_nd) - diff(u_full[:,:,ti],0,0,dy_nd);
+		RV_full[:,:,ti] = diff(v_nd[:,:,ti],1,1,dx_nd) - diff(u_full[:,:,ti],0,0,dy_nd);#;# 
 		RV_prime[:,:,ti] = diff(v_nd[:,:,ti],1,1,dx_nd) - diff(u_nd[:,:,ti],0,0,dy_nd);
 	RV_BG = - diff(U0_nd,2,0,dy_nd);	# This is defined outside the loop as it has no time-dependence.
-	
-	# Now define two of the PVs
+
 	PV_full = np.zeros((N,N,Nt));
 	PV_BG = np.zeros(N);
 	for j in range(0,N):
@@ -31,7 +30,7 @@ def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,d
 				PV_full[j,i,ti] = (RV_full[j,i,ti] + f_nd[j]) / eta_full[j,i,ti];
 		
 	# Two options to define the PV induced in the forced system: (1) PV_full-PV_BG or (2) use the algebraic def. given in the report.
-	PV_prime = np.zeros((N,N,Nt));
+	PV_prime = np.zeros((N,N,Nt));	
 	for j in range(1,N-1):
 		for i in range(0,N):
 			for ti in range(0,Nt):

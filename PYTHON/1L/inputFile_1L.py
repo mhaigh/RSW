@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 256; 			# Number of gridpoints
+N = 128; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -52,10 +52,10 @@ Ly = 3840000.		# Meridional lengthscale (m)
 Hflat = 4000.		# Motionless ocean depth (i.e. without BG flow SSH adjustment) (m)		
 L = Lx;
 
-y = np.linspace(-Ly/2,Ly/2,N);    # Array of all gridpoints in physical space
-x = np.linspace(-Lx/2,Lx/2,N+1);
+y = np.linspace(-Ly/2,Ly/2,N);				# Array of all grid points in physical space.
+x = np.linspace(-Lx/2,Lx/2+Lx/(N-1),N+1);	# Zonal grid points	set has an extra point, first and last points are duplicates of each other (periodicity).
 
-# Remove dead points in the y-direction
+# Remove dead points in the y-direction.
 yd = np.zeros(N2);
 for j in range(0,N2):
     yd[j] = y[j+1];
@@ -77,7 +77,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4e-8;	# Frictional coefficient (s-1)
-nu = 10.0;		# Kinematic viscosity (m2 s-1)
+nu = 0.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
