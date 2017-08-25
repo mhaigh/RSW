@@ -398,11 +398,9 @@ def ENER(b):
 	ax1.set_xlabel('TIME',fontsize=18)
 	# Make the y-axis label, ticks and tick labels match the line color.
 	ax1.set_ylabel('KE', color='b',fontsize=18)
-	ax1.tick_params('y', colors='b')
 	ax2 = ax1.twinx()
 	ax2.plot(T_nd[:Nt], PEtot, 'r-',linewidth=2)
 	ax2.set_ylabel('PE', color='r',fontsize=18)
-	ax2.tick_params('y', colors='r')
 	#ax3 = ax1.twinx()
 	#ax3.plot(T_nd,0.5*max(KEtot)*np.sin(T_nd),'k--',label='F amp',linewidth=2)
 	fig.tight_layout()

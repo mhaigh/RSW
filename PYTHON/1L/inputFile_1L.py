@@ -253,7 +253,7 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 #=======================================================
 
 plotForcing = False;
-plotBG = True;
+plotBG = False;
 plotSol = True;
 plotPV = True;
 plotPV_av = False;

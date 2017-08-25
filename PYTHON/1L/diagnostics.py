@@ -75,6 +75,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout();
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
 
 	plt.figure(2)
 	plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
@@ -88,6 +89,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout();
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
 
 	plt.figure(3)
 	plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
@@ -101,7 +103,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout();
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_' + str(Fpos) + '_'  + str(N) + '.png');
-
+	plt.close();
 	#cmap='coolwarm'
 
 #====================================================
@@ -299,6 +301,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout();
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_full_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
 
 	plt.figure(2);
 	plt.contourf(x_nd,y_nd,PV_prime[:,:,ts]);
@@ -312,7 +315,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout();
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_prime_' + str(Fpos) + '_'  + str(N) + '.png');
-
+	plt.close();
 	
 	plt.figure(3);
 	plt.contourf(x_nd,y_nd,P);
@@ -331,7 +334,8 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N):
 	plt.colorbar();
 	plt.tight_layout()
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_' + str(Fpos) + '_'  + str(N) + '.png');
-
+	plt.close();
+	
 	plt.figure(4);
 	plt.plot(P_xav,y_nd,linewidth=2)
 	#plt.text(10,0.40,r'$\langle P\rangle$',fontsize=26)
@@ -342,6 +346,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N):
 	plt.xlabel(r'$\langle P\rangle$',fontsize=26);
 	plt.tight_layout()
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_xav_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
 
 #====================================================
 
@@ -463,32 +468,45 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 
 # footprintComponentsPlot
 # A function that plots the footprint components.
-def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,x_nd,y_nd,N):
+def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt):
+
+	uq_tav = np.zeros((N,N));
+	Uq_tav = np.zeros((N,N));
+	uQ_tav = np.zeros((N,N));
+	vq_tav = np.zeros((N,N));
+	vQ_tav = np.zeros((N,N));
+	for j in range(0,N):
+		for i in range(0,N):
+			uq_tav[i,j] = sum(uq[i,j,:]) / Nt;
+			Uq_tav[i,j] = sum(Uq[i,j,:]) / Nt;
+			uQ_tav[i,j] = sum(uQ[i,j,:]) / Nt;
+			vq_tav[i,j] = sum(vq[i,j,:]) / Nt;
+			vQ_tav[i,j] = sum(vQ[i,j,:]) / Nt;
 
 	plt.figure(1);
 
 	plt.subplot(231);
-	plt.contourf(uq);
+	plt.contourf(uq_tav);
 	plt.title('uq');
 	plt.colorbar();
 
 	plt.subplot(232);
-	plt.contourf(uQ);
+	plt.contourf(uQ_tav);
 	plt.title('uQ');
 	plt.colorbar();
 
 	plt.subplot(233);
-	plt.contourf(Uq);
+	plt.contourf(Uq_tav);
 	plt.title('Uq');
 	plt.colorbar();
 
 	plt.subplot(234);
-	plt.contourf(vq);
+	plt.contourf(vq_tav);
 	plt.title('vq');
 	plt.colorbar();
 
 	plt.subplot(235);
-	plt.contourf(vQ);
+	plt.contourf(vQ_tav);
 	plt.title('vQ');
 	plt.colorbar();
 
@@ -496,27 +514,64 @@ def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,x_
 	plt.show();
 
 	#==
-	P_xav = uq_xav + Uq_xav + uQ_xav + vq_xav + vQ_xav
+
 	plt.figure(2);
 
 	plt.subplot(231);
-	plt.plot(uq_xav,y_nd,linewidth=2);
+	plt.contourf(P_uq);
+	plt.title('uq');
+	plt.colorbar();
+
+	plt.subplot(232);
+	plt.contourf(P_uQ);
+	plt.title('uQ');
+	plt.colorbar();
+
+	plt.subplot(233);
+	plt.contourf(P_Uq);
+	plt.title('Uq');
+	plt.colorbar();
+
+	plt.subplot(234);
+	plt.contourf(P_vq);
+	plt.title('vq');
+	plt.colorbar();
+
+	plt.subplot(235);
+	plt.contourf(P_vQ);
+	plt.title('vQ');
+	plt.colorbar();
+
+	plt.subplot(236);
+	plt.contourf(P);
+	plt.title('P');
+	plt.colorbar();
+
+	plt.tight_layout();
+	plt.show();
+
+	#==
+
+	plt.figure(3);
+
+	plt.subplot(231);
+	plt.plot(P_uq_xav,y_nd,linewidth=2);
 	plt.title('uq');
 
 	plt.subplot(232);
-	plt.plot(uQ_xav,y_nd,linewidth=2);
+	plt.plot(P_uQ_xav,y_nd,linewidth=2);
 	plt.title('uQ');
 
 	plt.subplot(233);
-	plt.plot(Uq_xav,y_nd,linewidth=2);
+	plt.plot(P_Uq_xav,y_nd,linewidth=2);
 	plt.title('Uq');
 
 	plt.subplot(234);
-	plt.plot(vq_xav,y_nd,linewidth=2);
+	plt.plot(P_vq_xav,y_nd,linewidth=2);
 	plt.title('vq');
 
 	plt.subplot(235);
-	plt.plot(vQ_xav,y_nd,linewidth=2);
+	plt.plot(P_vQ_xav,y_nd,linewidth=2);
 	plt.title('vQ');
 
 	plt.subplot(235);
@@ -525,6 +580,66 @@ def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,x_
 
 	plt.tight_layout()
 	plt.show();
+
+#====================================================
+
+# plotFluxes
+def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N):
+# This function plots two footprint components uq and vq, and saves the output.
+# These are the two fluxes that we are most interested in.
+
+	P_uq = extend(P_uq);
+	P_vq = extend(P_vq);
+	
+	P_uq_lim = np.max(abs(P_uq));
+	P_vq_lim = np.max(abs(P_vq));
+
+	plt.figure(10);
+	plt.contourf(x_nd,y_nd,P_uq);
+	plt.text(0.4,0.4,r'$P_{u}$',color='k',fontsize=26);
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xlabel('x',fontsize=18);
+	plt.ylabel('y',fontsize=18);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.clim(-P_uq_lim,P_uq_lim);
+	plt.colorbar();
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_uq_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
+	
+	plt.figure(11);
+	plt.contourf(x_nd,y_nd,P_vq);
+	plt.text(0.4,0.4,r'$P_{v}$',color='k',fontsize=26);
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xlabel('x',fontsize=18);
+	plt.ylabel('y',fontsize=18);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.clim(-P_vq_lim,P_vq_lim);
+	plt.colorbar();
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_vq_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
+
+	plt.figure(12);
+	fig, ax1 = plt.subplots();
+	ax1.plot(P_uq_xav,y_nd,'b-',linewidth=2);
+	#ax1.set_xlabel(r'$\langle P_{v}\rangle$',color='b',fontsize=24);
+	ax1.tick_params('x',colors='b');
+	# Make the y-axis label, ticks and tick labels match the line color.
+	ax1.set_yticks((-1./2,-1./4,0,1./4,1./2));
+	ax1.set_ylabel('y',fontsize=18);
+	ax1.text(-0.05,0.4,r'$\langle P_{v}\rangle$',color='r',fontsize=26);
+	ax1.text(0.04,-0.4,r'$\langle P_{u}\rangle$',color='b',fontsize=26);
+	#ax1.tick_params('y');
+	ax2 = ax1.twiny();
+	ax2.plot(P_vq_xav,y_nd,'r-',linewidth=2);
+	#ax2.set_xlabel(r'$\langle P_{v}\rangle$', color='r',fontsize=24);
+	ax2.tick_params('x',colors='r');
+	#ax2.tick_params('y', colors='r');
+	fig.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) + '/P_uv_' + str(Fpos) + str(N) + '.png')
 
 #====================================================
 

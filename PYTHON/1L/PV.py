@@ -9,9 +9,9 @@ from diagnostics import diff, extend
 
 #=====================================================================
 
-# vortcity
+# potentialVorticity
 # Calculate potential vorticity
-def vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd):
+def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd):
 	
 	RV_full = np.zeros((N,N,Nt));
 	RV_prime = np.zeros((N,N,Nt));
@@ -46,25 +46,53 @@ def vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd):
 
 #====================================================
 
-# footprint_1L
+# fluxes
+def fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt):
+# Calculates 6 PV flux terms
+	
+	uq = u_nd * PV_prime
+	vq = v_nd * PV_prime
+		
+	Uq = np.zeros((N,N,Nt));	
+	uQ = np.zeros((N,N,Nt));
+	vQ = np.zeros((N,N,Nt));
+	for i in range(0,N):
+		for ti in range(0,Nt):
+			Uq[:,i,ti] = U0_nd[:] * PV_prime[:,i,ti];
+			uQ[:,i,ti] = u_nd[:,i,ti] * PV_BG[:];
+			vQ[:,i,ti] = v_nd[:,i,ti] * PV_BG[:];
+
+	UQ = U0_nd * PV_BG;
+
+	return uq, Uq, uQ, UQ, vq, vQ
+
+#====================================================
+
+# footprint
 # A function that calculates the PV footprint of the 1L SW solution as produced by RSW_1L.py
-def footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS):
+def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt):
 # This code calculates the PV footprint, i.e. the PV flux convergence defined by
-# P = -(div(u*q,v*q)-div((u*q)_av,(v*q)_av)), where _av denotees the time average.
+# P = -(div(u*q,v*q)), where _av denotees the time average.
 # We will take the time average over one whole forcing period, and subtract this PV flux
 # convergence from the PV flux convergence at the end of one period.
 # To calculate footprints, we use the full PV and velocity profiles.
-
-	qu = PV_full * u_full;		# Zonal PV flux
-	qv = PV_full * v_nd;		# Meridional PV flux
+		
+	uq_full = uq + Uq + uQ;		# Total zonal PV flux
+	#for j in range(0,N):
+		#qu_full[:,j,:] = qu_full[:,j,:] + UQ[j];
+	vq_full = vq + vQ;			# Total meridional PV flux
+	
 
 	# Next step: taking appropriate derivatives of the fluxes. To save space, we won't define new variables, but instead overwrite the old ones.
 	# From these derivatives we can calculate the 
-	P = - diff(qu[:,:,0],1,1,dx_nd) - diff(qv[:,:,0],0,0,dy_nd);		# Initialise the footprint with the first time-step
+	P = - diff(uq_full[:,:,0],1,1,dx_nd) - diff(vq_full[:,:,0],0,0,dy_nd);		# Initialise the footprint with the first time-step
 	for ti in range(1,Nt):
-		P[:,:] = P[:,:] - diff(qu[:,:,ti],1,1,dx_nd) - diff(qv[:,:,ti],0,0,dy_nd);
+		P[:,:] = P[:,:] - diff(uq_full[:,:,ti],1,1,dx_nd) - diff(vq_full[:,:,ti],0,0,dy_nd);
 	P = P / Nt;
 	#P_av = np.trapz(P,T_nd[:Nt],dt_nd,axis=2) / T_nd[Nt-1];
+	plt.contourf(P);
+	plt.colorbar();
+	plt.show();
 	
 	# Normalisation
 	#P = P / AmpF_nd**2;
@@ -79,64 +107,49 @@ def footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,
 #====================================================
 
 # footprintComponents
-def footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd,dy_nd,N,Nt):
+def footprintComponents(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt):
 # A function that calculates the PV footprint of the 1L SW solution in terms of its components, allowing for analysis.
 # The function calculates the following terms: (1) uq, (2) Uq, (3) uQ, (4) UQ, (5) vq and (6) vQ. (UQ has zero zonal derivative.)
 # The zonal/meridional derivative of the zonal/meridional PV flux is taken, averaged over one forcing period.
 # Lastly, the zonal averages are calculated and everything useful returned.
 
-	uq = u_nd * PV_prime;
-	vq = v_nd * PV_prime;
-	#plt.contourf(vq[:,:,10]);
-	#plt.show();
-	UQ = U0_nd * PV_BG;
-	# Other components need to be defined in a loop
-	uQ = np.zeros((N,N,Nt));
-	Uq = np.zeros((N,N,Nt));
-	vQ = np.zeros((N,N,Nt));
-	for ti in range(0,Nt):
-		for i in range(0,N):
-			uQ[:,i,ti] = u_nd[:,i,ti] * PV_BG[:];
-			Uq[:,i,ti] = U0_nd[:] * PV_prime[:,i,ti];
-			vQ[:,i,ti] = v_nd[:,i,ti] * PV_BG[:];
-
 	# Derivatives (no need to operate on UQ) and time-averaging
-	uq_tav = diff(uq[:,:,0],1,1,dx_nd);
-	uQ_tav = diff(uQ[:,:,0],1,1,dx_nd);
-	Uq_tav = diff(Uq[:,:,0],1,1,dx_nd);
-	vQ_tav = diff(vQ[:,:,0],0,0,dy_nd);
-	vq_tav = diff(vq[:,:,0],0,0,dy_nd);
+	P_uq = diff(uq[:,:,0],1,1,dx_nd);
+	P_uQ = diff(uQ[:,:,0],1,1,dx_nd);
+	P_Uq = diff(Uq[:,:,0],1,1,dx_nd);
+	P_vQ = diff(vQ[:,:,0],0,0,dy_nd);
+	P_vq = diff(vq[:,:,0],0,0,dy_nd);
 
 	for ti in range(1,Nt):
-		uq_tav = uq_tav + diff(uq[:,:,ti],1,1,dx_nd);
-		uQ_tav = uQ_tav + diff(uQ[:,:,ti],1,1,dx_nd);
-		Uq_tav = Uq_tav + diff(Uq[:,:,ti],1,1,dx_nd);
-		vQ_tav = vQ_tav + diff(vQ[:,:,ti],0,0,dy_nd);
-		vq_tav = vq_tav + diff(vq[:,:,ti],0,0,dy_nd);
+		P_uq = P_uq + diff(uq[:,:,ti],1,1,dx_nd);
+		P_uQ = P_uQ + diff(uQ[:,:,ti],1,1,dx_nd);
+		P_Uq = P_Uq + diff(Uq[:,:,ti],1,1,dx_nd);
+		P_vQ = P_vQ + diff(vQ[:,:,ti],0,0,dy_nd);
+		P_vq = P_vq + diff(vq[:,:,ti],0,0,dy_nd);
 
-	# Divide by the number of time samples and simultaneously normalise by forcing amplitude and apply the negation
-	uq_tav = - uq_tav / Nt;
-	uQ_tav = - uQ_tav / Nt;
-	Uq_tav = - Uq_tav / Nt;
-	vq_tav = - vq_tav / Nt;
-	vQ_tav = - vQ_tav / Nt;
+	# Divide by the number of time samples and simultaneously normalise by forcing amplitude and apply the negation.
+	P_uq = - P_uq / Nt;
+	P_uQ = - P_uQ / Nt;
+	P_Uq = - P_Uq / Nt;
+	P_vq = - P_vq / Nt;
+	P_vQ = - P_vQ / Nt;
 
 	# Normalisation by AmpF_nd not needed if normalised quanities are passed into the function.
 
-	P_tav = uq_tav + uQ_tav + Uq_tav + vq_tav + vQ_tav;
+	P = P_uq + P_uQ + P_Uq + P_vq + P_vQ;
 
 	# Zonal averaging 
-	uq_xav = np.trapz(uq_tav,x_nd[:N],dx_nd,axis=1);
-	uQ_xav = np.trapz(uQ_tav,x_nd[:N],dx_nd,axis=1);
-	Uq_xav = np.trapz(Uq_tav,x_nd[:N],dx_nd,axis=1);
-	vq_xav = np.trapz(vq_tav,x_nd[:N],dx_nd,axis=1);
-	vQ_xav = np.trapz(vQ_tav,x_nd[:N],dx_nd,axis=1);
+	P_uq_xav = np.trapz(P_uq,x_nd[:N],dx_nd,axis=1);
+	P_uQ_xav = np.trapz(P_uQ,x_nd[:N],dx_nd,axis=1);
+	P_Uq_xav = np.trapz(P_Uq,x_nd[:N],dx_nd,axis=1);
+	P_vq_xav = np.trapz(P_vq,x_nd[:N],dx_nd,axis=1);
+	P_vQ_xav = np.trapz(P_vQ,x_nd[:N],dx_nd,axis=1);
 	
 	#P_xav = np.trapz(P_tav,x_nd[:N],dx_nd,axis=1);
-	P_xav = uq_xav + uQ_xav + Uq_xav + vq_xav + vQ_xav;
+	P_xav = P_uq_xav + P_uQ_xav + P_Uq_xav + P_vq_xav + P_vQ_xav;
 	# Tests confirm that the multiple approaches for calculating P_xav and P_tav yield the same results.
 
-	return P_tav, uq_tav, uQ_tav, Uq_tav, UQ, vq_tav, vQ_tav, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav;
+	return P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav;
 
 #====================================================
 
@@ -194,7 +207,7 @@ def EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
 #====================================================
 
 # EEF_components
-def EEF_components(P_xav,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
+def EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
 # This function works in the same way as the EEF function, but instead takes as input each individual component of the zonally averaged footprint
 # (of which there are five) and returns the EEF contribution in the north and south from each one.  
 # The five footprint components are (1) uq_xav, (2) Uq_xav, (3) uQ_xav, (4) vq_xav and (5) vQ_xav (UQ doesn't contribute - zero zonal derivative).
@@ -231,19 +244,19 @@ def EEF_components(P_xav,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,y_nd,y0_nd,dy_nd,ome
 	for j in range(0,N):
 		if y_nd[j] > y0_nd:
 			y_north.append(y_nd[j]);
-			uq_north.append(uq_xav[j]);
-			Uq_north.append(Uq_xav[j]);
-			uQ_north.append(uQ_xav[j]);
-			vq_north.append(vq_xav[j]);
-			vQ_north.append(vQ_xav[j]);
+			uq_north.append(P_uq_xav[j]);
+			Uq_north.append(P_Uq_xav[j]);
+			uQ_north.append(P_uQ_xav[j]);
+			vq_north.append(P_vq_xav[j]);
+			vQ_north.append(P_vQ_xav[j]);
 			P_north.append(P_xav[j]);
 		else:
 			y_south.append(y_nd[j]);
-			uq_south.append(uq_xav[j]);
-			Uq_south.append(Uq_xav[j]);
-			uQ_south.append(uQ_xav[j]);
-			vq_south.append(vq_xav[j]);
-			vQ_south.append(vQ_xav[j]);
+			uq_south.append(P_uq_xav[j]);
+			Uq_south.append(P_Uq_xav[j]);
+			uQ_south.append(P_uQ_xav[j]);
+			vq_south.append(P_vq_xav[j]);
+			vQ_south.append(P_vQ_xav[j]);
 			P_south.append(P_xav[j])
 
 	# Convert all to numpy arrays.

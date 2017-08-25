@@ -102,16 +102,21 @@ eta = eta_nd * chi;
 
 # Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
 if doPV:
-	PV_prime, PV_full, PV_BG = PV.vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+	PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+	uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+	# Keep these next two lines commented out unless testing effects of normalisation.
+	# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
+	# PV_prime, PV_full = PV_prime/AmpF_nd, PV_full/AmpF_nd;
 	if doFootprints:
 		if footprintComponents: 
-			P, uq, uQ, Uq, UQ, vq, vQ, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd,dy_nd,N,Nt);
-			diagnostics.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,x_nd,y_nd,N);
+			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt);
+			#diagnostics.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
+			diagnostics.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
 		else: 
-			P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
+			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt);			
 		if doEEFs:
 			if footprintComponents:
-				EEF_array = PV.EEF_components(P_xav,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+				EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
 				# This returns EEF_array, an array with the following structure:
 				# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
 				EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
