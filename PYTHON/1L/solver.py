@@ -182,9 +182,9 @@ def NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3
 
 		solution[:,i] = np.linalg.solve(A,F);
 
-		import matplotlib.pyplot as plt
-		plt.plot(solution[0:N,i]);
-		plt.show();
+		#import matplotlib.pyplot as plt
+		#plt.plot(solution[0:N,i]);
+		#plt.show();
 
 	return solution;
 
@@ -504,9 +504,9 @@ def FREE_SLIP_SOLVER3(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftild
 			
 		solution[:,i] = np.linalg.solve(A,F);
 
-		import matplotlib.pyplot as plt
-		plt.plot(solution[0:N,i]);
-		plt.show();
+		#import matplotlib.pyplot as plt
+		#plt.plot(solution[0:N,i]);
+		#plt.show();
 	
 	return solution;
 

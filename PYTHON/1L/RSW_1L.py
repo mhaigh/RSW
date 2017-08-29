@@ -26,6 +26,7 @@ import buoy
 import forcing_1L
 import solver
 import output
+import energy
 
 from inputFile_1L import *
 
@@ -57,6 +58,34 @@ if BC == 'FREE-SLIP':
 utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
+u_nd = np.real(u_nd);
+v_nd = np.real(v_nd);
+eta_nd = np.real(eta_nd);
+
+# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
+eta_full = np.zeros((N,N,Nt));
+u_full = np.zeros((N,N,Nt));
+for j in range(0,N):
+	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
+	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+
+#====================================================
+
+# Energy
+
+if True:
+	KE_BG, KE_BG_tot, PE_BG, PE_BG_tot = energy.energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N);
+	E_BG_tot = KE_BG_tot + PE_BG_tot;
+	print (KE_BG_tot, PE_BG_tot);
+	tii = 10
+	KE, KE_tot = energy.KE(u_full[:,:,tii],v_nd[:,:,tii],eta_full[:,:,tii],x_nd,y_nd,dx_nd,dy_nd,N);
+	PE, PE_tot = energy.PE(eta_full[:,:,tii],Ro,x_nd,y_nd,dx_nd,dy_nd,N);
+	E = KE + PE;
+	E_tot = KE_tot + PE_tot;
+
+	plt.contourf(KE);
+	plt.show();
+	print(E_tot-E_BG_tot);
 #====================================================
 
 # Error - if calculated, should be done before real part of solution is taken
@@ -74,21 +103,11 @@ b4,c1[:,i],c2,c3,c4[:,i],f_nd,Ro,K_nd[i],H0_nd,y_nd,dy_nd,N);
 
 #====================================================
 
-u_nd = np.real(u_nd);
-v_nd = np.real(v_nd);
-eta_nd = np.real(eta_nd);
-
 # Normalise all solutions by the (non-dimensional) forcing amplitude. 
 u_nd = u_nd / AmpF_nd;
 v_nd = v_nd / AmpF_nd;
 eta_nd = eta_nd / AmpF_nd;
 
-# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta
-eta_full = np.zeros((N,N,Nt));
-u_full = np.zeros((N,N,Nt));
-for j in range(0,N):
-	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
 # Dimensional solutions
 u = u_nd * U;

@@ -16,14 +16,14 @@ def energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N):
 # a useful quantity for when calculating the forcing induced energy or energy of eigenmodes.
 
 	# First kinetic energy, KE = 0.5 * U**2 * H (dimensionless, no v term)
-	KE = 0.5 * U**2 * H;					# KE in terms of y (uniform in x)
-	KE_full = np.trapz(KE,y_nd,dy_nd);		# Total KE in the 2D domain (x-length of domain is 1)
+	KE_BG = 0.5 * U0_nd**2 * H0_nd;					# KE in terms of y (uniform in x)
+	KE_BG_tot = np.trapz(KE_BG,y_nd,dy_nd);		# Total KE in the 2D domain (x-length of domain is 1)
 	
 	# Next the potential energy, PE = 0.5 * H**2 / Ro
-	PE = 0.5 * H**2 / Ro;					# PE in terms of y
-	PE_full = np.trapz(PE,y_nd,dy_nd);		# Total PE in the 2D domain
+	PE_BG = 0.5 * H0_nd**2 / Ro;				# PE in terms of y
+	PE_BG_tot = np.trapz(PE_BG,y_nd,dy_nd);		# Total PE in the 2D domain
 
-	return KE, PE
+	return KE_BG, KE_BG_tot, PE_BG, PE_BG_tot;
 
 #=========================================================
 
@@ -67,7 +67,7 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 		KE_av = KE_av / Nt;
 		return KE_av;
 
-		# 1. Temporal and spatial average of KE
+	# 2. Temporal and spatial average of KE
 	elif output == 'av_tot':
 		dx_nd = x_nd[1] - x_nd[0];
 		dy_nd = y_nd[1] - y_nd[0];
@@ -232,73 +232,33 @@ def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
 
 #=========================================================
 
-# KE_from_spec
-def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
-# A function that takes the spectral representation of the solution at only one wavenumber k, indexed by i,
-# and calculates the kinetic energy (KE) at that wavenumber.
-# Because of the linearity of the system, the KE outputted from this function can be summed over all wavenumbers
-# to produce the total KE.
-# All values are dimensionless - see documentation for scaling arguments.
+# KE
+def KE(u_full,v_nd,eta_full,x_nd,y_nd,dx_nd,dy_nd,N):
+# Outputs the KE at a moment in time, by taking as input as time-snapshot of the solution u,v,eta.
 
-# Options for output:
-# 1. 'av': outputs only the KE temporal average (as a function of x and y);
-# 2. 'av_tot': outputs the temporal and spatial average;
-# 2. 'full': outputs the full KE, as a function of x, y and t.
- 
-	I = np.complex(0,1);
+	KE = 0.5 * (u_full**2 + v_nd**2) * eta_full;
+
+	KE_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,axis=1),y_nd,dy_nd);
+
+	return KE, KE_tot;
+
+#=========================================================
+
+# PE
+def PE(eta_full,Ro,x_nd,y_nd,dx_nd,dy_nd,N):
+# Outputs the KE at a moment in time, by taking as input as time-snapshot of the solution u,v,eta.
+
+	PE = 0.5 * eta_full**2 / Ro;
+
+	PE_tot = np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,axis=1),y_nd,dy_nd);
+
+	return PE, PE_tot;
+
+
+
+
 	
-	# We want the KE at a discrete set of times over one forcing/solution/eigenmode period.
-	# Note that this calculation can be made independent of this period/frequency;
-	# instead we only need to sample 'times' from a interval of unit length, with Nt entries,
-	# the frequency omega cancels out with the period T.
-
-	u = np.zeros((N,N,Nt));
-	v = np.zeros((N,N,Nt));
-	eta = np.zeros((N,N,Nt));
-	KE = np.zeros((N,N,Nt));
-
-	omega_t = np.linspace(0,1,Nt);
-
-	for ti in range(0,Nt):
-		for j in range(0,N):
-			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
-			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
-			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
 	
-	# 1. Temporally averaged KE
-	if av == 'av':
-		KE_av = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
-		for ti in range(1,Nt):
-			KE_av = KE_av + 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
-		KE_av = KE_av / Nt;
-		return KE_av;
-
-		# 1. Temporal and spatial average of KE
-	if av == 'av_tot':
-		dx_nd = x_nd[1] - x_nd[0];
-		dy_nd = y_nd[1] - y_nd[0];
-		KE = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
-		KE_av_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		for ti in range(1,Nt):
-			KE = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
-			KE_av_tot = KE_av_tot + np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		KE_av_tot = KE_av_tot / Nt;
-		return KE_av_tot;
-	
-	# 3. Time-dependent KE
-	elif av == 'full':
-		KE = np.zeros((N,N,Nt));
-		for ti in range(0,Nt):
-			KE[:,:,ti] = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
-		return KE;
-
-	else:
-		import sys
-		sys.exit('Invalid output selection; must be "av" or "full".');
-	
-
-
-
 
 
 
