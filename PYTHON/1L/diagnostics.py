@@ -374,7 +374,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 			e16[j,i] = - Ro * F2_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
 	error2 = e11 + e12 + e13 + e14 + e15 + e16;
 
-	PLOT = 1;
+	PLOT = 0;
 	if PLOT == 1:
 		import matplotlib.pyplot as plt
 		plt.subplot(241);

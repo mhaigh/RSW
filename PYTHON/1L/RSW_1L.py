@@ -76,7 +76,7 @@ for j in range(0,N):
 if True:
 	KE_BG, KE_BG_tot, PE_BG, PE_BG_tot = energy.energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N);
 	E_BG_tot = KE_BG_tot + PE_BG_tot;
-	print (KE_BG_tot, PE_BG_tot);
+	#print (KE_BG_tot, PE_BG_tot);
 	tii = 10
 	KE, KE_tot = energy.KE(u_full[:,:,tii],v_nd[:,:,tii],eta_full[:,:,tii],x_nd,y_nd,dx_nd,dy_nd,N);
 	PE, PE_tot = energy.PE(eta_full[:,:,tii],Ro,x_nd,y_nd,dx_nd,dy_nd,N);
@@ -85,13 +85,15 @@ if True:
 
 	plt.contourf(KE);
 	plt.show();
-	print(E_tot-E_BG_tot);
+	#print(E_tot-E_BG_tot);
+
 #====================================================
 
 # Error - if calculated, should be done before real part of solution is taken
 if errorPhys:
 	e1, e2, e3 = diagnostics.error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
-	print 'ERROR: ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
+	e = np.sqrt((e1**2 + e2**2 + e3**2) / 3.0);
+	print 'Error = ' + str(e) + '. Error split = ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
 if errorSpec:
 	error_spec = np.zeros((3,N));	# An array to save the spectral error at each wavenumber for each equation.
 	for i in range(0,N):
