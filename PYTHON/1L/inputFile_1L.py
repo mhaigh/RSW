@@ -239,12 +239,12 @@ Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
 outputPath = '/home/mike/Documents/GulfStream/Code/DATA/1L/';
 
 errorPhys = False;     	# Print error of full solutions 
-errorSpec = False;		# Print error of spectral solutions
+errorSpec = True;		# Print error of spectral solutions
 
-doPV = True;			# Calculate potential vorticity
-doFootprints = True;	# Calculate footprints, requires findPV = True.
-doEEFs = True;			# Calculate equivalent eddy fluxes, require findFootprints = True.
-footprintComponents = True;	# If true, calculates the footprint in terms of its components.
+doPV = False;			# Calculate potential vorticity
+doFootprints = False;	# Calculate footprints, requires findPV = True.
+doEEFs = False;			# Calculate equivalent eddy fluxes, require findFootprints = True.
+footprintComponents = False;	# If true, calculates the footprint in terms of its components.
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;
@@ -254,8 +254,8 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 
 plotForcing = False;
 plotBG = False;
-plotSol = True;
-plotPV = True;
+plotSol = False;
+plotPV = False;
 plotPV_av = False;
 plotFootprint = False;
 plotPhaseAmp = False;

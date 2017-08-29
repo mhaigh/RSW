@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold2/';
+loc = '~/cluster/gold3/';
 cd(loc);
 
 %T = ncread('timestats.nc','Time');
@@ -20,8 +20,8 @@ f0 = 0.44e-4;
 beta = 2e-11;
 f = f0 + beta * y;
 
-loop_start = nf-1; 
-loop_end = nf-1;
+loop_start = nf-20; 
+loop_end = nf;
 RUN = 1;    % Choose to define PV from a completed RUN (1) or a RUN in progress (2)
 if RUN == 1
     PV_av = zeros(nx,ny);

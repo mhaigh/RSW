@@ -7,8 +7,112 @@ import numpy as np
 
 #====================================================
 
-# diff_4th_order
-def diff_4th_order(f,d,p,delta):
+# diff_fwd_4th
+def diff_fwd_2nd(f,d,p,delta):
+# 4th-order centered in space finite difference derivative of a function f
+# Assuming that f is a 2-D array, d=0 differentiates the first index (usually y),
+# and d=1 differentiates the second index (usually x). d=2 for 1-D array.
+# p is a periodic switch. p=0 for solid wall BCs, p=1 for periodic.
+# delta is the space step.
+# -2	-1 	 0	  1     2
+# 1/12 -2/3  0	 2/3  -1/12
+# f = f[0...dimy-1]
+	if d != 2:
+		dimx = np.shape(f)[1];		# Finds the number of gridpoints in the x and y directions
+		dimy = np.shape(f)[0];
+		df = np.zeros((dimy,dimx),dtype=f.dtype);
+	else:
+		dimy = np.shape(f)[0];
+		df = np.zeros(dimy,dtype=f.dtype);
+	
+	if p == 0:
+		# Solid boundary derivative.
+		if d == 0:
+		
+			df[2:dimy,:] = 1;
+		
+			# Southern boundary
+			df[1,:] = 0.5 * (f[2,:] - f[0,:]);
+			df[0,:] = f[1,:] - f[0,:];
+			# Northern boundary
+			df[dimy-2,:] = 0.5 * (f[dimy-1,:] - f[dimy-2,:]);
+			df[dimy-1,:] = f[dimy-1,:] - f[dimy-2,:];
+	
+		elif d == 1:
+
+			df[:,2:dimy-2] = 2.0 * (f[:,3:dimy-1] - f[:,1:dimy-3]) / 3.0 + (f[:,0:dimy-4] - f[:,4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[:,1] = 0.5 * (f[:,2] - f[:,0]);
+			df[:,0] = f[:,1] - f[:,0];
+			# Northern boundary
+			df[:,dimy-2] = 0.5 * (f[:,dimy-1] - f[:,dimy-2]);
+			df[:,dimy-1] = f[:,dimy-1] - f[:,dimy-2];
+		
+		elif d == 2:
+
+			df[2:dimy-2] = 2.0 * (f[3:dimy-1] - f[1:dimy-3]) / 3.0 + (f[0:dimy-4] - f[4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[1] = 0.5 * (f[2] - f[0]);
+			df[0] = f[1] - f[0];
+			# Northern boundary
+			df[dimy-2] = 0.5 * (f[dimy-1] - f[dimy-3]);
+			df[dimy-1] = f[dimy-1] - f[dimy-2];
+
+		else:
+			print('error')
+
+	elif p == 1:
+		# Periodic option
+
+		if d == 0:
+		
+			df[2:dimy,:] = 1;
+		
+			# Southern boundary
+			df[1,:] = 2.0 * (f[2,:] - f[0,:]) / 3.0 + (f[dimy-1,:] - f[3,:]) / 12.0;
+			df[0,:] = 2.0 * (f[1,:] - f[dimy-1,:]) / 3.0 + (f[dimy-2,:] - f[2,:]) / 12.0;
+			# Northern boundary
+			df[dimy-2,:] = 2.0 * (f[dimy-1,:] - f[dimy-3,:]) + (f[dimy-4,:] - f[0,:]) / 12.0;
+			df[dimy-1,:] = 2.0 * (f[0,:] - f[dimy-2,:]) + (f[dimy-3,:] - f[1,:]) / 12.0;
+	
+		elif d == 1:
+
+			df[:,2:dimy-2] = 2.0 * (f[:,3:dimy-1] - f[:,1:dimy-3]) / 3.0 + (f[:,0:dimy-4] - f[:,4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[:,1] = 2.0 * (f[:,2] - f[:,0]) / 3.0 + (f[:,dimy-1] - f[:,3]) / 12.0;
+			df[:,0] = 2.0 * (f[:,1] - f[:,dimy-1]) / 3.0 + (f[:,dimy-2] - f[:,2]) / 12.0;
+			# Northern boundary
+			df[:,dimy-2] = 2.0 * (f[:,dimy-1] - f[:,dimy-3]) + (f[:,dimy-4] - f[:,0]) / 12.0;
+			df[:,dimy-1] = 2.0 * (f[:,0] - f[:,dimy-2]) + (f[:,dimy-3] - f[:,1]) / 12.0;
+		
+		elif d == 2:
+
+			df[2:dimy] = 3.0 * f[2:dimy] / 2.0 - 2.0 * f[1:dimy-1] + f[0:dimy-2] / 2.0;
+		
+			# Southern boundary
+			df[1] = 0.5 * f[2] - 0.5 * f[0];
+			df[0] = 3.0 * f[0] / 2.0 - 2 * f[1] + f[2] / 2.0;
+			
+			#print(str(df[0])+'='+str(f[1])+'+'+str(f[dimy-1]));
+			#print(str(df[dimy-1])+'='+str(f[0])+'+'+str(f[dimy-2]));
+		
+		else:
+			print('error')
+
+	else:
+		print('error')
+
+	df = df / delta;
+
+	return df
+
+#====================================================
+
+# diff_center_4th
+def diff_center_4th(f,d,p,delta):
 # 4th-order centered in space finite difference derivative of a function f
 # Assuming that f is a 2-D array, d=0 differentiates the first index (usually y),
 # and d=1 differentiates the second index (usually x). d=2 for 1-D array.
@@ -30,26 +134,37 @@ def diff_4th_order(f,d,p,delta):
 		# Note multiplication by 2 of boundary terms are to
 		# invert the division by 2 at the end of the module.
 		if d == 0:
-		# WRITE THIS CODE
-			df[2:dimy-2,:] = 2.0 * (f[3:dimy-1,:] - f[1:dimy-3,:]) / 3.0 + (f[4:dimy,:] - f[0:dimy-dimy-4,:]) / 12.0;
 		
-			df[0,:] = 2.0 (f[1,:] - f[0,:]) / 3.0;
-			df[1,:] = 
-			df[dimy-1,:] = 2 * (f[dimy-1,:] - f[dimy-2,:]);
+			df[2:dimy-2,:] = 2.0 * (f[3:dimy-1,:] - f[1:dimy-3,:]) / 3.0 + (f[0:dimy-4,:] - f[4:dimy,:]) / 12.0;
+		
+			# Southern boundary
+			df[1,:] = 0.5 * (f[2,:] - f[0,:]);
+			df[0,:] = f[1,:] - f[0,:];
+			# Northern boundary
+			df[dimy-2,:] = 0.5 * (f[dimy-1,:] - f[dimy-2,:]);
+			df[dimy-1,:] = f[dimy-1,:] - f[dimy-2,:];
 	
 		elif d == 1:
 
-			df[:,1:dimx-1] = f[:,2:dimx] - f[:,0:dimx-2];
-
-			df[:,0] = 2 * (f[:,1] - f[:,0]);
-			df[:,dimx-1] = 2 * (f[:,0] - f[:,dimx-2]);
+			df[:,2:dimy-2] = 2.0 * (f[:,3:dimy-1] - f[:,1:dimy-3]) / 3.0 + (f[:,0:dimy-4] - f[:,4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[:,1] = 0.5 * (f[:,2] - f[:,0]);
+			df[:,0] = f[:,1] - f[:,0];
+			# Northern boundary
+			df[:,dimy-2] = 0.5 * (f[:,dimy-1] - f[:,dimy-2]);
+			df[:,dimy-1] = f[:,dimy-1] - f[:,dimy-2];
 		
 		elif d == 2:
 
-			df[1:dimy-1] = f[2:dimy] - f[0:dimy-2];
-
-			df[0] = 2 * (f[1] - f[0]);
-			df[dimy-1] = 2 * (f[dimy-1] - f[dimy-2]);
+			df[2:dimy-2] = 2.0 * (f[3:dimy-1] - f[1:dimy-3]) / 3.0 + (f[0:dimy-4] - f[4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[1] = 0.5 * (f[2] - f[0]);
+			df[0] = f[1] - f[0];
+			# Northern boundary
+			df[dimy-2] = 0.5 * (f[dimy-1] - f[dimy-3]);
+			df[dimy-1] = f[dimy-1] - f[dimy-2];
 
 		else:
 			print('error')
@@ -58,25 +173,37 @@ def diff_4th_order(f,d,p,delta):
 		# Periodic option
 
 		if d == 0:
-
-			df[1:dimy-1,:] = f[2:dimy,:] - f[0:dimy-2,:];	
-
-			df[0,:] = f[1,:] - f[dimy-1,:];
-			df[dimy-1,:] = f[0,:] - f[dimy-2,:];
+		
+			df[2:dimy-2,:] = 2.0 * (f[3:dimy-1,:] - f[1:dimy-3,:]) / 3.0 + (f[0:dimy-4,:] - f[4:dimy,:]) / 12.0;
+		
+			# Southern boundary
+			df[1,:] = 2.0 * (f[2,:] - f[0,:]) / 3.0 + (f[dimy-1,:] - f[3,:]) / 12.0;
+			df[0,:] = 2.0 * (f[1,:] - f[dimy-1,:]) / 3.0 + (f[dimy-2,:] - f[2,:]) / 12.0;
+			# Northern boundary
+			df[dimy-2,:] = 2.0 * (f[dimy-1,:] - f[dimy-3,:]) + (f[dimy-4,:] - f[0,:]) / 12.0;
+			df[dimy-1,:] = 2.0 * (f[0,:] - f[dimy-2,:]) + (f[dimy-3,:] - f[1,:]) / 12.0;
 	
 		elif d == 1:
 
-			df[:,1:dimx-1] = f[:,2:dimx]-f[:,0:dimx-2];
-
-			df[:,0] = f[:,1] - f[:,dimx-1];
-			df[:,dimx-1] = f[:,0] - f[:,dimx-2];
-
+			df[:,2:dimy-2] = 2.0 * (f[:,3:dimy-1] - f[:,1:dimy-3]) / 3.0 + (f[:,0:dimy-4] - f[:,4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[:,1] = 2.0 * (f[:,2] - f[:,0]) / 3.0 + (f[:,dimy-1] - f[:,3]) / 12.0;
+			df[:,0] = 2.0 * (f[:,1] - f[:,dimy-1]) / 3.0 + (f[:,dimy-2] - f[:,2]) / 12.0;
+			# Northern boundary
+			df[:,dimy-2] = 2.0 * (f[:,dimy-1] - f[:,dimy-3]) + (f[:,dimy-4] - f[:,0]) / 12.0;
+			df[:,dimy-1] = 2.0 * (f[:,0] - f[:,dimy-2]) + (f[:,dimy-3] - f[:,1]) / 12.0;
+		
 		elif d == 2:
 
-			df[1:dimy-1] = f[2:dimy] - f[0:dimy-2];
-
-			df[0] = f[1] - f[dimy-2];
-			df[dimy-1] = f[1] - f[dimy-2];
+			df[2:dimy-2] = 2.0 * (f[3:dimy-1] - f[1:dimy-3]) / 3.0 + (f[0:dimy-4] - f[4:dimy]) / 12.0;
+		
+			# Southern boundary
+			df[1] = 2.0 * (f[2] - f[0]) / 3.0 + (f[dimy-1] - f[3]) / 12.0;
+			df[0] = 2.0 * (f[1] - f[dimy-1]) / 3.0 + (f[dimy-2] - f[2]) / 12.0;
+			# Northern boundary
+			df[dimy-2] = 2.0 * (f[dimy-1] - f[dimy-3]) / 3.0 + (f[dimy-4] - f[0]) / 12.0;
+			df[dimy-1] = 2.0 * (f[0] - f[dimy-2]) / 3.0 + (f[dimy-3] - f[1]) / 12.0;
 			
 			#print(str(df[0])+'='+str(f[1])+'+'+str(f[dimy-1]));
 			#print(str(df[dimy-1])+'='+str(f[0])+'+'+str(f[dimy-2]));
@@ -202,6 +329,9 @@ def ddt(f,delta):
 def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N):
 # This function calculates the error of the 1L SW solutions, and is to be used in the main code RSW_visc_1L.py.
 
+	#SCHEME = diff;
+	SCHEME = diff_center_4th;	
+
 	if Re == None:
 		Ro_Re = 0;
 	else:
@@ -210,7 +340,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 	I = np.complex(0,1);
 	ts = 12;
 	# Now we calculate all the relevant x and y derivatives
-	u_y = diff(u_nd[:,:,ts],0,0,dy_nd);
+	u_y = SCHEME(u_nd[:,:,ts],0,0,dy_nd);
 	u_yy = diff(u_y[:,:],0,0,dy_nd);
 	u_x = diff(u_nd[:,:,ts],1,1,dx_nd);
 	u_xx = diff(u_x[:,:],1,1,dx_nd);
@@ -347,12 +477,16 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a1,a2,a3,a4,b4,c1,c2,c3,c4,f_nd,Ro,K_nd,H0_nd,y_nd,dy_nd,N):
 # An alternative error metric. Calculates the error associated with the three 1-D spectral equations for a given wavenumber K_nd[i].
 
+	
+	#SCHEME = diff;
+	SCHEME = diff_center_4th;
+
 	# Need relevant derivatives
-	utilde_y = diff(utilde_nd,2,0,dy_nd);
-	utilde_yy = diff(utilde_y,2,0,dy_nd);
-	vtilde_y = diff(vtilde_nd,2,0,dy_nd);
-	vtilde_yy = diff(vtilde_y,2,0,dy_nd);
-	etatilde_y = diff(etatilde_nd,2,0,dy_nd);
+	utilde_y = SCHEME(utilde_nd,2,0,dy_nd);
+	utilde_yy = SCHEME(utilde_y,2,0,dy_nd);
+	vtilde_y = SCHEME(vtilde_nd,2,0,dy_nd);
+	vtilde_yy = SCHEME(vtilde_y,2,0,dy_nd);
+	etatilde_y = SCHEME(etatilde_nd,2,0,dy_nd);
 
 	# Some coefficients need to be multiplied by dy_nd.
 	a2 = a2 * dy_nd**2;
@@ -367,6 +501,7 @@ def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a
 
 	PLOT1 = False;
 	if PLOT1:
+		import matplotlib.pyplot as plt
 		plt.subplot(221);
 		plt.plot(utilde_nd,y_nd);
 		plt.title('u');
