@@ -56,24 +56,32 @@ if BC == 'FREE-SLIP':
 	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 
 utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
+print('here');
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+print('here');
 
 u_nd = np.real(u_nd);
 v_nd = np.real(v_nd);
 eta_nd = np.real(eta_nd);
 
 # In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
-eta_full = np.zeros((N,N,Nt));
-u_full = np.zeros((N,N,Nt));
-for j in range(0,N):
-	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+#eta_full = np.zeros((N,N,Nt));
+#u_full = np.zeros((N,N,Nt));
+#for j in range(0,N):
+#	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
+#	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+
+print('here');
+
+np.save('u_nd.npy',u_nd);
+np.save('v_nd.npy',v_nd);
+np.save('eta_nd.npy',eta_nd);
 
 #====================================================
 
 # Energy
 
-if True:
+if False:
 	KE_BG, KE_BG_tot, PE_BG, PE_BG_tot = energy.energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N);
 	E_BG_tot = KE_BG_tot + PE_BG_tot;
 	#print (KE_BG_tot, PE_BG_tot);

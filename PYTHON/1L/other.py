@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import forcing_1L
 
 import diagnostics
 
@@ -11,7 +12,7 @@ from inputFile_1L import *
 #========================================
 option = -1;
 
-if option == -1:
+if option == -2:
 
 	e = [[0.00124837567643, 0.000366720099694,0.00010394024873,3.29592544853e-05], [3.88268775732e-05,2.09050012386e-05,1.0968198529e-05,5.61471142092e-06], [4.21546218187,1.4634855819,0.460154365787,0.15656485614]]; 
 	N_set = [64,128,256,512];
@@ -25,7 +26,30 @@ if option == -1:
 
 	e_512 = [3.29592544853e-05, 5.61471142092e-06, 0.15656485614];
 
+	e_1024 = [3.90850859518e-05, 3.90794314852e-05, 0.000253122737188];
+ 0.0019633208699, 0.00154172301784, 0.0604580282769
 
+if option == -1:
+
+	ts = 11;	
+	
+	u_nd = np.load('u_nd.npy');
+	v_nd = np.load('v_nd.npy');
+	eta_nd = np.load('eta_nd.npy');
+
+	plt.contourf(u_nd[:,:,ts]);
+	plt.show();
+
+	if FORCE_TYPE == 'CTS':
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+	elif FORCE_TYPE == 'DCTS':
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+	else:
+		sys.exit('ERROR: Invalid forcing option selected.');
+
+	e1, e2, e3 = diagnostics.error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
+	e = np.sqrt((e1**2 + e2**2 + e3**2) / 3.0);
+	print 'Error = ' + str(e) + '. Error split = ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
 
 	
 

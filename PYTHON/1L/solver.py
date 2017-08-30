@@ -305,7 +305,7 @@ def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftil
 
 	dim = N2 + 2 * N;
 	#print(dim);
-
+	
 	A = np.zeros((dim,dim),dtype=complex);	# For the free-slip, no-normal flow BC.
 
 	# Initialise the forcing.
@@ -315,7 +315,7 @@ def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftil
 	solution = np.zeros((dim,N),dtype=complex);
 
 	for i in range(0,N):
-		#print(i);
+		print(i);
 				
 		# First the boundary terms. Some of these could be defined in the upcoming loop,
 		# but for simplicity we define all boundary terms here.
@@ -543,7 +543,6 @@ def extractSols(solution,N,N2,BC):
 #=======================================================
 
 # SPEC_TO_PHYS
-#=======================================================
 def SPEC_TO_PHYS(utilde,vtilde,etatilde,T,dx,omega,N):
 # Function takes the spectral-physical solutions produced by the solver and returns the time-dependent solutions in physical space.
 	
@@ -555,7 +554,7 @@ def SPEC_TO_PHYS(utilde,vtilde,etatilde,T,dx,omega,N):
 	v = np.zeros((N,N,Nt),dtype=complex);
 	eta = np.zeros((N,N,Nt),dtype=complex);	
 
-	for ti in range(0,Nt):
+	for ti in range(8,12):
 		# Calculate the solutions in physical space at some instant t. Solutions are divided (later) by extra factor AmpF, so that they are normalised by the forcing amplitude.
 		u[:,:,ti] = np.exp(2.*np.pi*I*omega*T[ti])*np.fft.ifft(utilde,axis=1) / dx; 
 		v[:,:,ti] = np.exp(2.*np.pi*I*omega*T[ti])*np.fft.ifft(vtilde,axis=1) / dx;		

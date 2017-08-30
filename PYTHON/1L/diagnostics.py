@@ -323,7 +323,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 		Ro_Re = Ro / Re;
 	
 	I = np.complex(0,1);
-	ts = 12;
+	ts = 10;
 	# Now we calculate all the relevant x and y derivatives
 	u_y = SCHEME(u_nd[:,:,ts],0,0,dy_nd);
 	u_yy = SCHEME(u_y[:,:],0,0,dy_nd);
