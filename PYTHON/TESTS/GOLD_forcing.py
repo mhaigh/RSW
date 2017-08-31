@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = -2;
+OPT = -3;
 
 N = 256;
 y = np.linspace(1,256,N);
@@ -19,7 +19,34 @@ f = np.zeros(N);
 
 #==========================================================================
 
+if OPT == -3:
 
+	h1_restore = np.zeros(N);
+	
+	je = N; js = 0;
+	j_50 = int((je - js) / 2) + js ;
+	j_25 = int((j_50 - js) / 2) + js ; j_75 = int((je - j_50) / 2) + j_50;
+	j_12 = int((j_25 - js) / 2) + js ; j_37 = int((j_50 - j_25) / 2) + j_25;
+	j_62 = int((j_75 - j_50) / 2) + j_50 ; j_87 = int((je - j_75) / 2) + j_75;
+	j_44 = int((j_50 - j_37) / 2) + j_37 ; j_56 = int((j_62 - j_50) / 2) + j_50;
+
+	for j in range(js,je):
+		h1_restore[j] = 500;
+	for j in range(j_44,j_56):
+		y = 2.0 * np.pi * (j - j_37) / (j_62 - j_37) 
+		restore_shape = 40.0 * (y - y**3 / 6.0 + y**5 / 120.0 - y**7 / 5040.0 + y**9 / 362880.0 - y**11 / 39916800.0 + y**13 / 6227020800.0 - y**15 / 1307674368000 + y**17 / 3.55687428e14);
+		h1_restore[j] = 500.0 + restore_shape
+	for j in range(js,j_44):
+		y = np.pi * (j - js) / (2 * (j_44 - js)); 
+		restore_shape = 40.0 * (y - y**3 / 6.0 + y**5 / 120.0 - y**7 / 5040.0 + y**9 / 362880.0 - y**11 / 39916800.0 + y**13 / 6227020800.0 - y**15 / 1307674368000 + y**17 / 3.55687428e14);
+		h1_restore[j] = 500.0 + restore_shape
+	for j in range(j_56,je):
+		y = np.pi * (j - je) / (2 * (je - j_56)); 
+		restore_shape = 40.0 * (y - y**3 / 6.0 + y**5 / 120.0 - y**7 / 5040.0 + y**9 / 362880.0 - y**11 / 39916800.0 + y**13 / 6227020800.0 - y**15 / 1307674368000 + y**17 / 3.55687428e14);
+		h1_restore[j] = 500.0 + restore_shape
+	
+	plt.plot(h1_restore);
+	plt.show();
 
 if OPT == -2:
 	h1_restore = np.zeros(N);

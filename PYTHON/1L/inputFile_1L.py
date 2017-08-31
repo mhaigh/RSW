@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 1024; 			# Number of gridpoints
+N = 256; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -63,6 +63,8 @@ for j in range(0,N2):
 dy = y[1] - y[0];     # Distance between gridpoints (m)
 dx = x[1] - x[0];
 
+y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+2*dx,dx)];
+
 K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 
 # Rotation
@@ -76,7 +78,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 #=======================================================
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
-gamma = 4e-8;	# Frictional coefficient (s-1)
+gamma = 4.0e-8;	# Frictional coefficient (s-1)
 nu = 0.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
@@ -90,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.15;
+	Umag = 0.16;
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -146,8 +148,8 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 #=======================================================
 
 # Instead of defining the forcing amplitude in the forcing module, we define it here as other codes require this value for normalisation
-r0 = 120.0 * 1000;  
-AmpF = 1e-7; 
+r0 = 120.0 * 1000.0;  
+AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
 	y0 = Ly / 4;
 elif Fpos == 'CENTER':
@@ -199,6 +201,9 @@ x_nd = x / Ly;
 yd_nd = yd / Ly;
 y0_nd = y0 / Ly;
 
+y_grid = y_grid / Ly;
+x_grid = x_grid / Lx;
+
 dy_nd = y_nd[1] - y_nd[0];
 dx_nd = x_nd[1] - x_nd[0];
 
@@ -208,7 +213,7 @@ H0_nd = H0 / chi;	# The steady-state SSH scales the same way as eta.
 H0_y_nd = H0_y * Lx / chi;
 U0_nd = U0 / U;
 
-f0_nd = 1;						# =f0/f0      		 
+f0_nd = 1.0;					# =f0/f0      		 
 beta_nd = beta * Ly / f0;
 f_nd = f / f0;					# The same as: f_nd = f0_nd + beta_nd * y_nd      
 print(beta_nd);
@@ -236,15 +241,16 @@ Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
 # Output
 #=======================================================
 
-outputPath = '/home/mike/Documents/GulfStream/Code/DATA/1L/';
+outputPath = '/home/mike/Documents/GulfStream/RSW/DATA/1L/';
 
-errorPhys = True;     	# Print error of full solutions 
+errorPhys = False;     	# Print error of full solutions 
 errorSpec = False;		# Print error of spectral solutions
 
-doPV = False;			# Calculate potential vorticity
-doFootprints = False;	# Calculate footprints, requires findPV = True.
-doEEFs = False;			# Calculate equivalent eddy fluxes, require findFootprints = True.
-footprintComponents = False;	# If true, calculates the footprint in terms of its components.
+doEnergy = False;				# Energy
+doPV = False;					# Calculate potential vorticity
+doFootprints = True;			# Calculate footprints, requires findPV = True.
+doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
+footprintComponents = True;	# If true, calculates the footprint in terms of its components.
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;
@@ -254,13 +260,13 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 
 plotForcing = False;
 plotBG = False;
-plotSol = False;
+plotSol = True;
 plotPV = False;
 plotPV_av = False;
 plotFootprint = False;
 plotPhaseAmp = False;
 
-# ======================================================
+#=======================================================
 
 # Print essential parameters to the terminal
 print('SCALES: U = ' + str(U) + ', H = ' + str(H) + ', H scale = ' + str(chi) + ', T = ' + str(T_adv));
@@ -270,3 +276,5 @@ print('Ro = ' + str(Ro));
 print('Re = ' + str(Re));
 print('Ld = ' + str(Ld));
 print('N = ' + str(N));
+
+#=======================================================

@@ -329,7 +329,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 	u_yy = SCHEME(u_y[:,:],0,0,dy_nd);
 	u_x = SCHEME(u_nd[:,:,ts],1,1,dx_nd);
 	u_xx = SCHEME(u_x[:,:],1,1,dx_nd);
-
+	
 	v_y = SCHEME(v_nd[:,:,ts],0,0,dy_nd);
 	v_yy = SCHEME(v_y[:,:],0,0,dy_nd);
 	v_x = SCHEME(v_nd[:,:,ts],1,1,dx_nd);
@@ -340,7 +340,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 
 	U0_y = SCHEME(U0_nd,2,0,dy_nd);
 	H0_y = SCHEME(H0_nd,2,0,dy_nd);
-
+	
 	# t derivatives
 	u_t = ddt(u_nd,dt_nd);
 	v_t = ddt(v_nd,dt_nd);
@@ -363,7 +363,6 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 			e16[j,i] = - Ro * F1_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
 	error1 = e11 + e12 + e13 + e14 + e15 + e16;
 
-
 	for i in range(0,N):
 		for j in range(0,N):
 			e11[j,i] = Ro * (v_t[j,i,ts] + U0_nd[j] * v_x[j,i]);
@@ -373,7 +372,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 			e15[j,i] = eta_y[j,i];
 			e16[j,i] = - Ro * F2_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
 	error2 = e11 + e12 + e13 + e14 + e15 + e16;
-
+	
 	PLOT = 0;
 	if PLOT == 1:
 		import matplotlib.pyplot as plt
@@ -544,9 +543,20 @@ def extend(f):
 	
 		f_new[:,dimx] = f[:,0];
 
-	return f_new	 
+	return f_new
 
+#====================================================
 
+# timeAverage
+def timeAverage(u,T,Nt):
+# Use to calculate the time average.
+# Requires 3-D array input, with time in the third index (axis=2).
+
+	dt = T[1] - T[0];
+	u_tav = np.trapz(u,T[0:Nt],dt,axis=2);
+	u_tav = u_tav / T[Nt];
+
+	return u_tav
 
 
 

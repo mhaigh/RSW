@@ -27,6 +27,7 @@ import forcing_1L
 import solver
 import output
 import energy
+import plotting
 
 from inputFile_1L import *
 
@@ -56,32 +57,34 @@ if BC == 'FREE-SLIP':
 	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 
 utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-print('here');
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
-print('here');
 
 u_nd = np.real(u_nd);
 v_nd = np.real(v_nd);
 eta_nd = np.real(eta_nd);
 
+# Normalise all solutions by the (non-dimensional) forcing amplitude. 
+u_nd = u_nd / AmpF_nd;
+v_nd = v_nd / AmpF_nd;
+eta_nd = eta_nd / AmpF_nd;
+
 # In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
-#eta_full = np.zeros((N,N,Nt));
-#u_full = np.zeros((N,N,Nt));
-#for j in range(0,N):
-#	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-#	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+eta_full = np.zeros((N,N,Nt));
+u_full = np.zeros((N,N,Nt));
+for j in range(0,N):
+	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
+	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
-print('here');
 
-np.save('u_nd.npy',u_nd);
-np.save('v_nd.npy',v_nd);
-np.save('eta_nd.npy',eta_nd);
+#np.save('u_nd.npy',u_nd);
+#np.save('v_nd.npy',v_nd);
+#np.save('eta_nd.npy',eta_nd);
 
 #====================================================
 
 # Energy
 
-if False:
+if doEnergy:
 	KE_BG, KE_BG_tot, PE_BG, PE_BG_tot = energy.energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N);
 	E_BG_tot = KE_BG_tot + PE_BG_tot;
 	#print (KE_BG_tot, PE_BG_tot);
@@ -113,12 +116,6 @@ b4,c1[:,i],c2,c3,c4[:,i],f_nd,Ro,K_nd[i],H0_nd,y_nd,dy_nd,N);
 
 #====================================================
 
-# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-u_nd = u_nd / AmpF_nd;
-v_nd = v_nd / AmpF_nd;
-eta_nd = eta_nd / AmpF_nd;
-
-
 # Dimensional solutions
 u = u_nd * U;
 v = v_nd * U;
@@ -139,10 +136,10 @@ if doPV:
 	if doFootprints:
 		if footprintComponents: 
 			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt);
-			#diagnostics.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
+			#plotting.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
 			plotting.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
 		else: 
-			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt);			
+			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 		if doEEFs:
 			if footprintComponents:
 				EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
@@ -185,14 +182,14 @@ if plotBG:
 
 # Soltuion Plots
 if plotSol:
-	plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
-	#diagnostics.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N);
-	#diagnostics.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
+	plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+	plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
 
 # Plots of PV and zonally averaged PV
 if plotPV:
 	plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
-	#plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N);
+	plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N);
 if plotPV_av:
 	plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 

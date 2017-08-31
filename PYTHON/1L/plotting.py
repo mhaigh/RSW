@@ -4,106 +4,199 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from diagnostics import extend
 
 #====================================================
 
 # solutionPlots
-def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
+def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
 
 	ulim = np.max(abs(u_nd[:,:,ts]));
 	vlim = np.max(abs(v_nd[:,:,ts]));
 	etalim = np.max(abs(eta_nd[:,:,ts]));
 	
-	plt.figure(1,figsize=(22,6.4));
+	if div:
+			
+		plt.figure(1,figsize=(22,6.4));
 
-	plt.subplot(131);
-	plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
-	plt.text(0.3,0.45,'u',fontsize=22);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
-	plt.xlabel('x',fontsize=16);
-	plt.ylabel('y',fontsize=16);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-ulim,ulim);
-	plt.colorbar();
+		plt.subplot(131);
+		plt.pcolor(x_grid, y_grid, u_nd[:,:,ts], cmap='bwr', vmin=-ulim, vmax=ulim);
+		plt.text(0.3,0.45,'u',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
 
-	plt.subplot(132);
-	plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
-	plt.text(0.3,0.45,'v',fontsize=22);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-vlim,vlim);
-	plt.colorbar();
+		plt.subplot(132);
+		plt.pcolor(x_grid, y_grid, v_nd[:,:,ts], cmap='bwr', vmin=-vlim, vmax=vlim);
+		plt.text(0.3,0.45,'v',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
 
-	plt.subplot(133);
-	plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
-	plt.text(0.3,0.45,'eta',fontsize=22);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-etalim,etalim);
-	plt.colorbar();
+		plt.subplot(133);
+		plt.pcolor(x_grid, y_grid, eta_nd[:,:,ts], cmap='bwr', vmin=-etalim, vmax=etalim);
+		plt.text(0.3,0.45,'eta',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
 
-	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
-	plt.show();
+		plt.tight_layout();
+		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.show();
 
-	#cmap='coolwarm'
+		# Another good option is 'seismic' (slightly darker shades).
+
+	else:
+
+		plt.figure(1,figsize=(22,6.4));
+
+		plt.subplot(131);
+		plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
+		plt.text(0.3,0.45,'u',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-ulim,ulim);
+		plt.colorbar();
+
+		plt.subplot(132);
+		plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
+		plt.text(0.3,0.45,'v',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-vlim,vlim);
+		plt.colorbar();
+
+		plt.subplot(133);
+		plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
+		plt.text(0.3,0.45,'eta',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-etalim,etalim);
+		plt.colorbar();
+
+		plt.tight_layout();
+		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.show();
+
+		#cmap='coolwarm'
 
 #====================================================
 
 # solutionPlots_save
-def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,PV_prime,ts,FORCE,BG,Fpos,N):
+def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
 # Function that saves plots of the solutions (including PV) separately.
 
 	ulim = np.max(abs(u_nd[:,:,ts]));
 	vlim = np.max(abs(v_nd[:,:,ts]));
 	etalim = np.max(abs(eta_nd[:,:,ts]));
-	qlim = np.max(abs(PV_prime[:,:,ts]));
 
-	plt.figure(1)
-	plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
-	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
-	plt.xlabel('x',fontsize=18);
-	plt.ylabel('y',fontsize=18);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-ulim,ulim);
-	plt.colorbar();
-	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_' + str(Fpos) + '_'  + str(N) + '.png');
-	plt.close();
+	u_nd = u_nd / ulim;
+	v_nd = v_nd / vlim;
+	eta_nd = eta_nd / etalim
 
-	plt.figure(2)
-	plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
-	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
-	plt.xlabel('x',fontsize=18);
-	plt.ylabel('y',fontsize=18);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-vlim,vlim);
-	plt.colorbar();
-	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_' + str(Fpos) + '_'  + str(N) + '.png');
-	plt.close();
+	if div:
+			
+		plt.figure(1,figsize=(22,6.4));
 
-	plt.figure(3)
-	plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
-	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
-	plt.xlabel('x',fontsize=18);
-	plt.ylabel('y',fontsize=18);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.clim(-etalim,etalim);
-	plt.colorbar();
-	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_' + str(Fpos) + '_'  + str(N) + '.png');
-	plt.close();
-	#cmap='coolwarm'
+		plt.subplot(131);
+		plt.pcolor(x_grid, y_grid, u_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.text(0.3,0.45,'u',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		#plt.colorbar();
+		plt.tight_layout();
+		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.close();
+
+		plt.subplot(132);
+		plt.pcolor(x_grid, y_grid, v_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.text(0.3,0.45,'v',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		#plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		#plt.colorbar();
+		plt.tight_layout();
+		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.close();
+
+		plt.subplot(133);
+		plt.pcolor(x_grid, y_grid, eta_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.text(0.3,0.45,'eta',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		#plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+		plt.tight_layout();
+		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.close();
+
+
+
+	else:
+
+		plt.figure(1)
+		plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
+		plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=18);
+		plt.ylabel('y',fontsize=18);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-ulim,ulim);
+		plt.colorbar();
+		plt.tight_layout();
+		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.close();
+
+		plt.figure(2)
+		plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
+		plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.xlabel('x',fontsize=18);
+		plt.ylabel('y',fontsize=18);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-vlim,vlim);
+		plt.colorbar();
+		plt.tight_layout();
+		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.close();
+
+		plt.figure(3)
+		plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
+		plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.xlabel('x',fontsize=18);
+		plt.ylabel('y',fontsize=18);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-etalim,etalim);
+		plt.colorbar();
+		plt.tight_layout();
+		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.close();
+		
 
 #====================================================
 
@@ -282,8 +375,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N):
 
 	PV_full = extend(PV_full);
 	PV_prime = extend(PV_prime);
-	P = extend(P);
-	
+		
 	PV_full_lim = np.max(abs(PV_full[:,:,ts]));
 	PV_prime_lim = np.max(abs(PV_prime[:,:,ts]));
 	Plim = np.max(abs(P));
@@ -405,6 +497,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 # Function that plots the forcing, and its Fourier representation.
 
 	Plim = np.max(abs(P));
+
 	plt.figure(1,figsize=(15,7))
 	plt.subplot(121)
 	#plt.contourf(x_nd,y_nd,P,cmap='coolwarm')

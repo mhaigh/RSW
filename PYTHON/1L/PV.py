@@ -5,7 +5,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from diagnostics import diff, extend
+from diagnostics import diff, extend, timeAverage
 
 #=====================================================================
 
@@ -69,7 +69,7 @@ def fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt):
 
 # footprint
 # A function that calculates the PV footprint of the 1L SW solution as produced by RSW_1L.py
-def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt):
+def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 # This code calculates the PV footprint, i.e. the PV flux convergence defined by
 # P = -(div(u*q,v*q)), where _av denotees the time average.
 # We will take the time average over one whole forcing period, and subtract this PV flux
@@ -79,26 +79,18 @@ def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt):
 	uq_full = uq + Uq + uQ;		# Total zonal PV flux
 	#for j in range(0,N):
 		#qu_full[:,j,:] = qu_full[:,j,:] + UQ[j];
-	vq_full = vq + vQ;			# Total meridional PV flux
+	vq_full = vq + vQ;			# Total meridional PV flux	
 	
+	# Time-averaging
+	uq_full = timeAverage(uq_full,T_nd,Nt);
+	vq_full = timeAverage(vq_full,T_nd,Nt);
 
-	# Next step: taking appropriate derivatives of the fluxes. To save space, we won't define new variables, but instead overwrite the old ones.
-	# From these derivatives we can calculate the 
-	P = - diff(uq_full[:,:,0],1,1,dx_nd) - diff(vq_full[:,:,0],0,0,dy_nd);		# Initialise the footprint with the first time-step
-	for ti in range(1,Nt):
-		P[:,:] = P[:,:] - diff(uq_full[:,:,ti],1,1,dx_nd) - diff(vq_full[:,:,ti],0,0,dy_nd);
-	P = P / Nt;
-	#P_av = np.trapz(P,T_nd[:Nt],dt_nd,axis=2) / T_nd[Nt-1];
-	plt.contourf(P);
-	plt.colorbar();
-	plt.show();
-	
-	# Normalisation
-	#P = P / AmpF_nd**2;
-	
+	# Calculate the footprint.
+	P = - diff(uq_full,1,1,dx_nd) - diff(vq_full,0,0,dy_nd);
+		
 	# We are interested in the zonal average of the footprint
-	P_xav = np.trapz(P,x_nd[:N],dx_nd,axis=1);
-	
+	P_xav = np.trapz(P,x_nd[0:N],dx_nd,axis=1);
+
 	P = extend(P);
 	
 	return P, P_xav

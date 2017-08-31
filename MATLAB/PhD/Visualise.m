@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold/';
+loc = '~/cluster/gold4/';
 cd(loc);
 
 %T = ncread('timestats.nc','Time');

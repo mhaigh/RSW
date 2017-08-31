@@ -10,35 +10,39 @@ import diagnostics
 from inputFile_1L import *
 
 #========================================
-option = -1;
+option = -2;
 
 if option == -2:
 
-	e = [[0.00124837567643, 0.000366720099694,0.00010394024873,3.29592544853e-05], [3.88268775732e-05,2.09050012386e-05,1.0968198529e-05,5.61471142092e-06], [4.21546218187,1.4634855819,0.460154365787,0.15656485614]]; 
-	N_set = [64,128,256,512];
+	e = [[0.00124837567643, 0.000366720099694,0.00010394024873,3.29592544853e-05,1.19889451831e-05], [3.88268775732e-05,2.09050012386e-05,1.0968198529e-05,5.61471142092e-06,2.90614746129e-06], [4.21546218187,1.4634855819,0.460154365787,0.15656485614,0.0598864150904]];
 
-	plt.plot(N_set,e[0]);
+	eq = 0;	
+
+	N_set = [64,128,256,512,1024];
+	Nlen = len(N_set);
+	scale = np.zeros(Nlen);
+	d = np.zeros(Nlen);
+	for i in range(0,Nlen):
+		scale[i] = 1.0/float(N_set[i])**2;	
+		d[i] = e[eq][i] - scale[i];
+	
+	plt.plot(N_set,scale,'k--',linewidth=2.0);
+	plt.plot(N_set,e[eq],color='r',linewidth=2.0);
 	plt.xscale('log',basex=2);
 	plt.yscale('log',basex=2);
 	plt.show();
 
-	e_32 = [0.000992998105249, 6.43854967778e-05, 2.57517203733];
+	plt.plot(d);
+	plt.show();
 
-	e_512 = [3.29592544853e-05, 5.61471142092e-06, 0.15656485614];
-
-	e_1024 = [3.90850859518e-05, 3.90794314852e-05, 0.000253122737188];
- 0.0019633208699, 0.00154172301784, 0.0604580282769
 
 if option == -1:
 
-	ts = 11;	
+	ts = 10;	
 	
 	u_nd = np.load('u_nd.npy');
 	v_nd = np.load('v_nd.npy');
 	eta_nd = np.load('eta_nd.npy');
-
-	plt.contourf(u_nd[:,:,ts]);
-	plt.show();
 
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
