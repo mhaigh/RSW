@@ -315,7 +315,7 @@ def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftil
 	solution = np.zeros((dim,N),dtype=complex);
 
 	for i in range(0,N):
-		#print(i);
+		print(i);
 				
 		# First the boundary terms. Some of these could be defined in the upcoming loop,
 		# but for simplicity we define all boundary terms here.

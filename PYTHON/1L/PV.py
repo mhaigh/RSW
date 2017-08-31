@@ -90,45 +90,36 @@ def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 		
 	# We are interested in the zonal average of the footprint
 	P_xav = np.trapz(P,x_nd[0:N],dx_nd,axis=1);
-
-	P = extend(P);
-	
+	print('not comp');
 	return P, P_xav
 
 #====================================================
 
 # footprintComponents
-def footprintComponents(uq,Uq,uQ,UQ,vq,vQ,x_nd,dx_nd,dy_nd,N,Nt):
+def footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 # A function that calculates the PV footprint of the 1L SW solution in terms of its components, allowing for analysis.
 # The function calculates the following terms: (1) uq, (2) Uq, (3) uQ, (4) UQ, (5) vq and (6) vQ. (UQ has zero zonal derivative.)
 # The zonal/meridional derivative of the zonal/meridional PV flux is taken, averaged over one forcing period.
 # Lastly, the zonal averages are calculated and everything useful returned.
 
+	# Time averaging
+	uq = timeAverage(uq,T_nd,Nt);
+	Uq = timeAverage(Uq,T_nd,Nt);
+	uQ = timeAverage(uQ,T_nd,Nt);
+	vq = timeAverage(vq,T_nd,Nt);
+	vQ = timeAverage(vQ,T_nd,Nt);
+	
 	# Derivatives (no need to operate on UQ) and time-averaging
-	P_uq = diff(uq[:,:,0],1,1,dx_nd);
-	P_uQ = diff(uQ[:,:,0],1,1,dx_nd);
-	P_Uq = diff(Uq[:,:,0],1,1,dx_nd);
-	P_vQ = diff(vQ[:,:,0],0,0,dy_nd);
-	P_vq = diff(vq[:,:,0],0,0,dy_nd);
-
-	for ti in range(1,Nt):
-		P_uq = P_uq + diff(uq[:,:,ti],1,1,dx_nd);
-		P_uQ = P_uQ + diff(uQ[:,:,ti],1,1,dx_nd);
-		P_Uq = P_Uq + diff(Uq[:,:,ti],1,1,dx_nd);
-		P_vQ = P_vQ + diff(vQ[:,:,ti],0,0,dy_nd);
-		P_vq = P_vq + diff(vq[:,:,ti],0,0,dy_nd);
-
-	# Divide by the number of time samples and simultaneously normalise by forcing amplitude and apply the negation.
-	P_uq = - P_uq / Nt;
-	P_uQ = - P_uQ / Nt;
-	P_Uq = - P_Uq / Nt;
-	P_vq = - P_vq / Nt;
-	P_vQ = - P_vQ / Nt;
+	P_uq = - diff(uq,1,1,dx_nd);
+	P_uQ = - diff(uQ,1,1,dx_nd);
+	P_Uq = - diff(Uq,1,1,dx_nd);
+	P_vQ = - diff(vQ,0,0,dy_nd);
+	P_vq = - diff(vq,0,0,dy_nd);
 
 	# Normalisation by AmpF_nd not needed if normalised quanities are passed into the function.
 
 	P = P_uq + P_uQ + P_Uq + P_vq + P_vQ;
-
+	print('comp');
 	# Zonal averaging 
 	P_uq_xav = np.trapz(P_uq,x_nd[:N],dx_nd,axis=1);
 	P_uQ_xav = np.trapz(P_uQ,x_nd[:N],dx_nd,axis=1);

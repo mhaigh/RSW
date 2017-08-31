@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 128; 			# Number of gridpoints
+N = 512; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -247,7 +247,7 @@ errorPhys = False;     	# Print error of full solutions
 errorSpec = False;		# Print error of spectral solutions
 
 doEnergy = False;				# Energy
-doPV = True;					# Calculate potential vorticity
+doPV = False;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
 doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = True;	# If true, calculates the footprint in terms of its components.
@@ -260,10 +260,10 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 
 plotForcing = False;
 plotBG = False;
-plotSol = False;
-plotPV = True;
+plotSol = True;
+plotPV = False;
 plotPV_av = False;
-plotFootprint = True;
+plotFootprint = False;
 plotPhaseAmp = False;
 
 #=======================================================
