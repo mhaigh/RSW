@@ -10,9 +10,9 @@ from diagnostics import diff, extend, timeAverage
 #=====================================================================
 
 # potentialVorticity
-# Calculate potential vorticity
 def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd):
-	
+# Calculate potential vorticity	
+
 	RV_full = np.zeros((N,N,Nt));
 	RV_prime = np.zeros((N,N,Nt));
 	for ti in range(0,Nt):
@@ -90,7 +90,7 @@ def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 		
 	# We are interested in the zonal average of the footprint
 	P_xav = np.trapz(P,x_nd[0:N],dx_nd,axis=1);
-	print('not comp');
+
 	return P, P_xav
 
 #====================================================
@@ -119,7 +119,7 @@ def footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 	# Normalisation by AmpF_nd not needed if normalised quanities are passed into the function.
 
 	P = P_uq + P_uQ + P_Uq + P_vq + P_vQ;
-	print('comp');
+
 	# Zonal averaging 
 	P_uq_xav = np.trapz(P_uq,x_nd[:N],dx_nd,axis=1);
 	P_uQ_xav = np.trapz(P_uQ,x_nd[:N],dx_nd,axis=1);
@@ -278,8 +278,17 @@ def EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd
 	norm2_north = np.trapz(Pabs_north,y_north,dy_nd);
 	norm1_south = np.trapz(Pabs_south*yabs_south,y_south,dy_nd);
 	norm2_south = np.trapz(Pabs_south,y_south,dy_nd);
-	norm_north = norm1_north / norm2_north;
-	norm_south = norm1_south / norm2_south;	
+
+
+	if norm2_north == 0:
+		norm_north = 1;
+	else:
+		norm_north = norm1_north / norm2_north;
+
+	if norm2_south == 0:
+		norm_south = 1;
+	else:
+		norm_south = norm1_south / norm2_south;	
 
 	# Now integrate uq_north/south etc. (overwrite the original variables, not needed), multiply by normalisation constant and forcing frequency.
 	# uq

@@ -3,11 +3,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = -3;
+OPT = 3;
 
 N = 256;
-y = np.linspace(1,256,N);
-x = np.linspace(1,256,N);
+y = np.linspace(1,N,N);
+x = np.linspace(1,N,N);
 Amp = 1.0;
 
 j2 = int((y[N-1] - y[0]) / 2) + int(y[0]);
@@ -18,6 +18,7 @@ jNo = int((y[N-1] - j2)/ 2) + j2;
 f = np.zeros(N);
 
 #==========================================================================
+
 
 if OPT == -3:
 
@@ -122,23 +123,26 @@ if OPT == 2:
 
 # Igor's wind forcing
 if OPT == 3:
-	a = 255;
-	b = 255;
+
+	a = N-1;
+	b = N-1;
 	beta = 0.8;
 	Amp = 1.0;
-	wind_asym1 = 0.5;
+	wind_asym1 = 1.5;
 
-	taux1 = np.zeros(256);
-	taux2 = np.zeros(256);
+	taux1 = np.zeros(N);
+	taux2 = np.zeros(N);
 	for j in range(0,N):
 		x0 = beta * y[j]
-		Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 # The asymmetry of the wind
-		taux1[j] = 0.5 * (1.0 - np.cos(2.0 * np.pi * y[j] / 256));
-		taux2[j] = 0.5 * (1.0 - np.cos(2.0 * np.pi * y[j] / 256) + Pr);
+		Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 	# The asymmetry of the wind
+		taux1[j] = 0.5 * (1.0 - np.cos(2.0 * np.pi * y[j] / N));
+		taux2[j] = 0.5 * (1.0 - np.cos(2.0 * np.pi * y[j] / N) + Pr);
 
 	i1 = np.argsort(-taux1);
 	i2 = np.argsort(-taux2);
-	print(i1[0],i2[0]);
+	
+	print('Buoyancy shift = ' + str(int(N / 32.0)))
+	print('Wind shift = ' + str(i2[0] - i1[0]));
 
 	plt.subplot(121);
 	plt.plot(taux1);

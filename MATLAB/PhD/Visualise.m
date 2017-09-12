@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold4/';
+loc = '~/cluster/gold3/';
 cd(loc);
 
 %T = ncread('timestats.nc','Time');
@@ -20,7 +20,7 @@ f0 = 0.44e-4;
 beta = 2e-11;
 f = f0 + beta * y;
 
-loop_start = nf-1; 
+loop_start = nf-4; 
 loop_end = nf-1;
 RUN = 1;    % Choose to define PV from a completed RUN (1) or a RUN in progress (2)
 if RUN == 1
@@ -56,34 +56,33 @@ PV_av = PV_av / (nt - n0 + 1);
 
 %%
 
-for j = 1:nx
-    disp(j);
-    for i = 1:ny
-        for ti = 1:nt
-            PV1(j,i,ti) = PV1(j,i,ti) - f(j)/4000;
-        end
-    end
-end
-
-%%
-
 qlim1 = min(min(PV1(:,:,nt)));
 qlim2 = max(max(PV1(:,:,nt)));
 
-surf(PV1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
-    caxis([qlim1 qlim2]);...
+figure(1);
+surf(x,y,PV1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
+    caxis([qlim1 qlim2]); xlabel('x'); ylabel('y'); title('PV');...
+    set(gca,'xTick',x(1):x(nx)-x(1):x(nx)); set(gca,'xTickLabel',{'0','L'});...
+    set(gca,'yTick',y(1):y(ny)-y(1):y(ny)); set(gca,'yTickLabel',{'0','L'});...
     saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','PV_snapshot'],'png');
 pause
 
-surf(u1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
-        saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','u_snapshot'],'png');
+figure(2);
+surf(x,y,u1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
+    xlabel('x'); xlabel('x'); ylabel('y'); title('u');...
+    set(gca,'xTick',x(1):x(nx)-x(1):x(nx)); set(gca,'xTickLabel',{'0','L'});...
+    set(gca,'yTick',y(1):y(ny)-y(1):y(ny)); set(gca,'yTickLabel',{'0','L'});...
+    saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','u_snapshot'],'png');
 pause
 
 qlim1 = min(min(PV_av));
 qlim2 = max(max(PV_av));
 
-surf(PV_av(:,:),'edgecolor','none');view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
-    caxis([qlim1 qlim2]);...
+figure(3);
+surf(x,y,PV_av(:,:),'edgecolor','none');view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
+    caxis([qlim1 qlim2]); xlabel('x'); ylabel('y'); title('PV av');...
+    set(gca,'xTick',x(1):x(nx)-x(1):x(nx)); set(gca,'xTickLabel',{'0','L'});...
+    set(gca,'yTick',y(1):y(ny)-y(1):y(ny)); set(gca,'yTickLabel',{'0','L'});...
     saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','PV_av'],'png');
 pause
 
@@ -105,11 +104,11 @@ if movie == 1
 
         if ii == 1
 
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/RSW/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
+            imwrite(imind,cm,'/home/mike/Documents/GulfStream/GOLD/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
 
         else
 
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/RSW/IMAGES/GOLD_PV.gif','WriteMode','append');
+            imwrite(imind,cm,'/home/mike/Documents/GulfStream/GOLD/IMAGES/GOLD_PV.gif','WriteMode','append');
         end
 
     end
@@ -120,30 +119,17 @@ pause
 %%
 % 
 
-loc = '~/cluster/gold/';
+%loc = '~/cluster/gold3/'; cd(loc);
 
-cd(loc);
-
-%T = ncread('timestats.nc','Time');
-files = dir('prog__*');
-x = ncread(files(1).name,'xq');
-y = ncread(files(1).name,'yq');
-
-%nt = size(T,1);
-nx = size(x,1);
-ny = size(y,1);
-
-nf = size(files);
-nf = nf(1);
-
-h = ncread(files(nf-1).name,'h');
+h = ncread(files(loop_end).name,'h');
 
 h1 = squeeze(h(:,:,1,:));
 h2 = squeeze(h(:,:,2,:));
 h3 = squeeze(h(:,:,3,:));
 
-%nt = nt / (loop_end - loop_start);
-nt = 73
+h_size = size(h1);
+nt = h_size(3);
+
 for ti = 1:nt
     h1(:,:,ti) = transpose(h1(:,:,ti));
     h2(:,:,ti) = transpose(h2(:,:,ti));
@@ -160,7 +146,10 @@ h3lim1 = min(min(min(h3)));
 h3lim2 = max(max(max(h3)));
 
 
-surf(h1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;
+surf(x,y,h1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
+    xlabel('x'); ylabel('y'); title('h1');...
+    set(gca,'xTick',x(1):x(nx)-x(1):x(nx)); set(gca,'xTickLabel',{'0','L'});...
+    set(gca,'yTick',y(1):y(ny)-y(1):y(ny)); set(gca,'yTickLabel',{'0','L'});...
     saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','h_snapshot'],'png');
 pause
 

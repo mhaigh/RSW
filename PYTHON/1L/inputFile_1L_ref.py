@@ -63,7 +63,7 @@ for j in range(0,N2):
 dy = y[1] - y[0];     # Distance between gridpoints (m)
 dx = x[1] - x[0];
 
-y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+2*dx,dx)];
+y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+dx,dx)];
 
 K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 
@@ -247,7 +247,7 @@ errorPhys = False;     	# Print error of full solutions
 errorSpec = False;		# Print error of spectral solutions
 
 doEnergy = False;				# Energy
-doPV = False;					# Calculate potential vorticity
+doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
 doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = True;	# If true, calculates the footprint in terms of its components.
@@ -261,7 +261,7 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 plotForcing = False;
 plotBG = False;
 plotSol = True;
-plotPV = False;
+plotPV = True;
 plotPV_av = False;
 plotFootprint = False;
 plotPhaseAmp = False;

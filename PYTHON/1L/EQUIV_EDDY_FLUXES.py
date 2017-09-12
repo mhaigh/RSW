@@ -3,6 +3,7 @@
 # This is an executable code that solves the 1L shallow water system a number of times, each time storing the equivalent eddy flux.
 #=======================================================
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -15,6 +16,8 @@ import solver
 from inputFile_1L import *
 
 #=======================================================
+
+filename = 'EEF_' + str(int(period_days));
 
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
 TEST = 'y0';
@@ -44,65 +47,79 @@ if TEST == 'y0':
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 			
 # Initialise the array which stores the EEF values.
-if footprintComponents:
-	EEF_array = np.zeros((nn,6,2));
+if os.path.isfile(filename + '.npy'):
+	EEF_array = np.load(filename + '.npy');
 else:
-	EEF_array = np.zeros((nn,2));
+	if footprintComponents:
+		EEF_array = np.zeros((nn,6,2));
+	else:
+		EEF_array = np.zeros((nn,2));
+
 # Now start the loop over each forcing index.
 for ii in range(0,nn):
 	print(ii);
 
-	# If TEST==U0, linear problem has to be redefined each iteration.
-	if TEST == 'U0':
-		U0_nd = U0_nd_set[ii] * U_ones;	# Redefine U0 in each run.
-		a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
+	if EEF_array[ii,0,0] == 0:
+
+		# If TEST==U0, linear problem has to be redefined each iteration.
+		if TEST == 'U0':
+			U0_nd = U0_nd_set[ii] * U_ones;	# Redefine U0 in each run.
+			a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
+				
+		# If TEST==y0, matrix only needs to be defined once, but forcing must be defined each iteration.
+		if TEST == 'y0':
+			y0 = y0_set[ii];				# Redefine y0 and the forcing in each run.
+			y0_nd = y0 / L;
+			# Forcing
+			if FORCE_TYPE == 'CTS':
+				F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+			elif FORCE_TYPE == 'DCTS':
+				F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+			else:
+				sys.exit('ERROR: Invalid forcing option selected.');	
+	
+		# Solver
+		if BC == 'NO-SLIP':
+			solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
+		if BC == 'FREE-SLIP':
+			solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
+	
+		utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
+		u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 			
-	# If TEST==y0, matrix only needs to be defined once, but forcing must be defined each iteration.
-	if TEST == 'y0':
-		y0 = y0_set[ii];				# Redefine y0 and the forcing in each run.
-		y0_nd = y0 / L;
-		# Forcing
-		if FORCE_TYPE == 'CTS':
-			F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
-		elif FORCE_TYPE == 'DCTS':
-			F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
-		else:
-			sys.exit('ERROR: Invalid forcing option selected.');	
+		# Take real part.
+		u_nd = np.real(u_nd);
+		v_nd = np.real(v_nd);
+		eta_nd = np.real(eta_nd);
+	
+		# Normalise all solutions by the (non-dimensional) forcing amplitude. 
+		u_nd = u_nd / AmpF_nd;
+		v_nd = v_nd / AmpF_nd;
+		eta_nd = eta_nd / AmpF_nd;
+	
+		# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
+		eta_full = np.zeros((N,N,Nt));
+		u_full = np.zeros((N,N,Nt));
+		for j in range(0,N):
+			eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
+			u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+	
+		# Calculate PV fields and PV fluxes.
+		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+	
+		# Do footprints
+		if footprintComponents:
+			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
+			EEF_array[ii,:,:] = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+		else: 
+			P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
+			EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
 
-	# Solver
-	if BC == 'NO-SLIP':
-		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
-	if BC == 'FREE-SLIP':
-		solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
-
-	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-	u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
-		
-	u_nd = np.real(u_nd);
-	v_nd = np.real(v_nd);
-	eta_nd = np.real(eta_nd);
-
-	# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
-	eta_full = np.zeros((N,N,Nt));
-	u_full = np.zeros((N,N,Nt));
-	for j in range(0,N):
-		eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-		u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
-
-	# Calculate PV fields.
-	PV_prime, PV_full, PV_BG = PV.vort(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
-
-	# Do footprints
-	if footprintComponents:
-		P, uq, uQ, Uq, UQ, vq, vQ, P_xav, uq_xav, uQ_xav, Uq_xav, vq_xav, vQ_xav = PV.footprintComponents(u_nd,v_nd,eta_nd,PV_prime,PV_BG,U0_nd,AmpF_nd,x_nd,dx_nd,dy_nd,N,Nt);
-		EEF_array[ii,:,:] = PV.EEF_components(P_xav,uq_xav,uQ_xav,Uq_xav,vq_xav,vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
-	else: 
-		P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
-		EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
-
+	np.save(filename,EEF_array);
+	
 if footprintComponents:
 	#output.ncSaveEEF_y0_components(EEF_array,y0_set,period_days,nn);
-	filename = 'EEF_' + str(int(period_days));
 	np.save(filename,EEF_array);
 else:
 	# not written this nc function yet.

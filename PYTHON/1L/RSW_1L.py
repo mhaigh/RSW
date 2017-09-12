@@ -29,7 +29,7 @@ import output
 import energy
 import plotting
 
-from inputFile_1L_ref import *
+from inputFile_1L import *
 
 # 1L SW Solver
 #====================================================
@@ -75,9 +75,11 @@ for j in range(0,N):
 	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
 	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
-np.save('u_nd.npy',u_nd);
-np.save('v_nd.npy',v_nd);
-np.save('eta_nd.npy',eta_nd);
+#np.save('u_nd.npy',u_nd);
+#np.save('v_nd.npy',v_nd);
+#np.save('eta_nd.npy',eta_nd);
+
+#sys.exit();
 
 #====================================================
 
@@ -136,7 +138,7 @@ if doPV:
 		if footprintComponents: 
 			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 			#plotting.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
-			plotting.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
+			#plotting.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
 		else: 
 			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 		if doEEFs:
@@ -155,12 +157,6 @@ if doPV:
 
 # Should these be zero, according to conservation of mass?
 #Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);
-
-#====================================================
-
-u_nd = diagnostics.extend(u_nd);
-v_nd = diagnostics.extend(v_nd);
-eta_nd = diagnostics.extend(eta_nd);
 
 #====================================================
 
@@ -186,15 +182,15 @@ if plotSol:
 	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
 
 # Plots of PV and zonally averaged PV
-if plotPV:
-	#plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
-	plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
-if plotPV_av:
-	plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
-
-# Plots of footprints - may need to edit the source code at times.
-if plotFootprint:
-	plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd,U,N);
+if doPV:
+	if plotPV:
+		#plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
+		plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+	if plotPV_av:
+		plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
+	if doFootprints:
+		if plotFootprint:
+			plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd,U,N);
 
 # Phase and amplitude
 if plotPhaseAmp:

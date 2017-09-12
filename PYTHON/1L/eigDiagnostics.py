@@ -230,7 +230,7 @@ def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	else:
 		y_max = l_max + 1;
 
-	print(colors2);
+	#print(colors2);
 	
 	y_ticks = np.linspace(0,y_max,y_max/2+1);
 

@@ -108,10 +108,13 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_gr
 	v_nd = v_nd / vlim;
 	eta_nd = eta_nd / etalim
 
+	U0_str = r'$U_{0}=-0.16$';
+
 	if div:
 			
 		plt.pcolor(x_grid, y_grid, u_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26);
+		plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 		plt.xlabel('x',fontsize=16);
@@ -124,6 +127,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_gr
 
 		plt.pcolor(x_grid, y_grid, v_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
+		#plt.text(-0.45,0.4,U0_str,color='k',fontsize=22)
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);	
 		plt.xlabel('x',fontsize=16);
@@ -135,6 +139,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_gr
 
 		plt.pcolor(x_grid, y_grid, eta_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26);
+		#plt.text(-0.45,0.4,U0_str,color='k',fontsize=22)
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);	
 		plt.xlabel('x',fontsize=16);
@@ -297,10 +302,8 @@ def solutionPlotsPhase(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
 # Plots of the zonal averages of PV, both the BG state and the forced state
 def PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N):
 
-	PV_prime = extend(PV_prime);
-	PV_full = extend(PV_full);
 
-	PV_full_av = np.trapz(PV_full[:,:,ts],x_nd,x_nd[1]-x_nd[0],1);
+	PV_full_av = np.trapz(PV_full[:,:,ts],x_nd[0:N],x_nd[1]-x_nd[0],1);
 
 	plt.figure(1)
 
@@ -338,13 +341,12 @@ def bgPlots(y_nd,H0_nd,U0_nd,PV_BG):
 # Plots of PV and footprint
 def pvPlots(PV_full,PV_prime,x_nd,y_nd):
 
-	PV_full = extend(PV_full);
-	PV_prime = extend(PV_prime);
-	
+	N = len(y_nd);
+
 	plt.figure(1,figsize=[13,6]);
 
 	plt.subplot(121);
-	plt.contourf(x_nd,y_nd,PV_full[:,:,1]);
+	plt.contourf(x_nd[0:N],y_nd,PV_full[:,:,1]);
 	plt.text(0.05,0.4,'PV FULL',color='k',fontsize=22);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -352,7 +354,7 @@ def pvPlots(PV_full,PV_prime,x_nd,y_nd):
 	plt.colorbar();
 
 	plt.subplot(122);
-	plt.contourf(x_nd,y_nd,PV_prime[:,:,1]);
+	plt.contourf(x_nd[0:N],y_nd,PV_prime[:,:,1]);
 	plt.text(0.05,0.4,'PV PRIME',color='k',fontsize=22);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -367,9 +369,6 @@ def pvPlots(PV_full,PV_prime,x_nd,y_nd):
 # pvPlots_save
 def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
 
-	PV_full = extend(PV_full);
-	PV_prime = extend(PV_prime);
-		
 	PV_full_lim = np.max(abs(PV_full[:,:,ts]));
 	PV_prime_lim = np.max(abs(PV_prime[:,:,ts]));
 	Plim = np.max(abs(P));
@@ -379,11 +378,14 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 	P = P / Plim; 
 	P_xav = P_xav / Plim;
 
+	U0_str = r'$U_{0}=-0.16$';
+
 	if div:
 
 		plt.figure(1);
 		plt.pcolor(x_grid, y_grid, PV_full[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$q$',color='k',fontsize=26);
+		plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
 		plt.xlabel('x',fontsize=18);
@@ -397,6 +399,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 		plt.figure(1);
 		plt.pcolor(x_grid, y_grid, PV_prime[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$q^{\prime}$',color='k',fontsize=26);
+		plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
 		plt.xlabel('x',fontsize=18);
@@ -408,7 +411,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 		plt.close();
 	
 		plt.figure(1);
-		plt.pcolor(x_grid, y_grid, PV_prime[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.pcolor(x_grid, y_grid, P, cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$P$',fontsize=26);
 		#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
 		#plt.text(0.15,0.4,'r0 = '+str(r0/1000) + ' km' ,fontsize=18);	
@@ -428,13 +431,13 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 		
 		plt.figure(4);
 		plt.plot(P_xav,y_nd,'k-',linewidth=2)
-		#plt.text(10,0.40,r'$\langle P\rangle$',fontsize=26)
-		plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
+		plt.text(0.8*max(abs(P_xav)),0.40,r'$\langle P\rangle$',fontsize=26)
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
 		plt.ylim(-0.5,0.5);
-		#plt.ylabel('y',fontsize=18);
+		plt.ylabel('y',fontsize=18);
 		plt.grid(b=True, which='both', color='0.65',linestyle='--');
 		plt.xlim(-1.1*np.max(abs(P_xav)),1.1*np.max(abs(P_xav)));
-		plt.xlabel(r'$\langle P\rangle$',fontsize=26);
+		plt.xlabel('x',color='white',fontsize=18);
 		plt.tight_layout()
 		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_xav_' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.close();
@@ -503,7 +506,6 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 #====================================================
 
 # forcingPlots
-# Forcing plots 
 def forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N):
 # Function that plots the forcing, and its Fourier representation.
 
@@ -558,12 +560,11 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 # Function that plots the forcing, and its Fourier representation.
 
 	Plim = np.max(abs(P));
-	P = extend(P);	
 
 	plt.figure(1,figsize=(15,7))
 	plt.subplot(121)
 	#plt.contourf(x_nd,y_nd,P,cmap='coolwarm')
-	plt.contourf(x_nd,y_nd,P)
+	plt.contourf(x_nd[0:N],y_nd,P)
 	plt.text(0.0,0.4,'PV FOOTPRINT',fontsize=22);
 	#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
 	#plt.text(0.15,0.4,'r0 = '+str(r0/1000) + ' km' ,fontsize=18);	
@@ -742,11 +743,10 @@ def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N)
 # This function plots two footprint components uq and vq, and saves the output.
 # These are the two fluxes that we are most interested in.
 
-	P_uq = extend(P_uq);
-	P_vq = extend(P_vq);
-	
 	P_uq_lim = np.max(abs(P_uq));
 	P_vq_lim = np.max(abs(P_vq));
+
+	U0_str = r'$U_{0}=0.16$';
 
 	plt.figure(10);
 	plt.contourf(x_nd,y_nd,P_uq);

@@ -63,7 +63,7 @@ for j in range(0,N2):
 dy = y[1] - y[0];     # Distance between gridpoints (m)
 dx = x[1] - x[0];
 
-y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+2*dx,dx)];
+y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+dx,dx)];
 
 K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.16;
+	Umag = 0.15;
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -260,10 +260,10 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 
 plotForcing = False;
 plotBG = False;
-plotSol = False;
+plotSol = True;
 plotPV = True;
 plotPV_av = False;
-plotFootprint = True;
+plotFootprint = False;
 plotPhaseAmp = False;
 
 #=======================================================

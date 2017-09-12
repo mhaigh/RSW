@@ -36,7 +36,7 @@ if SOL == 'NEW':
 	# Import the relevant modules.
 	import forcing_1L
 		# Forcing
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
 	# Coefficients
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 	# Solver
@@ -76,7 +76,7 @@ print('solved');
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
 LOOP = 'PART';		# FULL, PART
 
-Nm = 6;						# How many modes to use in the decomposition at each wavenumber.
+Nm = 4;						# How many modes to use in the decomposition at each wavenumber.
 if LOOP == 'FULL':
 	loop = range(0,N);
 	Nk = N;
@@ -99,7 +99,7 @@ theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set 
 for ii in loop:	 
 	k = K_nd[ii];
 
-	i = int(k % N);
+	i = int(k % Nk);
 		
 	print('i = ' + str(i));
 	print('k = ' + str(int(k)));
@@ -133,7 +133,7 @@ for ii in loop:
 	theta_tmp = np.linalg.solve(vec,Phi); 				# 2.
 	theta_abs_tmp = np.abs(theta_tmp);
 	dom_index_tmp = np.argsort(-theta_abs_tmp);			# 3. The indices of the modes, ordered by 'dominance'.
-	theta_abs_tot[i] = sum(theta_abs_tmp[dom_index_tmp[0:dim]]);	# Change dim to Nm if necessary
+	theta_abs_tot[i] = sum(theta_abs_tmp[dom_index_tmp[0:Nm]]);	# Change dim to Nm if necessary
 	for mi in range(0,Nm):
 		#print(dom_index_tmp[mi]);
 		#print('count = ' + str(count[dom_index_tmp[mi]]));
@@ -156,9 +156,7 @@ for ii in loop:
 	#plt.ylim(-0.5,0.5);
 	#plt.show();
 
-eigDiagnostics.scatterModes(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);
-
-	
+eigDiagnostics.scatterModes(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
 
 #====================================================
 
