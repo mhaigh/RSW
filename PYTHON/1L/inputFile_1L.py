@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 128; 			# Number of gridpoints
+N = 256; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -216,9 +216,9 @@ U0_nd = U0 / U;
 f0_nd = 1.0;					# =f0/f0      		 
 beta_nd = beta * Ly / f0;
 f_nd = f / f0;					# The same as: f_nd = f0_nd + beta_nd * y_nd      
-print(beta_nd);
+
 gamma_nd = gamma / f0;			# Simply scaled by the base Coriolis frequency
-print(gamma_nd);
+
 omega_nd = omega * T_adv;      	# All time variables scale advectively, i.e. T_adv~L/U
 t_nd = t / T_adv;
 T_nd = T / T_adv;
@@ -231,9 +231,9 @@ AmpF_nd = AmpF * g / (f0 * U**2);
 # Important dimensionless numbers
 #=======================================================
 
-Ro = U / (f0 * Ly); 			# Rossby number: measures inertial forces relative to rotational ones.
+Ro = U / (f0 * r0); 			# Rossby number: measures inertial forces relative to rotational ones.
 if nu != 0:
-	Re = Ly * U / nu;			# Reynolds number: measures inertial forces relative to viscous ones.
+	Re = r0 * U / nu;			# Reynolds number: measures inertial forces relative to viscous ones.
 else:
 	Re = None;					# Instead of defining it as infinity, define it as None.
 Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.

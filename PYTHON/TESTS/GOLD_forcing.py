@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = 3;
+OPT = 5;
 
 N = 256;
 y = np.linspace(1,N,N);
@@ -147,8 +147,7 @@ if OPT == 3:
 	plt.subplot(121);
 	plt.plot(taux1);
 	plt.subplot(122);
-	plt.plot(taux2);
-	
+	plt.plot(taux2);	
 	plt.show();
 
 # Pavel's wind forcing
@@ -170,3 +169,102 @@ if OPT == 4:
 	plt.contourf(W);
 	plt.colorbar();
 	plt.show();
+
+
+if OPT == 5:
+	
+	N = 400;
+	y = np.linspace(1,N,N);
+	x = np.linspace(1,N,N);
+
+	a = N-1;
+	b = N-1;
+
+	m = 0.2
+	yf = y[N/2+1];	
+	
+	beta = 0.8;
+	Amp = 1.0;
+
+	wind_asym1 = 1.5;
+	
+	theta = np.pi / 8;	
+
+	taux = np.zeros((N,N));
+	tauy = np.zeros((N,N));
+	for j in range(0,N):
+		for i in range(0,N):
+			x0 = beta * y[j]
+			#Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 	# The asymmetry of the wind
+			taux[j,i] = 0.5 * (1.0 + np.cos(2.0 * np.pi *(m * x[i] - y[j] - yf) / N));
+			tauy[j,i] = m * taux[j,i];
+
+
+	Nv = 15;
+	yv = np.linspace(1,Nv,Nv);
+	xv = np.linspace(1,Nv,Nv);
+
+	taux_vec = np.zeros((Nv,Nv));
+	tauy_vec = np.zeros((Nv,Nv));
+	for j in range(0,Nv):
+		for i in range(0,Nv):
+			x0 = beta * yv[j]
+			#Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 	# The asymmetry of the wind
+			taux_vec[j,i] = 0.5 * (1.0 + np.cos(1.0 * 2.0 * np.pi *(m * xv[i] - yv[j] - yf) / Nv));
+			tauy_vec[j,i] = m * taux_vec[j,i];
+
+	
+
+	plt.subplot(121);	
+	plt.quiver(xv,yv,taux_vec,tauy_vec);
+	plt.subplot(122);
+	plt.contourf(taux);
+	plt.colorbar();
+	plt.show();
+	
+
+if OPT == 6:
+	
+	N = 20;
+	y = np.linspace(1,N,N);
+	x = np.linspace(1,N,N);
+
+	a = N-1;
+	b = N-1;
+	beta = 0.8;
+	Amp = 1.0;
+	wind_asym1 = 1.5;
+	
+	theta = np.pi / 8;	
+
+	taux = np.zeros((N,N));
+	for j in range(0,N):
+		x0 = beta * y[j]
+		Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 	# The asymmetry of the wind
+		taux[j,:] = 0.5 * (1.0 - np.cos(2.0 * np.pi * y[j] / N) + Pr);
+		
+	Rtaux = np.zeros((N,N));
+	Rtauy = np.zeros((N,N));
+	for j in range(0,N):
+		Rtaux[j,:] = np.cos(theta) * taux[j,:];
+		Rtauy[j,:] = np.sin(theta) * taux[j,:];
+
+	plt.subplot(121);
+	plt.contourf(Rtaux);
+	plt.subplot(122);	
+	plt.contourf(Rtauy);
+	plt.show();
+	
+	plt.subplot(121);
+	plt.quiver(x,y,taux,np.zeros((N,N)));
+	plt.subplot(122);
+	plt.quiver(x,y,Rtaux,Rtauy);
+	plt.show();
+		
+	
+
+
+
+
+
+	

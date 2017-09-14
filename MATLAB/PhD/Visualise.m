@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold3/';
+loc = '~/cluster/gold5/';
 cd(loc);
 
 %T = ncread('timestats.nc','Time');
@@ -20,7 +20,7 @@ f0 = 0.44e-4;
 beta = 2e-11;
 f = f0 + beta * y;
 
-loop_start = nf-4; 
+loop_start = nf-1; 
 loop_end = nf-1;
 RUN = 1;    % Choose to define PV from a completed RUN (1) or a RUN in progress (2)
 if RUN == 1
@@ -102,14 +102,14 @@ if movie == 1
         im=frame2im(mov(ii));
         [imind,cm] = rgb2ind(im,256);
 
-        if ii == 1
+        %if ii == 1
 
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/GOLD/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
+        %    imwrite(imind,cm,'/home/mike/Documents/GulfStream/GOLD/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
 
-        else
+        %else
 
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/GOLD/IMAGES/GOLD_PV.gif','WriteMode','append');
-        end
+        %    imwrite(imind,cm,'/home/mike/Documents/GulfStream/GOLD/IMAGES/GOLD_PV.gif','WriteMode','append');
+        %end
 
     end
 end
@@ -145,7 +145,7 @@ h2lim2 = max(max(max(h2)));
 h3lim1 = min(min(min(h3)));
 h3lim2 = max(max(max(h3)));
 
-
+figure(6)
 surf(x,y,h1(:,:,nt),'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
     xlabel('x'); ylabel('y'); title('h1');...
     set(gca,'xTick',x(1):x(nx)-x(1):x(nx)); set(gca,'xTickLabel',{'0','L'});...
@@ -162,6 +162,26 @@ for ii=1:nt
     im=frame2im(mov(ii));
     [imind,cm] = rgb2ind(im,256);
 end
+
+%%
+% Deformation Radius
+
+g_prime = 0.01;     % reduced gravity between 1st and 2nd layers
+Rd = zeros(nx,ny);
+for i=1:nx
+    for j =1:ny
+        Rd(j,i) = sqrt(g_prime * h1(j,i,nt)) / f(j);
+    end
+end
+
+figure(7)
+surf(x,y,Rd,'edgecolor','none'); view(0,90); shading interp; colorbar(); colormap(jet); axis image;...
+    xlabel('x'); ylabel('y'); title('Rd');...
+    set(gca,'xTick',x(1):x(nx)-x(1):x(nx)); set(gca,'xTickLabel',{'0','L'});...
+    set(gca,'yTick',y(1):y(ny)-y(1):y(ny)); set(gca,'yTickLabel',{'0','L'});...
+    saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','Rd_snapshot'],'png');
+
+
 
 %%
 % ENERGY

@@ -66,6 +66,10 @@ if BC == 'NO-SLIP':
 		etatilde_nd[j,:] = solution[2*N2+j,:];
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
+u_nd = np.real(u_nd);
+v_nd = np.real(v_nd);
+eta_nd = np.real(eta_nd);
+
 print('solved');
 
 #====================================================
@@ -76,12 +80,12 @@ print('solved');
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
 LOOP = 'PART';		# FULL, PART
 
-Nm = 4;						# How many modes to use in the decomposition at each wavenumber.
+Nm = 16;						# How many modes to use in the decomposition at each wavenumber.
 if LOOP == 'FULL':
 	loop = range(0,N);
 	Nk = N;
 elif LOOP == 'PART':
-	Nk_neg = 8; Nk_pos = 8;		# How many positive/negative wavenumbers to perform this decomposition at.
+	Nk_neg = 40; Nk_pos = 40;		# How many positive/negative wavenumbers to perform this decomposition at.
 	loop = it.chain(range(0,Nk_pos+1),range(N-Nk_neg,N));
 	Nk = Nk_neg + Nk_pos + 1;
 else:
@@ -96,6 +100,8 @@ scatter_l = np.zeros(Nm * Nk);		# An empty array for storing the count, psuedo-w
 theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
+# ii indexes arrays storing information at ALL wavenumbers k
+# i indexes arrays storing information ONLY at wavenumbers used in the decomposition.
 for ii in loop:	 
 	k = K_nd[ii];
 
@@ -126,9 +132,9 @@ for ii in loop:
 	# 1. Define the solution to be decomposed as Phi.
 	# 2. Decompose Phi into vec using a linear solver; theta_tmp stores the weights.
 	# 3. Arrange the weights in descending order according to their complex amplitude.
-	# 4. Sum the nm-most dominant weights.
+	# 4. Sum the Nm-most dominant weights.
 
-	Phi = solution[:,i];		# 1. Assign the solution corresponding to wavenumber k=K_nd[i].
+	Phi = solution[:,ii];		# 1. Assign the solution corresponding to wavenumber k=K_nd[i].
 	
 	theta_tmp = np.linalg.solve(vec,Phi); 				# 2.
 	theta_abs_tmp = np.abs(theta_tmp);

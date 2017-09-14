@@ -8,6 +8,33 @@ from diagnostics import extend
 
 #====================================================
 
+# forcingPlot_save
+def forcingPlot_save(x_grid,y_grid,F3_nd,FORCE,BG,Fpos,N):
+
+	aa = 1./24;
+	Fmax = np.max(np.max(F3_nd,axis=0));
+	Flim = np.max(abs(F3_nd/(1.05*Fmax)));
+	#F3[0,0] = - Fmax;
+
+	plt.pcolor(x_grid,y_grid,F3_nd/(1.1*Fmax),cmap='bwr',vmin=-Flim,vmax=Flim);
+	plt.xlabel('x',fontsize=22);
+	plt.ylabel('y',fontsize=22);
+	plt.text(0.4,0.4,r'$F_{3}$',fontsize=26);
+	plt.arrow(-aa,2*aa+0.25,2*aa,0,head_width=0.02, head_length=0.02,color='k');
+	plt.arrow(2*aa,aa+.25,0,-2*aa,head_width=0.02, head_length=0.02,color='k');
+	plt.arrow(aa,-2*aa+.25,-2*aa,0,head_width=0.02, head_length=0.02,color='k');
+	plt.arrow(-2*aa,-aa+.25,0,2*aa,head_width=0.02, head_length=0.02,color='k');
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.xlabel('x',fontsize=16);
+	plt.ylabel('y',fontsize=16);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/F_' + str(Fpos) + '_'  + str(N) + '.png');
+	plt.close();
+
 # solutionPlots
 def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
 

@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from diagnostics import diff, extend
+
 # Forcing 
 #=======================================================
 
@@ -66,31 +67,6 @@ def forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
 				if r >= r0:
 					F3[j,i] = - mass;
-
-	PLOT = False;
-	if PLOT:
-		aa = 1./24;
-		Fmax = np.max(np.max(F3,axis=0));
-		Flim = np.max(abs(F3/(1.05*Fmax)));
-		#F3[0,0] = - Fmax;
-		x_nd = x / L;
-		y_nd = y / L;
-		plt.contourf(x_nd,y_nd,F3/(1.1*Fmax));
-		plt.xlabel('x',fontsize=22);
-		plt.ylabel('y',fontsize=22);
-		plt.text(y_nd[N-130],x_nd[N-130],'F3',color='k',fontsize=22);
-		plt.arrow(-aa,2*aa+0.25,2*aa,0,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.arrow(2*aa,aa+.25,0,-2*aa,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.arrow(aa,-2*aa+.25,-2*aa,0,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.arrow(-2*aa,-aa+.25,0,2*aa,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.xticks((-1./2,0,1./2),['-0.5','0','0.5'],fontsize=14);
-		plt.yticks((-1./2,0,1./2),['-0.5','0','0.5'],fontsize=14);
-		plt.clim(-Flim,Flim);
-		plt.colorbar();
-		plt.tight_layout();
-		plt.show();
-
-		
 
 	if FORCE == 'VORTICITY':
 		for i in range(0,N):
