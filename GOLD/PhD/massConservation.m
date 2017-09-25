@@ -26,7 +26,7 @@ mass2 = [0];
 mass3 = [0];
 count = 0;
 %for i = 3:3
-for i = nf-1:nf-1
+for i = 1:1
     disp(i);
     h_new = ncread(files(i).name,'h');
     h1_new = h_new(:,:,1,:);
@@ -50,32 +50,8 @@ subplot(142); plot(mass2);
 subplot(143); plot(mass3);
 subplot(144); plot(mass1+mass2+mass3);
 
+pause
 
-
-movie = 1;
-if movie == 1
-    
-    for ii=1:nt
-        ii
-        figure(1)
-        surf(PV1(:,:,ii),'edgecolor','none'); shading interp; view(0,90); colorbar; colormap(jet); axis image;...
-            caxis([qlim1 qlim2]);
-        
-        mov(ii)=getframe(1);
-        im=frame2im(mov(ii));
-        [imind,cm] = rgb2ind(im,256);
-
-        if ii == 1
-
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/RSW/IMAGES/GOLD_PV.gif', 'Loopcount',inf);
-
-        else
-
-            imwrite(imind,cm,'/home/mike/Documents/GulfStream/RSW/IMAGES/GOLD_PV.gif','WriteMode','append');
-        end
-
-    end
-end
 
 
 %%

@@ -1,7 +1,7 @@
 % visualise
 clear all
 
-loc = '~/cluster/gold5/';
+loc = '~/cluster/gold3/';
 cd(loc);
 
 %T = ncread('timestats.nc','Time');
@@ -19,6 +19,7 @@ nf = nf(1);
 f0 = 0.44e-4;
 beta = 2e-11;
 f = f0 + beta * y;
+Q = f / 300.0;
 
 loop_start = nf-1; 
 loop_end = nf-1;
@@ -86,6 +87,8 @@ surf(x,y,PV_av(:,:),'edgecolor','none');view(0,90); shading interp; colorbar(); 
     saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','PV_av'],'png');
 pause
 
+close all
+
 qlim1 = min(min(min(PV1)));
 qlim2 = max(max(max(PV1)));
 
@@ -116,12 +119,13 @@ end
 
 pause 
 
+close all
 %%
 % 
 
 %loc = '~/cluster/gold3/'; cd(loc);
 
-h = ncread(files(loop_end).name,'h');
+h = ncread(files(nf-1).name,'h');
 
 h1 = squeeze(h(:,:,1,:));
 h2 = squeeze(h(:,:,2,:));
@@ -181,7 +185,9 @@ surf(x,y,Rd,'edgecolor','none'); view(0,90); shading interp; colorbar(); colorma
     set(gca,'yTick',y(1):y(ny)-y(1):y(ny)); set(gca,'yTickLabel',{'0','L'});...
     saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','Rd_snapshot'],'png');
 
+pause 
 
+close all
 
 %%
 % ENERGY
@@ -202,10 +208,10 @@ surf(x,y,Rd,'edgecolor','none'); view(0,90); shading interp; colorbar(); colorma
 % end
 % nt = size(KE1,3);
 
-TE = load('energy_d_mass');
-TE = TE(:,2);
+%TE = load('energy_d_mass');
+%TE = TE(:,2);
 
-plot(TE); xlabel('days'); ylabel('Total Energy');...
-    saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','TE'],'png');
+%plot(TE); xlabel('days'); ylabel('Total Energy');...
+ %   saveas(gcf,['~/Documents/GulfStream/GOLD/Images/','TE'],'png');
     
-
+%pause close all

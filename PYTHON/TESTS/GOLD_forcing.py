@@ -3,11 +3,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = 5;
+OPT = 7;
 
 N = 256;
 y = np.linspace(1,N,N);
 x = np.linspace(1,N,N);
+Lx = x[N-1] - x[0];
 Amp = 1.0;
 
 j2 = int((y[N-1] - y[0]) / 2) + int(y[0]);
@@ -171,6 +172,7 @@ if OPT == 4:
 	plt.show();
 
 
+# Tilted wind forcing and thickness relaxation
 if OPT == 5:
 	
 	N = 400;
@@ -182,38 +184,34 @@ if OPT == 5:
 
 	m = 0.2
 	yf = y[N/2+1];	
+	y_8 = y[N/8+1] - y[0];
 	
-	beta = 0.8;
-	Amp = 1.0;
-
-	wind_asym1 = 1.5;
-	
-	theta = np.pi / 8;	
+	theta = np.pi / 8.0;	
 
 	taux = np.zeros((N,N));
 	tauy = np.zeros((N,N));
+	h1 = 300.0 * np.ones((N,N));
 	for j in range(0,N):
 		for i in range(0,N):
-			x0 = beta * y[j]
-			#Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 	# The asymmetry of the wind
 			taux[j,i] = 0.5 * (1.0 + np.cos(2.0 * np.pi *(m * x[i] - y[j] - yf) / N));
 			tauy[j,i] = m * taux[j,i];
+			if y[j] - yf - y_8 < m*x[i] < y[j] - yf + y_8:
+				h1[j,i] = 300.0 + np.sin(1.0 * np.pi * (m * x[i] - y[j] - yf) / y_8);
 
-
-	Nv = 15;
-	yv = np.linspace(1,Nv,Nv);
-	xv = np.linspace(1,Nv,Nv);
+	
+	plt.contourf(h1);
+	plt.show();
+	
+	Nv = 16;
+	yv = np.linspace(0,N-1,Nv,dtype=int);
+	xv = np.linspace(0,N-1,Nv,dtype=int);
 
 	taux_vec = np.zeros((Nv,Nv));
 	tauy_vec = np.zeros((Nv,Nv));
 	for j in range(0,Nv):
 		for i in range(0,Nv):
-			x0 = beta * yv[j]
-			#Pr= (beta + Amp * (- beta + x0 / b)) * wind_asym1;			 	# The asymmetry of the wind
-			taux_vec[j,i] = 0.5 * (1.0 + np.cos(1.0 * 2.0 * np.pi *(m * xv[i] - yv[j] - yf) / Nv));
+			taux_vec[j,i] = 0.5 * (1.0 + np.cos(1.0 * 2.0 * np.pi *(m * x[xv[i]] - y[yv[j]] - yf) / N));
 			tauy_vec[j,i] = m * taux_vec[j,i];
-
-	
 
 	plt.subplot(121);	
 	plt.quiver(xv,yv,taux_vec,tauy_vec);
@@ -260,8 +258,70 @@ if OPT == 6:
 	plt.subplot(122);
 	plt.quiver(x,y,Rtaux,Rtauy);
 	plt.show();
-		
+
+if OPT == 7:
+	N = 512;
+	nj = N;
+
+	js = 0 ; je = N;
+	i1 = 0 ; ie = N;
+
+  	j_50 = int((je - js) / 2) + js ;
+  	j_25 = int((j_50 - js) / 2) + js ; j_75 = int((je - j_50) / 2) + j_50
+  	j_12 = int((j_25 - js) / 2) + js ; j_37 = int((j_50 - j_25) / 2) + j_25
+  	j_62 = int((j_75 - j_50) / 2) + j_50 ; j_87 = int((je - j_75) / 2) + j_75
+
+	dh = 100.0;
+
+	m = 0;
+	yf = j_25 - m * i1;
+	L = j_62-j_37;
+	pi = 3.14159265;
+
+	h1_restore = np.zeros((N,N));
+	sine1 = np.zeros(N);
+	sine2 = np.zeros(N);
+	h1_restore[:,:] = 300.0 
+	for i in range(i1,ie):
+		for j in range(js,je):
+			if (m * i + yf - 0.5 * L < j and j < m * i + yf + 0.5 * L):
+				xy = 2.0 * np.pi * (m * i - j + yf) / L; 
+				#sine1 = xy - xy**3 / 6.0 + xy**5 / 120.0 - xy**7 / 5040.0 + xy**9 / 362880.0 - xy**11 / 39916800.0 + xy**13 / 6227020800.0 - xy**15 / 1307674368000 + xy**17 / 3.55687428e14 - xy**19 / 1.216451e17
+				sine2 = np.sin(xy);				
+				h1_restore[j,i] = 300.0 + dh * sine2
+
 	
+	plt.contourf(h1_restore);	
+	plt.colorbar();
+	plt.show();
+
+	
+if OPT == 8:
+
+	N = 256;
+	nj = N;
+
+	dh = 100.0;
+
+	m = 0.2;
+	yf = nj/2.0+1.0;
+	sine_range = nj/8.0+0.0;
+	pi = 3.14159265;
+
+	sine1 = np.zeros(N);
+	sine2 = np.zeros(N);
+
+	for i in range(0,N):
+		xy = 1.0 * np.pi * (m * x[i] - y[0] - yf) / Lx;
+		sine1[i] = xy - xy**3 / 6.0 + xy**5 / 120.0 - xy**7 / 5040.0 + xy**9 / 362880.0 - xy**11 / 39916800.0 + xy**13 / 6227020800.0 - xy**15 / 1307674368000 + xy**17 / 3.55687428e14 - xy**19 / 1.216451e17
+	
+		sine2[i] = np.sin(xy);	
+	
+	plt.subplot(121);
+	plt.plot(sine1);
+	plt.subplot(122);
+	plt.plot(sine2);	
+	plt.show();
 
 
 
