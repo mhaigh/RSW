@@ -87,7 +87,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.figure(1,figsize=(22,6.4));
 
 		plt.subplot(131);
-		plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
+		plt.contourf(x_nd[0:N],y_nd,u_nd[:,:,ts]);
 		plt.text(0.3,0.45,'u',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -98,7 +98,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.colorbar();
 
 		plt.subplot(132);
-		plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
+		plt.contourf(x_nd[0:N],y_nd,v_nd[:,:,ts]);
 		plt.text(0.3,0.45,'v',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -107,7 +107,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.colorbar();
 
 		plt.subplot(133);
-		plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
+		plt.contourf(x_nd[0:N],y_nd,eta_nd[:,:,ts]);
 		plt.text(0.3,0.45,'eta',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));

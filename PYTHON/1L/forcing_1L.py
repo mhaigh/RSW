@@ -79,77 +79,54 @@ def forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 	
 	# Lastly, Fourier transform the three forcings in the x-direction
 		
-	Ftilde1 = dx * np.fft.hfft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
-	Ftilde3 = dx * np.fft.hfft(F3,N,axis=1); 
+	Ftilde1 = dx * np.fft.fft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3 = dx * np.fft.fft(F3,N,axis=1); 
 	Ftilde2 = np.zeros((N,N),dtype=complex);
 	for j in range(0,N):
 		for i in range(0,N):
 			Ftilde2[j,i] = 2 * np.pi * g * I * K[i] * Ftilde3[j,i] / f[j];
 
-	# Nondimensionalise forcing terms
-	#=======================================================
-
-	F1_nd = F1 / (f0 * U);
-	F2_nd = F2 / (f0 * U);
-	F3_nd = F3 * g / (f0 * U**2); 
-
-	Ftilde1_nd = Ftilde1 / (f0 * U * L);
-	Ftilde2_nd = Ftilde2 / (f0 * U * L);
-	Ftilde3_nd = Ftilde3 * g / (f0 * U**2 * L);
-
 	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
 
 #=======================================================
 
-def forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
+def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,dy_nd):
 	
-	I = np.complex(0,1);
-	F1 = np.zeros((N,N+1));
-	F2 = np.zeros((N,N+1));
-	F3 = np.zeros((N,N+1));
-	if FORCE == 'BALANCED':
-		count = 0;
-		mass = 0;
-		for i in range(0,N+1):
-			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r < r0:
-					count = count + 1;
-					if r == 0:
-						F1[j,i] = 0;
-						F2[j,i] = 0;						
-					else:	
-						F1[j,i] = 0.5 * AmpF * np.pi * g * (y[j]-y0) / (r0 * f[j] * r) * np.sin(np.pi * r / r0);
-						F2[j,i] = - 0.5 * AmpF * np.pi * g * x[i] / (r0 * f[j] * r) * np.sin(np.pi * r / r0);
-					F3[j,i] = 0.5 * AmpF * (1 + np.cos(np.pi * r / r0));
-					mass = mass + F3[j,i];
-		mass = mass / (N*(N+1) - count);
-		for i in range(0,N+1):
-			for j in range(0,N):
-				F3[j,i] = F3[j,i] - mass;
-		#F3x = diff(F3,1,1,dx);
-		#F3y = diff(F3,0,0,dy);
-		#for j in range(0,N):
-		#	F1[j,:] = - g * F3y[j,:] / f[j];
-		#	F2[j,:] = g * F3x[j,:] / f[j];
-			
+	Nx = N;	
 
+	I = np.complex(0,1);
+	F1_nd = np.zeros((N,Nx));
+	F2_nd = np.zeros((N,Nx));
+	F3_nd = np.zeros((N,Nx));
+	if FORCE == 'BALANCED':
+		mass = 0;
+		for i in range(0,Nx):
+			for j in range(0,N):
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
+					if r_nd == 0:
+						F1_nd[j,i] = 0;
+						F2_nd[j,i] = 0;						
+					else:	
+						F1_nd[j,i] = 0.5 * AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
+						F2_nd[j,i] = - 0.5 * AmpF_nd * np.pi * x_nd[i] / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
+					F3_nd[j,i] = 0.5 * AmpF_nd * (1 + np.cos(np.pi * r_nd / r0_nd));
+					mass = mass + F3_nd[j,i];
+		mass = mass / (N*(N+1));
+		F3_nd = F3_nd - mass;
+		#mass1 = np.trapz(np.trapz(F3_nd,y_nd,dy_nd,axis=0),x_nd,dx_nd,axis=0);
+		
 	if FORCE == 'BUOYANCY':
-		count = 0;
 		mass = 0;
 		for i in range(0,N):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r<r0:
-					count = count + 1;
-					F3[j,i] = AmpF * np.cos((np.pi / 2) * r / r0);
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
+					F3_nd[j,i] = AmpF_nd * np.cos((np.pi_nd / 2) * r_nd / r0_nd);
 					mass = mass + F3[j,i];
-		mass = mass / (N**2 - count);
-		for i in range(0,N):
-			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r >= r0:
-					F3[j,i] = - mass;
+		mass = mass / (N*(N+1));
+		F3_nd = F3_nd - mass;
+	
 
 	PLOT = False;
 	if PLOT:
@@ -174,36 +151,24 @@ def forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 		plt.tight_layout();
 		plt.show();
 
-		
-
 	if FORCE == 'VORTICITY':
 		for i in range(0,N):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
 				if r<r0:
-					F1[j,i] = AmpF * np.pi * g * (y[j]-y0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-					F2[j,i] = - AmpF * np.pi * g * x[i] / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
+					F1_nd[j,i] = AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
+					F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
 	
 	
 	# Lastly, Fourier transform the three forcings in the x-direction
 		
-	Ftilde1 = dx * np.fft.hfft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
-	Ftilde3 = dx * np.fft.hfft(F3,N,axis=1); 
-	Ftilde2 = np.zeros((N,N),dtype=complex);
-	for j in range(0,N):
-		for i in range(0,N):
-			Ftilde2[j,i] = 2 * np.pi * g * I * K[i] * Ftilde3[j,i] / f[j];
-
-	# Nondimensionalise forcing terms
-	#=======================================================
-
-	F1_nd = F1 * L / U**2;
-	F2_nd = F2 * L / U**2;
-	F3_nd = F3 * g / (f0 * U**2); 
-
-	Ftilde1_nd = Ftilde1 / U**2;
-	Ftilde2_nd = Ftilde2 / U**2;
-	Ftilde3_nd = Ftilde3 * g / (f0 * U**2 * L);
+	Ftilde1_nd = dx_nd * np.fft.hfft(F1_nd,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3_nd = dx_nd * np.fft.hfft(F3_nd,N,axis=1); 
+	Ftilde2_nd = dx_nd * np.fft.fft(F2_nd,axis=1);
+	#Ftilde2_nd = np.zeros((N,Nx),dtype=complex);
+	#for j in range(0,N):
+	#	for i in range(0,Nx):
+	#		Ftilde2_nd[j,i] = 2 * np.pi * I * K_nd[i] * Ftilde3_nd[j,i] / f_nd[j];
 
 	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
 
@@ -215,54 +180,22 @@ def forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N):
 # A function that calculates the inverse of the forcing the check that the original forcing is found.
 
 	F1i = np.real(np.fft.ihfft(Ftilde1_nd,axis=1)) / dx_nd;
-	F2 = np.fft.ifft(Ftilde2_nd,axis=1) / dx_nd;
+	F2_nd = np.fft.ifft(Ftilde2_nd,axis=1) / dx_nd;
 	F3i = np.real(np.fft.ihfft(Ftilde3_nd,axis=1)) / dx_nd;
 
-	F1 = np.zeros((N,N));
-	F3 = np.zeros((N,N));
+	F1_nd = np.zeros((N,N));
+	F3_nd = np.zeros((N,N));
 	for i in range(0,N/2):
-		F1[:,i] = F1i[:,i];
-		F1[:,N-1-i] = F1i[:,i]; 
-		F3[:,i] = F3i[:,i];
-		F3[:,N-1-i] = F3i[:,i];
-	
-	F1 = extend(F1);
-	F2 = extend(F2);
-	F3 = extend(F3);
+		F1_nd[:,i] = F1i[:,i];
+		F1_nd[:,N-1-i] = F1i[:,i]; 
+		F3_nd[:,i] = F3i[:,i];
+		F3_nd[:,N-1-i] = F3i[:,i];
 
-	plt.figure(2);
+	F1_nd = extend(F1_nd);
+	F2_nd = extend(F2_nd);
+	F3_nd = extend(F3_nd);
 
-	plt.subplot(331);
-	plt.contourf(x_nd,y_nd,F1);
-	plt.colorbar();
-	plt.subplot(332);
-	plt.contourf(x_nd,y_nd,F2);
-	plt.colorbar();
-	plt.subplot(333);
-	plt.contourf(x_nd,y_nd,F3);
-	plt.colorbar()
-
-	plt.subplot(334);
-	plt.contourf(np.real(Ftilde1_nd));
-	plt.colorbar()
-	plt.subplot(335);
-	plt.contourf(np.real(Ftilde2_nd));
-	plt.colorbar()
-	plt.subplot(336);
-	plt.contourf(np.real(Ftilde3_nd));
-	plt.colorbar()
-
-	plt.subplot(337);
-	plt.contourf(np.imag(Ftilde1_nd));
-	plt.colorbar()
-	plt.subplot(338);
-	plt.contourf(np.imag(Ftilde2_nd));
-	plt.colorbar()
-	plt.subplot(339);
-	plt.contourf(np.imag(Ftilde3_nd));
-	plt.colorbar()
-
-	plt.show();
+	return F1_nd, F2_nd, F3_nd;
 
 #=======================================================
 
@@ -309,7 +242,7 @@ def F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N):
 
 	F3_nd = np.zeros((N,N+1));
 	for i in range(0,N+1):
-		F3_nd[:,i] = integrate(F1_nd[:,i]*f_nd[:],y_nd,dy_nd,0);
+		F3_nd[:,i] = integrate.quad(F1_nd[:,i]*f_nd[:],y_nd,dy_nd,0);
 
 	return F3_nd;
 

@@ -21,10 +21,10 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 64; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -54,7 +54,7 @@ L = Lx;
 
 y = np.linspace(-Ly/2,Ly/2,N);				# Array of all grid points in physical space.
 x = np.linspace(-Lx/2,Lx/2+Lx/(N-1),N+1);	# Zonal grid points	set has an extra point, first and last points are duplicates of each other (periodicity).
-
+print(x);
 # Remove dead points in the y-direction.
 yd = np.zeros(N2);
 for j in range(0,N2):
@@ -151,11 +151,11 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 r0 = 90.0 * 1000.0;  
 AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
-	y0 = Ly / 4;
+	y0 = Ly/4;#y[int(3*N/4)];
 elif Fpos == 'CENTER':
-	y0 = 0;
+	y0 = y[int(N/2)];
 elif Fpos == 'SOUTH':
-	y0 = - Ly / 6;
+	y0 = y[int(N/4)];
 elif Fpos == 'USER':
 	y0 = y[N/2+2];
 
@@ -184,33 +184,34 @@ t = T[ts];								# Time of the snapshot
 # geostrophic BG state U0 and H0.
 #=======================================================
 
-U = 1.
+U = 1.0e0;
 H = Hflat;
 
 chi = f0 * U * Ly / g;
-T_adv = Lx / U;		# The advective timescale
+T_adv = Lx / U;			# The advective timescale
 
 # Defining dimensionless parameters
 #=======================================================
 
-Lx_nd = Lx / Lx;		# In case Lx and Ly are chosen to be different, we still scale by the same length, Ly
+Lx_nd = Lx / Ly;		# In case Lx and Ly are chosen to be different, we still scale by the same length, Ly
 Ly_nd = Ly / Ly;				
 
 y_nd = y / Ly;    
 x_nd = x / Ly;
 yd_nd = yd / Ly;
 y0_nd = y0 / Ly;
+r0_nd = r0 / Ly;
 
 y_grid = y_grid / Ly;
-x_grid = x_grid / Lx;
+x_grid = x_grid / Ly;
 
 dy_nd = y_nd[1] - y_nd[0];
 dx_nd = x_nd[1] - x_nd[0];
 
-K_nd = K * Lx ;		# The same as: K_nd = np.fft.fftfreq(N2,dx_nd)
+K_nd = K * Ly ;		# The same as: K_nd = np.fft.fftfreq(N2,dx_nd)
 
 H0_nd = H0 / chi;	# The steady-state SSH scales the same way as eta.
-H0_y_nd = H0_y * Lx / chi;
+H0_y_nd = H0_y * Ly / chi;
 U0_nd = U0 / U;
 
 f0_nd = 1.0;					# =f0/f0      		 
@@ -231,11 +232,11 @@ AmpF_nd = AmpF * g / (f0 * U**2);
 # Important dimensionless numbers
 #=======================================================
 
-Ro = U / (f0 * r0); 			# Rossby number: measures inertial forces relative to rotational ones.
+Ro = U / (f0 * L); 			# Rossby number: measures inertial forces relative to rotational ones.
 if nu != 0:
-	Re = r0 * U / nu;			# Reynolds number: measures inertial forces relative to viscous ones.
+	Re = L * U / nu;		# Reynolds number: measures inertial forces relative to viscous ones.
 else:
-	Re = None;					# Instead of defining it as infinity, define it as None.
+	Re = None;				# Instead of defining it as infinity, define it as None.
 Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
 
 # Output
@@ -250,7 +251,7 @@ doEnergy = False;				# Energy
 doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
 doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
-footprintComponents = True;	# If true, calculates the footprint in terms of its components.
+footprintComponents = True;		# If true, calculates the footprint in terms of its components.
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;
@@ -261,9 +262,9 @@ PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = 
 plotForcing = False;
 plotBG = False;
 plotSol = True;
-plotPV = True;
+plotPV = False;
 plotPV_av = False;
-plotFootprint = False;
+plotFootprint = True;
 plotPhaseAmp = False;
 
 #=======================================================

@@ -37,18 +37,19 @@ from inputFile_1L import *
 
 # Forcing
 if FORCE_TYPE == 'CTS':
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,dy_nd);
 elif FORCE_TYPE == 'DCTS':
 	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
 else:
 	sys.exit('ERROR: Invalid forcing option selected.');
-plotting.forcingPlot_save(x_grid,y_grid,F3_nd[:,0:N],FORCE,BG,Fpos,N);
+#plotting.forcingPlot_save(x_grid,y_grid,F3_nd[:,0:N],FORCE,BG,Fpos,N);
 
+#F1_nd, F2_nd, F3_nd = forcing_1L.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
 #F1_nd, F2_nd = forcing_1L.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
 #F3_nd = forcing_1L.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
-#diagnostics.forcingPlots(x_nd,y_nd,Ro*F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
+plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
-
+#sys.exit();
 # Coefficients
 a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 # Solver
@@ -178,7 +179,7 @@ if plotBG:
 
 # Soltuion Plots
 if plotSol:
-	#plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+	plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,False);
 	plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
 	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
 
