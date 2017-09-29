@@ -18,32 +18,33 @@ from diagnostics import diff, extend
 
 #=======================================================
 
-def forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
+def forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd):
+	
+	Nx = N;
 	
 	I = np.complex(0,1);
-	F1 = np.zeros((N,N+1));
-	F2 = np.zeros((N,N+1));
-	F3 = np.zeros((N,N+1));
+	F1 = np.zeros((N,Nx));
+	F2 = np.zeros((N,Nx));
+	F3 = np.zeros((N,Nx));
+
+	# Balanced
 	if FORCE == 'BALANCED':
 		count = 0;
 		mass = 0;
-		for i in range(0,N+1):
+		for i in range(0,Nx):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r < r0:
-					count = count + 1;
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
 					if r == 0:
-						F1[j,i] = 0;
-						F2[j,i] = 0;						
+						F1_nd[j,i] = 0;
+						F2_nd[j,i] = 0;						
 					else:	
-						F1[j,i] = AmpF * np.pi * g * (y[j]-y0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-						F2[j,i] = - AmpF * np.pi * g * x[i] / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-					F3[j,i] = AmpF * np.cos((np.pi / 2) * r / r0);
-					mass = mass + F3[j,i];
-		mass = mass / (N*(N+1) - count);
-		for i in range(0,N+1):
-			for j in range(0,N):
-				F3[j,i] = F3[j,i] - mass;
+						F1_nd[j,i] = AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
+						F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
+					F3[j,i] = AmpF_nd * np.cos((np.pi / 2) * r_nd / r0_nd);
+					mass = mass + F3_nd[j,i];
+		mass = mass / (N*Nx)
+		F3_nd[j,i] = F3_nd[j,i] - mass;
 		#F3x = diff(F3,1,1,dx);
 		#F3y = diff(F3,0,0,dy);
 		#for j in range(0,N):
@@ -51,23 +52,23 @@ def forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 		#	F2[j,:] = g * F3x[j,:] / f[j];
 			
 
+	# Buoyancy only
 	if FORCE == 'BUOYANCY':
-		count = 0;
 		mass = 0;
-		for i in range(0,N):
+		for i in range(0,Nx):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r<r0:
-					count = count + 1;
-					F3[j,i] = AmpF * np.cos((np.pi / 2) * r / r0);
-					mass = mass + F3[j,i];
-		mass = mass / (N**2 - count);
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
+					F3_nd[j,i] = AmpF_nd * np.cos((np.pi / 2) * r_nd / r0_nd);
+					mass = mass + F3_nd[j,i];
+		mass = mass / (N*Nx);
 		for i in range(0,N):
 			for j in range(0,N):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
 				if r >= r0:
 					F3[j,i] = - mass;
 
+	# Vorticity only
 	if FORCE == 'VORTICITY':
 		for i in range(0,N):
 			for j in range(0,N):
@@ -79,8 +80,8 @@ def forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 	
 	# Lastly, Fourier transform the three forcings in the x-direction
 		
-	Ftilde1 = dx * np.fft.fft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
-	Ftilde3 = dx * np.fft.fft(F3,N,axis=1); 
+	Ftilde1 = dx * np.fft.hfft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3 = dx * np.fft.hfft(F3,N,axis=1); 
 	Ftilde2 = np.zeros((N,N),dtype=complex);
 	for j in range(0,N):
 		for i in range(0,N):
@@ -90,7 +91,7 @@ def forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 
 #=======================================================
 
-def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,dy_nd):
+def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd):
 	
 	Nx = N;	
 
@@ -98,6 +99,8 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,
 	F1_nd = np.zeros((N,Nx));
 	F2_nd = np.zeros((N,Nx));
 	F3_nd = np.zeros((N,Nx));
+
+	# Balanced
 	if FORCE == 'BALANCED':
 		mass = 0;
 		for i in range(0,Nx):
@@ -112,10 +115,10 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,
 						F2_nd[j,i] = - 0.5 * AmpF_nd * np.pi * x_nd[i] / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
 					F3_nd[j,i] = 0.5 * AmpF_nd * (1 + np.cos(np.pi * r_nd / r0_nd));
 					mass = mass + F3_nd[j,i];
-		mass = mass / (N*(N+1));
+		mass = mass / (N*Nx);
 		F3_nd = F3_nd - mass;
-		#mass1 = np.trapz(np.trapz(F3_nd,y_nd,dy_nd,axis=0),x_nd,dx_nd,axis=0);
-		
+
+	# Buoyancy only
 	if FORCE == 'BUOYANCY':
 		mass = 0;
 		for i in range(0,N):
@@ -124,7 +127,7 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,
 				if r_nd < r0_nd:
 					F3_nd[j,i] = AmpF_nd * np.cos((np.pi_nd / 2) * r_nd / r0_nd);
 					mass = mass + F3[j,i];
-		mass = mass / (N*(N+1));
+		mass = mass / (N*Nx);
 		F3_nd = F3_nd - mass;
 	
 
@@ -151,6 +154,7 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,U,L,dx_nd,
 		plt.tight_layout();
 		plt.show();
 
+	# Voriticity only
 	if FORCE == 'VORTICITY':
 		for i in range(0,N):
 			for j in range(0,N):

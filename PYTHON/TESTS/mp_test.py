@@ -6,9 +6,11 @@ import time
 
 #========================================================================
 
-def foo():
-	for i in range(0,10):
-		print(i);	
+pe = 2;
+
+def foo(pi):
+	for i in range(0,2):
+		return(pi,i);	
 
 def info(title):
     print(title)
@@ -21,25 +23,16 @@ if len(sys.argv) > 1:
 else:
 	ncpus = 1;
 
+def main():
+	p = mp.Pool(pe);
+	for result in p.imap(foo,[1,2]):
+		x=result
+		
+
+	
+
 
 if __name__ == '__main__':
-	info('main line');
-	#mp.set_start_method('spawn');
-	p1 = mp.Process(target=foo)
-	p1.start();
-	p2 = mp.Process(target=foo)
-	p2.start();
-	p3 = mp.Process(target=foo)
-	p3.start();
-	p4 = mp.Process(target=foo)
-	p4.start();
-	p5 = mp.Process(target=foo)
-	p5.start();
-	p6 = mp.Process(target=foo)
-	p6.start();
-	p7 = mp.Process(target=foo)
-	p7.start();
-	p8 = mp.Process(target=foo)
-	p8.start();
+	main();
 
-
+print(x)

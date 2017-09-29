@@ -1,6 +1,8 @@
 import numpy
 import sys
 from collections import defaultdict
+import matplotlib.pyplot as plt
+import numpy as np
 
 class Brownian():
 
@@ -10,7 +12,7 @@ class Brownian():
     alpha is distributed with mean 0 and variance 1.
     """
 
-    def __init__(self, dt, initV = 0.0, runtime = 100.0):
+    def __init__(self, dt, initV = 0.0, runtime = 121.0):
         self.dt =  dt
         self.steps = int(runtime/dt)
         self.dxs = numpy.zeros(self.steps)
@@ -58,7 +60,21 @@ def getRMSDisplacement(pos):
     """get root mean squared displacements of a particle """
     return numpy.mean(numpy.square(pos))
 
+
 def solve_problem1():
+	dt = 1.0
+	v = 0;
+    # This is a dictionary with keys as (timestep,initV) and final velocity as
+    # values.
+	finalvecolicies = defaultdict(list)
+	total = 1;
+	a = Brownian(dt, v)
+	a.solve()
+	plt.plot(a.time,a.pos);
+	plt.show();
+	np.save('time_series',a.pos);
+
+def solve_problem3():
     import pylab
     timesteps = [0.1, 0.01, 0.001]
     initV = [0, 10]

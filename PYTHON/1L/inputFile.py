@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 256+1; 			# Number of gridpoints
+N = 16+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -226,7 +226,7 @@ T_nd = T / T_adv;
 dt_nd = dt / T_adv;
 
 AmpF_nd = AmpF * g / (f0 * U**2);
-print(K_nd);
+
 # Note that gravity g and kinematic viscosity aren't scaled, but rather used to define some extra dimensionless parameters
 
 # Important dimensionless numbers
