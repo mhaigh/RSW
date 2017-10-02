@@ -126,7 +126,7 @@ if __name__ == '__main__':
 	jobs = [];
 	for pi in range(0,pe):
 		print(pi);
-		p = mp.Process(target=EEF_y0,args=(y0_sets[pi],pi))
+		p = mp.Process(target=EEF_y0,args=(y0_sets[pi],pi));
 		jobs.append(p);
 		p.start();
 

@@ -30,7 +30,7 @@ import output
 import energy
 import plotting
 
-from inputFile_1L import *
+from inputFile import *
 
 # RSW SOLVER STOCHASTIC 
 #====================================================
@@ -51,16 +51,31 @@ else:
 #plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
 #sys.exit();
-# Coefficients
-a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
-# Solver
-if BC == 'NO-SLIP':
-	solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
-if BC == 'FREE-SLIP':
-	solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 
-utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+u_nd = np.zeros((N,N,Nt),dtype=complex);
+v_nd = np.zeros((N,N,Nt),dtype=complex);
+eta_nd = np.zeros((N,N,Nt),dtype=complex);
+
+S = np.load('time_series.npy');
+S = S[1:Nt+1];
+Om = np.fft.fftfreq(Nt,dt_nd);
+S_tilde = np.fft.fft(S);
+
+for wi in range(1,Nt):
+	omega_nd = Om[wi];
+	# Coefficients
+	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
+	# Solver
+	if BC == 'NO-SLIP':
+		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,S_tilde[wi]*Ro*Ftilde1_nd,S_tilde[wi]*Ro*Ftilde2_nd,S_tilde[wi]*Ftilde3_nd,N,N2);
+	if BC == 'FREE-SLIP':
+		solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,S_tilde[wi]*Ro*Ftilde1_nd,S_tilde[wi]*Ro*Ftilde2_nd,S_tilde[wi]*Ftilde3_nd,N,N2);
+
+	u_nd[:,:,wi], v_nd[:,:,wi], eta_nd[:,:,wi] = solver.extractSols(solution,N,N2,BC);
+
+
+
+u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS_STOCH(u_nd,v_nd,eta_nd,T_nd,dx_nd,Om,N);
 
 u_nd = np.real(u_nd);
 v_nd = np.real(v_nd);
@@ -78,9 +93,9 @@ for j in range(0,N):
 	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
 	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
-#np.save('u_nd.npy',u_nd);
-#np.save('v_nd.npy',v_nd);
-#np.save('eta_nd.npy',eta_nd);
+np.save('u_nd.npy',u_nd);
+np.save('v_nd.npy',v_nd);
+np.save('eta_nd.npy',eta_nd);
 
 #sys.exit();
 

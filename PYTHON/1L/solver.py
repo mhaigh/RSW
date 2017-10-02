@@ -562,6 +562,23 @@ def SPEC_TO_PHYS(utilde,vtilde,etatilde,T,dx,omega,N):
 
 	return u, v, eta;
 
+#=======================================================
+
+# SPEC_TO_PHYS_STOCH
+def SPEC_TO_PHYS_STOCH(utilde,vtilde,etatilde,T,dx,Om,N):
+# Function takes the spectral-physical solutions produced by the solver and returns the time-dependent solutions in physical space.
+	
+	I = np.complex(0,1);
+
+	Nt = np.size(Om);
+	dt = T[1] - T[0];
+	
+	u = np.fft.ifft(np.fft.ifft(utilde,axis=1),axis=2) / (dx * dt);
+	v = np.fft.ifft(np.fft.ifft(vtilde,axis=1),axis=2) / (dx * dt);
+	eta = np.fft.ifft(np.fft.ifft(etatilde,axis=1),axis=2) / (dx * dt);
+
+
+	return u, v, eta;
 
 
 

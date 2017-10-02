@@ -1,4 +1,4 @@
-# inputFile_1L
+# inputFile.py
 #=======================================================
 #=======================================================
 # File of input parameters for the 1L RSW plunger code
@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 16+1; 			# Number of gridpoints
+N = 256+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -167,7 +167,7 @@ elif Fpos == 'USER':
 period_days = 60.;						# Periodicity of plunger (days)
 period = 3600. * 24. * period_days;		# Periodicity of plunger (s)
 omega = 1. / (period);          		# Frequency of plunger, once every 50 days (e-6) (s-1)
-Nt = 200;								# Number of time samples
+Nt = 40;#200;								# Number of time samples
 T = np.linspace(0,period,Nt+1);			# Array of time samples across one forcing period (s)
 dt = T[1] - T[0];						# Size of the timestep (s)
 ts = Nt-1; 								# index at which the time-snapshot is taken
