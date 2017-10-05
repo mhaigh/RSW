@@ -60,6 +60,8 @@ S = np.load('time_series.npy');
 S = S[1:Nt+1];
 Om = np.fft.fftfreq(Nt,dt_nd);
 S_tilde = np.fft.fft(S);
+plt.plot(S_tilde);
+plt.show();
 
 for wi in range(1,Nt):
 	omega_nd = Om[wi];
@@ -72,8 +74,6 @@ for wi in range(1,Nt):
 		solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,S_tilde[wi]*Ro*Ftilde1_nd,S_tilde[wi]*Ro*Ftilde2_nd,S_tilde[wi]*Ftilde3_nd,N,N2);
 
 	u_nd[:,:,wi], v_nd[:,:,wi], eta_nd[:,:,wi] = solver.extractSols(solution,N,N2,BC);
-
-
 
 u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS_STOCH(u_nd,v_nd,eta_nd,T_nd,dx_nd,Om,N);
 

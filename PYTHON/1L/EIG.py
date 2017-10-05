@@ -18,7 +18,7 @@ import eigSolver
 import energy
 from output import ncSaveEigenmodes
 
-from inputFile_1L import *
+from inputFile_ref import *
 
 # 1L eigenmode solver
 #====================================================
@@ -38,7 +38,8 @@ a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd
 k_start = -20;
 k_end = -9;
 Nk = 6;
-loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
+#loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
+loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
@@ -53,6 +54,7 @@ for ii in loop:
 	# i_count = set of indices ordering modes by their count
 	#count, i_count = eigDiagnostics.orderEigenmodes(vec,val,N,False);	
 	count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False);
+	# orderEigenmodes2 works best.
 	
 	# Order all relevant arrays
 	count = count[i_count];
@@ -60,16 +62,18 @@ for ii in loop:
 	val = val[i_count];
 
 	# Before saving the modes, they need to be normalised by their energy.
-	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
-	E = np.zeros(dim);	
-	for wi in range(0,dim):
-		print(str(wi+1) + ' / ' + str(dim));		
-		KE_av_tot, PE_av_tot = energy.E_from_spec(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],Ro,k,x_nd,y_nd,100,N,'av_tot');
-		E[wi] = KE_av_tot + PE_av_tot;
-		print('Energy = ' + str(E[wi]));
+	energy=0;
+	if energy==1:
+		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
+		E = np.zeros(dim);	
+		for wi in range(0,dim):
+			print(str(wi+1) + ' / ' + str(dim));		
+			KE_av_tot, PE_av_tot = energy.E_from_spec(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],Ro,k,x_nd,y_nd,100,N,'av_tot');
+			E[wi] = KE_av_tot + PE_av_tot;
+			print('Energy = ' + str(E[wi]));
 
-	#plt.plot(E);
-	#plt.show();
+		#plt.plot(E);
+		#plt.show();
 
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 

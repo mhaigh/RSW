@@ -23,9 +23,9 @@ def forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_
 	Nx = N;
 	
 	I = np.complex(0,1);
-	F1 = np.zeros((N,Nx));
-	F2 = np.zeros((N,Nx));
-	F3 = np.zeros((N,Nx));
+	F1_nd = np.zeros((N,Nx));
+	F2_nd = np.zeros((N,Nx));
+	F3_nd = np.zeros((N,Nx));
 
 	# Balanced
 	if FORCE == 'BALANCED':
@@ -35,13 +35,13 @@ def forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_
 			for j in range(0,N):
 				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
 				if r_nd < r0_nd:
-					if r == 0:
+					if r_nd == 0:
 						F1_nd[j,i] = 0;
 						F2_nd[j,i] = 0;						
 					else:	
 						F1_nd[j,i] = AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
 						F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
-					F3[j,i] = AmpF_nd * np.cos((np.pi / 2) * r_nd / r0_nd);
+					F3_nd[j,i] = AmpF_nd * np.cos((np.pi / 2) * r_nd / r0_nd);
 					mass = mass + F3_nd[j,i];
 		mass = mass / (N*Nx)
 		F3_nd[j,i] = F3_nd[j,i] - mass;
@@ -64,28 +64,27 @@ def forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_
 		mass = mass / (N*Nx);
 		for i in range(0,N):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r >= r0:
-					F3[j,i] = - mass;
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd >= r0_nd:
+					F3_nd[j,i] = - mass;
 
 	# Vorticity only
 	if FORCE == 'VORTICITY':
 		for i in range(0,N):
 			for j in range(0,N):
-				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r<r0:
-					F1[j,i] = AmpF * np.pi * g * (y[j]-y0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-					F2[j,i] = - AmpF * np.pi * g * x[i] / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
+					F1_nd[j,i] = AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
+					F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (2 * r0_nd * f_nd[j] * r_nd) * np.sin((np.pi / 2) * r_nd / r0_nd);
+
 	
 	
 	# Lastly, Fourier transform the three forcings in the x-direction
 		
-	Ftilde1 = dx * np.fft.hfft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
-	Ftilde3 = dx * np.fft.hfft(F3,N,axis=1); 
-	Ftilde2 = np.zeros((N,N),dtype=complex);
-	for j in range(0,N):
-		for i in range(0,N):
-			Ftilde2[j,i] = 2 * np.pi * g * I * K[i] * Ftilde3[j,i] / f[j];
+	Ftilde1_nd = dx_nd * np.fft.hfft(F1_nd,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3_nd = dx_nd * np.fft.hfft(F3_nd,N,axis=1); 
+	Ftilde2_nd = dx_nd * np.fft.fft(F2_nd,axis=1);
+	
 
 	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
 

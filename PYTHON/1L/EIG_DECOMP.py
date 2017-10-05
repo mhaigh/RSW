@@ -20,7 +20,7 @@ import solver
 import output
 import output_read
 
-from inputFile_1L import *
+from inputFile_ref import *
 
 #====================================================
 
@@ -36,7 +36,7 @@ if SOL == 'NEW':
 	# Import the relevant modules.
 	import forcing_1L
 		# Forcing
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy);
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 	# Coefficients
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 	# Solver
@@ -44,7 +44,7 @@ if SOL == 'NEW':
 		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
 	elif BC == 'FREE-SLIP':
 		uBC, etaBC = solver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
-		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
+		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	else:
 		sys.exit('ERROR: choose valid BC');
 
@@ -80,10 +80,12 @@ print('solved');
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
 LOOP = 'PART';		# FULL, PART
 
-Nm = 6;						# How many modes to use in the decomposition at each wavenumber.
+Nm = 8;						# How many modes to use in the decomposition at each wavenumber (dim is maximum).
 if LOOP == 'FULL':
 	loop = range(0,N);
 	Nk = N;
+	Nk_neg = 6;
+	Nk_pos = 6;
 elif LOOP == 'PART':
 	Nk_neg = 6; Nk_pos = 6;		# How many positive/negative wavenumbers to perform this decomposition at.
 	loop = it.chain(range(0,Nk_pos+1),range(N-Nk_neg,N));
@@ -97,6 +99,7 @@ dom_index = np.zeros((Nm,Nk),dtype=int);	# To store the indices of the Nm-most d
 
 scatter_k = np.zeros(Nm * Nk);		# An empty array for saving k-values, for use in the scatter plot of dominant modes.
 scatter_l = np.zeros(Nm * Nk);		# An empty array for storing the count, psuedo-wavenumber l.
+scatter_p = np.zeros(Nm * Nk);	# An empty array for storing periods of the dominant wavenumbers.
 theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
@@ -121,11 +124,17 @@ for ii in loop:
 			count = np.zeros(dim);
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
 		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/';
-		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N128.nc';
+		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N129.nc';
 		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
 	else:
 		sys.exit('VEC must be FILE or NEW');
+	
+	# Expresses the eigenvalues (frequencies) in terms of periods.
+	freq = np.real(val);
+	period_days = T_adv / (freq * 24. * 3600.);
+	#print(np.transpose(period_days[dom_index[0:Nm,0]]));
+
 	# This section returns three arrays: 1. val, 2. vec, 3. count
 	# 1.) val = val[0:dim] stores the eigenvalues/frequencies.
 	# 2.) vec = vec[]
@@ -153,9 +162,12 @@ for ii in loop:
 		proj[:,ii] = proj[:,ii] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
 		scatter_k[i*Nm+mi] = k;	
 		scatter_l[i*Nm+mi] = count[dom_index[mi,i]];
+		scatter_p[i*Nm+mi] = period_days[dom_index[mi,i]];
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
 		#plt.ylim(-0.5,0.5);
 		#plt.show();
+
+	print(scatter_p);
 	
 	#plt.subplot(121);
 	#plt.plot(np.real(proj[0:N,i]),y_nd);
@@ -165,11 +177,6 @@ for ii in loop:
 	#plt.plot(vec[0:N,dom_index_tmp[0:Nm]],y_nd);
 	#plt.ylim(-0.5,0.5);
 	#plt.show();
-
-freq = np.real(val);
-period_days = T_adv / (freq * 24. * 3600.);
-print(period_days[dom_index[0:Nm,4]]);
-eigDiagnostics.scatterModes(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
 
 #====================================================
 
@@ -207,9 +214,12 @@ for i in range(0,N):
 
 #====================================================
 
-eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u_nd[:,:,ts],v_nd[:,:,ts],eta_nd[:,:,ts],x_nd,y_nd,True);
+eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u_nd[:,:,ts],v_nd[:,:,ts],eta_nd[:,:,ts],x_nd,y_nd,x_grid,y_grid,True);
 
 #====================================================
+
+eigDiagnostics.scatterWeight(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
+eigDiagnostics.scatterPeriod(scatter_k,scatter_l,scatter_p,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
 
 #PV_full, PV_prime = eigDiagnostics.PV(u_proj,v_proj,eta_proj,u_full,eta_full,H0_nd,U0_nd,f_nd,dx_nd,dy_nd,N);
 #P, P_xav = eigDiagnostics.footprint(u_proj,v_proj,PV_full,x_nd,dx_nd,dy_nd,N);

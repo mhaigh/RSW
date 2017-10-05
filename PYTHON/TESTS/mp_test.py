@@ -24,14 +24,9 @@ else:
 	ncpus = 1;
 
 def main():
-	p = mp.Pool(pe);
-	for result in p.imap(foo,[1,2]):
-		x=result
+	pool = mp.Pool(pe);
 		
-
 	
-
-
 if __name__ == '__main__':
 	main();
 

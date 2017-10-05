@@ -35,6 +35,8 @@ def forcingPlot_save(x_grid,y_grid,F3_nd,FORCE,BG,Fpos,N):
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/F_' + str(Fpos) + '_'  + str(N) + '.png');
 	plt.close();
 
+#====================================================
+
 # solutionPlots
 def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
 

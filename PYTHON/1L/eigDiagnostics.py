@@ -15,66 +15,82 @@ import plotly.plotly as py
 
 #====================================================
 
-# The potential vorticity (both of background state and normal modes)
-# PV
-def PV(u,v,eta,u_full,eta_full,H_nd,U_nd,f_nd,dx_nd,dy_nd,N):
-# Takes input u, v, eta which are the eigenvectors of the 1-L SW system, projected onto two dimensions, 
-# i.e. u = u_vec(y) * exp(i*k*x). 
-
-	# Relative vorticity
-	RV_full = diff(v,1,1,dx_nd) - diff(u_full,0,0,dy_nd);
-	RV_prime = diff(v,1,1,dx_nd) - diff(u,0,0,dy_nd);
-	RV_BG = - diff(U_nd,2,0,dy_nd);
-
-	# Potential vorticity
-	PV_BG = (f_nd + RV_BG) / H_nd; 
-	PV_full = np.zeros((N,N));
-	PV_prime = np.zeros((N,N));
-	for i in range(0,N):
-		PV_full[:,i] = (f_nd[:] + RV_full[:,i]) / eta_full[:,i];
-		PV_prime[:,i] = PV_full[:,i] - PV_BG[:];
-
-	return PV_full, PV_prime;
-
-#====================================================
-
-# footprint
-# A function that calculates the PV footprint of the 1L SW solution as produced by RSW_1L.py
-def footprint(u_full,v,PV_full,x_nd,dx_nd,dy_nd,N):
-# This code calculates the PV footprint, i.e. the PV flux convergence defined by
-# P = -(div(u*q,v*q)-div((u*q)_av,(v*q)_av)), where _av denotees the time average.
-# We will take the time average over one whole forcing period, and subtract this PV flux
-# convergence from the PV flux convergence at the end of one period.
-# To calculate footprints, we use the full PV and velocity profiles.
-
-
-	qu = PV_full * u_full;		# Zonal PV flux
-	qv = PV_full * v;		# Meridional PV flux
-
-	# Next step: taking appropriate derivatives of the fluxes. To save space, we won't define new variables, but instead overwrite the old ones.
-	# From these derivatives we can calculate the 
-	P = - diff(qu,1,1,dx_nd) - diff(qv,0,0,dy_nd);		
-	
-	# We are interested in the zonal average of the footprint
-	P_xav = np.trapz(P,x_nd[:N],dx_nd,axis=1);
-	
-	P[0,:] = 0; P[N-1,:] = 0;
-
-	P = extend(P);
-
-	return P, P_xav
-
-
-#====================================================
-
 # eigPlot
-def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
+def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol):
 	
-	u_proj = extend(u_proj);
-	v_proj = extend(v_proj);
-	eta_proj = extend(eta_proj);
+	ulim = np.max(abs(u_nd));
+	vlim = np.max(abs(v_nd));
+	etalim = np.max(abs(eta_nd));
 
 	if sol:
+
+		plt.figure(1,figsize=[21,10]);
+
+		plt.subplot(231);
+		plt.pcolor(x_grid,y_grid,u_proj, cmap='bwr', vmin=-ulim, vmax=ulim);
+		plt.text(0.3,0.45,'u proj',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.subplot(232);
+		plt.pcolor(x_grid,y_grid,v_proj, cmap='bwr', vmin=-vlim, vmax=vlim);
+		plt.text(0.3,0.45,'v proj',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.subplot(233);
+		plt.pcolor(x_grid,y_grid,eta_proj, cmap='bwr', vmin=-etalim, vmax=etalim);
+		plt.text(0.3,0.45,'eta proj',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+	
+		plt.subplot(234);
+		plt.pcolor(x_grid,y_grid,u_nd, cmap='bwr', vmin=-ulim, vmax=ulim);
+		plt.text(0.3,0.45,'u',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.subplot(235);
+		plt.pcolor(x_grid,y_grid,v_nd, cmap='bwr', vmin=-vlim, vmax=vlim);
+		plt.text(0.3,0.45,'v',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.subplot(236);
+		plt.pcolor(x_grid,y_grid,eta_nd, cmap='bwr', vmin=-etalim, vmax=etalim);
+		plt.text(0.3,0.45,'eta',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.tight_layout();
+		plt.show();
+
+	# Code never executed, unless we want contourf plots.
+	elif 1==0:
 
 		u_nd = extend(u_nd);
 		v_nd = extend(v_nd);
@@ -82,50 +98,64 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 
 		plt.figure(1,figsize=[21,6]);
 		plt.subplot(231)
-		plt.contourf(x_nd,y_nd,u_proj);
-		plt.xticks((-1./2,0,1./2));
-		plt.yticks((-1./2,0,1./2));	
+		plt.contourf(x_nd,y_nd,u_proj,vmin=-ulim,vmax=ulim);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 		plt.xlabel('x');
 		plt.ylabel('y');
+		plt.clim(-ulim,ulim);
 		plt.colorbar();
+
 		plt.subplot(232)
-		plt.contourf(x_nd,y_nd,v_proj);
-		plt.xticks((-1./2,0,1./2));
-		plt.yticks((-1./2,0,1./2));	
+		plt.contourf(x_nd,y_nd,v_proj,vmin=-vlim,vmax=vlim);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
 		plt.xlabel('x');
 		plt.ylabel('y');
+		plt.clim(-vlim,vlim);
 		plt.colorbar();
+
 		plt.subplot(233)
-		plt.contourf(x_nd,y_nd,eta_proj);
-		plt.xticks((-1./2,0,1./2));
-		plt.yticks((-1./2,0,1./2));	
+		plt.contourf(x_nd,y_nd,eta_proj,vmin=-etalim,vmax=etalim);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 		plt.xlabel('x');
 		plt.ylabel('y');
+		plt.clim(-etalim,etalim);
 		plt.colorbar();
 	
-		plt.subplot(234)
-		plt.contourf(x_nd,y_nd,u_nd);
-		plt.xticks((-1./2,0,1./2));
-		plt.yticks((-1./2,0,1./2));	
-		plt.xlabel('x');
-		plt.ylabel('y');
+		plt.subplot(234);
+		plt.contourf(x_nd,y_nd,u_nd,vmin=-ulim,vmax=ulim);
+		plt.text(0.3,0.45,'u',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-ulim,ulim);
 		plt.colorbar();
-		plt.subplot(235)
-		plt.contourf(x_nd,y_nd,v_nd);
-		plt.xticks((-1./2,0,1./2));
-		plt.yticks((-1./2,0,1./2));	
-		plt.xlabel('x');
-		plt.ylabel('y');
+
+		plt.subplot(235);
+		plt.contourf(x_nd,y_nd,v_nd,vmin=-vlim,vmax=vlim);
+		plt.text(0.3,0.45,'v',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-vlim,vlim);
 		plt.colorbar();
-		plt.subplot(236)
-		plt.contourf(x_nd,y_nd,eta_nd);
-		plt.xticks((-1./2,0,1./2));
-		plt.yticks((-1./2,0,1./2));	
-		plt.xlabel('x');
-		plt.ylabel('y');
+
+		plt.subplot(236);
+		plt.contourf(x_nd,y_nd,eta_nd,vmin=-etalim,vmax=etalim);
+		plt.text(0.3,0.45,'eta',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.clim(-etalim,etalim);
 		plt.colorbar();
+
 		plt.tight_layout();
 		plt.show();
+
 
 	else:	
 
@@ -156,8 +186,8 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,sol):
 
 #====================================================
 
-# scatterModes
-def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
+# scatterWeight
+def scatterWeight(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	
 	Nk = Nk_neg + Nk_pos + 1;
 
@@ -234,10 +264,12 @@ def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	
 	y_ticks = np.linspace(0,y_max,y_max/2+1);
 
-	plt.scatter(k1,l1,c=colors1,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='s',s=50);
-	plt.scatter(k2,l2,c=colors2,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='o',s=50);
-	plt.scatter(k3,l3,c=colors3,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='^',s=50);
-	plt.scatter(k4,l4,c=colors4,cmap='YlOrRd',vmin=0,vmax=theta_max,marker='*',s=50);
+	cm = 'YlOrRd';
+
+	plt.scatter(k1,l1,c=colors1,cmap=cm,vmin=0,vmax=theta_max,marker='s',s=50);
+	plt.scatter(k2,l2,c=colors2,cmap=cm,vmin=0,vmax=theta_max,marker='o',s=50);
+	plt.scatter(k3,l3,c=colors3,cmap=cm,vmin=0,vmax=theta_max,marker='^',s=50);
+	plt.scatter(k4,l4,c=colors4,cmap=cm,vmin=0,vmax=theta_max,marker='*',s=50);
 	plt.ylim([0,y_max+4]);	
 	plt.yticks(y_ticks);
 	plt.colorbar();#ticks=np.linspace(0,theta_max,10)
@@ -249,6 +281,93 @@ def scatterModes(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	plt.ylabel('l',fontsize=22);
 	plt.show();	
 	
+
+#====================================================
+
+# scatterPeriod
+def scatterPeriod(k,l,p,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
+	
+	Nk = Nk_neg + Nk_pos + 1;
+
+	dim = Nk * Nm;
+
+	p = abs(p);	# Interested in period regardless of direction.
+	pmin = 0;
+	pmax = 120.0;#np.max(p);
+
+	# Some points may be repeated, the next few lines allow repeated points to be plotted as different shapes.
+	# First arrange all points as list of tuples
+	L = [];
+	L_p = [];
+	for ii in range(0,dim):
+		L.append(tuple([k[ii],l[ii]]));
+		L_p.append(tuple([k[ii],l[ii],p[ii]]));
+
+	# Turn this list into a set and count how many time each element in the set S appears in the list L.	
+	S = set(L);
+	S_p = set(L_p);
+	F = {};
+	for ii in list(S):			# Loop through each element in the set S...
+		F[ii] = L.count(ii);	# and count how many times it appears in L
+
+	# We also need a dictionary containing the periods of each tuple.
+ 	F_p = {};
+	for wi in range(0,dim):
+		ii = L[wi];
+		if ii in F_p:				# Check if this key is already in the dictionary.
+			F[ii] = p[wi];		
+		else:
+			F_p[ii] = p[wi];		# Create a new key, with corresponding value p[wi].
+
+	# Now loop through all the tuples (keys) in the dictionary, storing each tuple in an array depending on the number of times it is repeated.
+	k1 = []; l1 = []; p1 = [];
+	k2 = []; l2 = []; p2 = [];
+	k3 = []; l3 = []; p3 = [];
+	k4 = []; l4 = []; p4 = [];
+	for ii in list(S):
+		if F[ii] == 1:
+			k1.append(ii[0]); l1.append(ii[1]); p1.append(F_p[ii]);
+		elif F[ii] == 2:
+			k2.append(ii[0]); l2.append(ii[1]); p2.append(F_p[ii]);
+		elif F[ii] == 3:
+			k3.append(ii[0]); l3.append(ii[1]); p3.append(F_p[ii]);
+		else:
+			k4.append(ii[0]); l4.append(ii[1]); p4.append(F_p[ii]);
+		
+	k1 = np.array(k1); l1 = np.array(l1); p1 = np.array(p1);
+	k2 = np.array(k2); l2 = np.array(l2); p2 = np.array(p2);
+	k3 = np.array(k3); l3 = np.array(l3); p3 = np.array(p3);
+	k4 = np.array(k4); l4 = np.array(l4); p4 = np.array(p4);
+
+	colors1 = p1; colors2 = p2;
+	colors3 = p3; colors4 = p4;
+	
+	l_max = max(l);
+	if l_max % 2 == 0:
+		y_max = l_max + 2;
+	else:
+		y_max = l_max + 1;
+
+	#print(colors2);
+	
+	y_ticks = np.linspace(0,y_max,y_max/2+1);
+
+	#cm = 'Set1'
+	cm = plt.cm.get_cmap('Set2',8);
+
+	plt.scatter(k1,l1,c=colors1,cmap=cm,vmin=pmin,vmax=pmax,marker='s',s=50);
+	plt.scatter(k2,l2,c=colors2,cmap=cm,vmin=pmin,vmax=pmax,marker='o',s=50);
+	plt.scatter(k3,l3,c=colors3,cmap=cm,vmin=pmin,vmax=pmax,marker='^',s=50);
+	plt.scatter(k4,l4,c=colors4,cmap=cm,vmin=pmin,vmax=pmax,marker='*',s=50);
+	plt.ylim([0,y_max+4]);	
+	plt.yticks(y_ticks);
+	plt.colorbar();#ticks=np.linspace(0,theta_max,10)
+	plt.grid();
+	plt.title('Eigenmode decomposition - ' + str(Fpos),fontsize=22);
+	plt.xlabel('k',fontsize=22);
+	plt.ylabel('l',fontsize=22);
+	plt.show();	
+
 #====================================================
 
 # orderEigenmodes
