@@ -21,7 +21,7 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'SOUTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
 BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
@@ -79,7 +79,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 10.0;		# Kinematic viscosity (m2 s-1)
+nu = 100.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -151,7 +151,7 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 r0 = 90.0 * 1000.0;  
 AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
-	y0 = Ly/4;#y[int(3*N/4)];
+	y0 = y[int(3*N/4)];
 elif Fpos == 'CENTER':
 	y0 = y[int(N/2)];
 elif Fpos == 'SOUTH':

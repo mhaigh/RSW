@@ -20,12 +20,14 @@ import solver
 import output
 import output_read
 
-from inputFile_ref import *
+from inputFile import *
 
 #====================================================
 
 # The 1L SW solution
 #====================================================
+
+I = np.complex(0.0,1.0);
 
 SOL = 'NEW';
 
@@ -78,12 +80,13 @@ print('solved');
 #====================================================
 
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
-LOOP = 'PART';		# FULL, PART
+LOOP = 'FULL';		# FULL, PART
 
 Nm = 8;						# How many modes to use in the decomposition at each wavenumber (dim is maximum).
 if LOOP == 'FULL':
 	loop = range(0,N);
 	Nk = N;
+	# 
 	Nk_neg = 6;
 	Nk_pos = 6;
 elif LOOP == 'PART':
@@ -106,34 +109,35 @@ theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set 
 # ii indexes arrays storing information at ALL wavenumbers k
 # i indexes arrays storing information ONLY at wavenumbers used in the decomposition.
 for ii in loop:	 
+	print('ii = ' + str(ii));
 	k = K_nd[ii];
-
-	i = int(k % Nk);
-		
+	print('k = ' + str(k));
+	i = k % Nk
 	print('i = ' + str(i));
-	print('k = ' + str(int(k)));
-	
+	i = int(i+0.01);
+
 	# Run the solver for the current k-value.
 	if VEC == 'NEW':	# Solve the eigenmode problem anew.
-		a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
+		a1,a2,a3,a4,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 		if BC == 'NO-SLIP':
 			val, vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
 			count = np.zeros(dim);
 		if BC == 'FREE-SLIP':
-			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,False);
+			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,ii,False);
 			count = np.zeros(dim);
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
-		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/';
+		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/k=100/';
 		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N129.nc';
 		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
 	else:
 		sys.exit('VEC must be FILE or NEW');
 	
+	val = val / (-2 * np.pi * I * Ro);
 	# Expresses the eigenvalues (frequencies) in terms of periods.
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24. * 3600.);
-	#print(np.transpose(period_days[dom_index[0:Nm,0]]));
+	print(np.transpose(period_days[dom_index[0:Nm,0]]));
 
 	# This section returns three arrays: 1. val, 2. vec, 3. count
 	# 1.) val = val[0:dim] stores the eigenvalues/frequencies.
@@ -148,7 +152,7 @@ for ii in loop:
 	# 4. Sum the Nm-most dominant weights.
 
 	Phi = solution[:,ii];		# 1. Assign the solution corresponding to wavenumber k=K_nd[i].
-	
+
 	theta_tmp = np.linalg.solve(vec,Phi); 				# 2.
 	theta_abs_tmp = np.abs(theta_tmp);
 	dom_index_tmp = np.argsort(-theta_abs_tmp);			# 3. The indices of the modes, ordered by 'dominance'.
@@ -167,8 +171,6 @@ for ii in loop:
 		#plt.ylim(-0.5,0.5);
 		#plt.show();
 
-	print(scatter_p);
-	
 	#plt.subplot(121);
 	#plt.plot(np.real(proj[0:N,i]),y_nd);
 	#plt.plot(np.real(Phi[0:N]),y_nd);

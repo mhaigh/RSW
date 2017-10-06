@@ -33,12 +33,13 @@ from inputFile_ref import *
 I = np.complex(0.0,1.0);
 
 # Define the coefficients required by the solver
-a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
+a1,a2,a3,a4,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-k_start = -20;
-k_end = -9;
+k_start = 3;
+k_end = 4;
 Nk = 6;
 #loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
+#loop = range(k_start,k_end);
 loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
@@ -47,7 +48,11 @@ for ii in loop:
 	if BC == 'NO-SLIP':
 		val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 	if BC == 'FREE-SLIP':
-		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
+		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,ii,False);
+		#val, vec = eigSolver.FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
+
+	freq = np.real(val);
+	period_days = T_adv / (freq * 24.0 * 3600.0);
 
 	dim = np.size(val);
 	# count = number of zero-crossings by the eigenvector 
@@ -60,6 +65,7 @@ for ii in loop:
 	count = count[i_count];
 	vec = vec[:,i_count];
 	val = val[i_count];
+	period_days = period_days[i_count];
 
 	# Before saving the modes, they need to be normalised by their energy.
 	energy=0;
@@ -94,8 +100,7 @@ for ii in loop:
 
 	# 1. This first section runs through each mode, allowing to manually update the zero-crossings count.
 	# To quit updating the vector's counts, type end.
-	# We use the u vector as an example.
-
+	# We use the u vector as an example
 	u = np.zeros((N,N),dtype=float);
 	count_new = np.array(list(count));
 	update_i = [];		# Used to store the set of wi indices that need updating.
@@ -106,6 +111,7 @@ for ii in loop:
 			for j in range(0,N):
 				u[j,i] = np.real(u_vec[j,wii] * np.exp(2 * np.pi * I * (k * x_nd[i])));
 		print('count = ' + str(count[wii]));
+		print('period = ' + str(period_days[wii]));
 		plt.subplot(121);
 		plt.contourf(u);
 		plt.subplot(122);
@@ -217,33 +223,4 @@ for ii in loop:
 		plt.plot(y_nd,u_set[wi,:]);
 		plt.show();
 
-#====================================================
 
-# Selects all the frequencies inside some desired range, e.g. unstable modes.
-#====================================================
-
-#scatter_set = [];
-for jj in range(0,dim):
-	if -0.015 <= np.imag(val[jj]):
-		scatter_set.append([k,24*3600*val[jj]/T_adv]);
-
-scatter_set = np.array(scatter_set);	
-print(scatter_set);	
-	
-plt.scatter(scatter_set[:,0],np.real(scatter_set[:,1]));
-plt.xlabel('Wavenumber',fontsize=18);
-plt.ylabel('Frequency (day-1)',fontsize=18);	
-plt.show();
-		
-
-
-
-
-
-
-
-
-
-
-
-	

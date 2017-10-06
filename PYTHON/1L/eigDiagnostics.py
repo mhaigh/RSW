@@ -199,8 +199,9 @@ def scatterWeight(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	for i in range(0,Nk):
 		for j in range(0,Nm):
 			theta_normalised[i*Nm+j] = np.abs(theta[j,i] / theta_abs_tot[i]);
-	theta_max = max(theta_normalised);
 
+	theta_max = max(theta_normalised);
+	
 	# Calculate the performance of the decompisition at each wavenumber; 1 is perfect.
 	perf = np.zeros(Nk);
 	for i in range(0,Nk):
@@ -277,6 +278,7 @@ def scatterWeight(k,l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	for i in range(-Nk_neg,Nk_pos+1):
 		plt.text(i-0.25,y_max+0.8,str(round(perf[i],2)),fontsize=14,rotation=90);
 	plt.title('Eigenmode decomposition - ' + str(Fpos),fontsize=22);
+	plt.text(Nk_pos-4,y_max-6,'Weight',fontsize=22);
 	plt.xlabel('k',fontsize=22);
 	plt.ylabel('l',fontsize=22);
 	plt.show();	
@@ -293,7 +295,7 @@ def scatterPeriod(k,l,p,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 
 	p = abs(p);	# Interested in period regardless of direction.
 	pmin = 0;
-	pmax = 120.0;#np.max(p);
+	pmax = 2*60.0;#np.max(p);
 
 	# Some points may be repeated, the next few lines allow repeated points to be plotted as different shapes.
 	# First arrange all points as list of tuples
@@ -364,6 +366,7 @@ def scatterPeriod(k,l,p,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 	plt.colorbar();#ticks=np.linspace(0,theta_max,10)
 	plt.grid();
 	plt.title('Eigenmode decomposition - ' + str(Fpos),fontsize=22);
+	plt.text(Nk_pos-6,y_max,'Period (days)',fontsize=22);
 	plt.xlabel('k',fontsize=22);
 	plt.ylabel('l',fontsize=22);
 	plt.show();	
@@ -478,6 +481,7 @@ def vec2vecs(vec,N,dim,BC):
 
 	return u_vec, v_vec, eta_vec;
 
+#===================================================
 
 	
 	

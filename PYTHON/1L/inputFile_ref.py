@@ -79,7 +79,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 10.0;		# Kinematic viscosity (m2 s-1)
+nu = 100.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -148,7 +148,7 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 #=======================================================
 
 # Instead of defining the forcing amplitude in the forcing module, we define it here as other codes require this value for normalisation
-r0 = 90.0 * 1000.0;  
+r0 = 2*90.0 * 1000.0;  
 AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
 	y0 = Ly/4;#y[int(3*N/4)];

@@ -29,7 +29,7 @@ import output
 import energy
 import plotting
 
-from inputFile_ref import *
+from inputFile import *
 
 # 1L SW Solver
 #====================================================

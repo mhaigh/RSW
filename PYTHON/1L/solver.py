@@ -11,7 +11,7 @@ from diagnostics import diff
 
 #=======================================================
 
-# NO_SLIP_SOLVER_COEFFICIENTS
+# SOLVER_COEFFICIENTS
 #=======================================================
 def SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N):
 # Here we also divide coeficients of derivatives by the relevant space-step: 
