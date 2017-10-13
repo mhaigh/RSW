@@ -620,7 +620,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 	# These if loops are for constantly altering depending on the test being done.
 	if BG == 'GAUSSIAN':
 		plt.figure(2)
-		plt.contourf(x_nd,y_nd,P)
+		plt.contourf(x_nd[0:N],y_nd,P)
 		plt.plot(U*U0_nd/(1.5*Umag)-0.5,y_nd,'k--',linewidth=2);
 		plt.text(0.25,0.4,str(GAUSS),fontsize=18);
 		#plt.text(0.25,0.4,str(period_days)+' days',fontsize=18)
@@ -639,7 +639,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 		
 	if BG == 'UNIFORM':
 		plt.figure(2)
-		plt.contourf(x_nd,y_nd,P)
+		plt.contourf(x_nd[0:N],y_nd,P);
 		plt.text(0.25,0.4,'U0 = ' + str(U*U0_nd[0]),fontsize=18);
 		plt.colorbar()
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
@@ -666,6 +666,8 @@ def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq
 			uQ_tav[i,j] = sum(uQ[i,j,:]) / Nt;
 			vq_tav[i,j] = sum(vq[i,j,:]) / Nt;
 			vQ_tav[i,j] = sum(vQ[i,j,:]) / Nt;
+
+	print('Plotting time-averages of footprint components');
 
 	plt.figure(1);
 
@@ -698,6 +700,8 @@ def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq
 	plt.show();
 
 	#==
+
+	print('Plotting contribution to footprint of each component (i.e. differentiated in space)');
 
 	plt.figure(2);
 
@@ -736,6 +740,8 @@ def footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq
 
 	#==
 
+	print('Plotting zonal averages');	
+	
 	plt.figure(3);
 
 	plt.subplot(231);
@@ -772,13 +778,15 @@ def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N)
 # This function plots two footprint components uq and vq, and saves the output.
 # These are the two fluxes that we are most interested in.
 
+	print('Now plotting Primary components: contributions from uq and vq');
+	
 	P_uq_lim = np.max(abs(P_uq));
 	P_vq_lim = np.max(abs(P_vq));
 
 	U0_str = r'$U_{0}=0.16$';
 
 	plt.figure(10);
-	plt.contourf(x_nd,y_nd,P_uq);
+	plt.contourf(x_nd[0:N],y_nd,P_uq);
 	plt.text(0.4,0.4,r'$P_{u}$',color='k',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -792,7 +800,7 @@ def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N)
 	plt.close();
 	
 	plt.figure(11);
-	plt.contourf(x_nd,y_nd,P_vq);
+	plt.contourf(x_nd[0:N],y_nd,P_vq);
 	plt.text(0.4,0.4,r'$P_{v}$',color='k',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));

@@ -108,6 +108,9 @@ def footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 	uQ = timeAverage(uQ,T_nd,Nt);
 	vq = timeAverage(vq,T_nd,Nt);
 	vQ = timeAverage(vQ,T_nd,Nt);
+
+	plt.contourf(uQ);
+	plt.show();
 	
 	# Derivatives (no need to operate on UQ) and time-averaging
 	P_uq = - diff(uq,1,1,dx_nd);

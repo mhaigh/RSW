@@ -35,12 +35,12 @@ I = np.complex(0.0,1.0);
 # Define the coefficients required by the solver
 a1,a2,a3,a4,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-k_start = 3;
-k_end = 4;
+k_start = 2;
+k_end = 3;
 Nk = 6;
 #loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
-#loop = range(k_start,k_end);
-loop = range(0,N);
+loop = range(k_start,k_end);
+#loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
@@ -50,10 +50,11 @@ for ii in loop:
 	if BC == 'FREE-SLIP':
 		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,ii,False);
 		#val, vec = eigSolver.FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
-
+	val = val / (2*np.pi*I*Ro);
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24.0 * 3600.0);
-
+	iii=np.argsort(period_days);
+	print(period_days[iii]);
 	dim = np.size(val);
 	# count = number of zero-crossings by the eigenvector 
 	# i_count = set of indices ordering modes by their count

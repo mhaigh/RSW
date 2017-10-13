@@ -514,9 +514,8 @@ def specError(utilde_nd,vtilde_nd,etatilde_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,a
 	error1 = np.sqrt((np.real(error1[2:N-3])**2).mean());
 	error2 = np.sqrt((np.real(error2[2:N-3])**2).mean());
 	error3 = np.sqrt((np.real(error3[2:N-3])**2).mean());
-	print(error3);
 
-	return error1,error2,error1;
+	return error1,error2,error3;
 	
 
 #====================================================
@@ -552,8 +551,15 @@ def timeAverage(u,T,Nt):
 # Use to calculate the time average.
 # Requires 3-D array input, with time in the third index (axis=2).
 
+	shape = np.shape(u);
+
+	# 
+	u1 = np.zeros((shape[0],shape[1],shape[2]+1));
+	u1[:,:,0:Nt] = u;
+	u1[:,:,Nt] = u[:,:,0];
+
 	dt = T[1] - T[0];
-	u_tav = np.trapz(u,T[0:Nt],dt,axis=2);
+	u_tav = np.trapz(u1,T,dt,axis=2);
 	u_tav = u_tav / T[Nt];
 
 	return u_tav
