@@ -4,7 +4,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from diagnostics import extend
 
 #====================================================
 
@@ -786,7 +785,7 @@ def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N)
 	U0_str = r'$U_{0}=0.16$';
 
 	plt.figure(10);
-	plt.contourf(x_nd[0:N],y_nd,P_uq);
+	plt.contourf(x_nd,y_nd,P_uq);
 	plt.text(0.4,0.4,r'$P_{u}$',color='k',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -800,7 +799,7 @@ def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N)
 	plt.close();
 	
 	plt.figure(11);
-	plt.contourf(x_nd[0:N],y_nd,P_vq);
+	plt.contourf(x_nd,y_nd,P_vq);
 	plt.text(0.4,0.4,r'$P_{v}$',color='k',fontsize=26);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));

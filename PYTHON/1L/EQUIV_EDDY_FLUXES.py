@@ -82,7 +82,7 @@ for ii in range(0,nn):
 		if BC == 'NO-SLIP':
 			solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
 		if BC == 'FREE-SLIP':
-			solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
+			solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	
 		utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 		u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
@@ -125,8 +125,8 @@ else:
 	# not written this nc function yet.
 	a=1;
 
-
-
+plt.plot(EEF_array[:,0,0] - EEF_array[:,0,1]);
+plt.show();
 
 	
 	

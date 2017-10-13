@@ -13,7 +13,8 @@ from inputFile import *
 
 # This test code computes the various components of the footprint at different stages of the operation.
 # TEST1: Do zonal derivative and averaging cause uq to have small contribution?
-# TEST2: What causes vq behaviour?
+# TEST2: Do zonal averages strongly depend on including the final x gridpoint?
+# TEST3: What causes vq behaviour?
 
 #====================================================
 # Load the solution, this has already been normalised.
@@ -56,25 +57,43 @@ if TEST1:
 # but the domain is periodic so this is small!
 # The average of the derivative of a period function is zero.
 
-TEST2 = True;
-if TEST2:	
+"""!!! This test will now fail, improvements have been made based upon it !!!"""
+TEST2 = False;
+if TEST2:
+	# Define a second PV flux vq2 which includes the final periodic gridpoint in x.
+	P_vq2 = np.zeros((N,N+1));
+	P_vq2[:,0:N] = P_vq[:,:];
+	P_vq2[:,N] = P_vq[:,0];
+	P_vq_xav2 = np.trapz(P_vq2,x_nd,dx_nd,axis=1);
+	
+	plt.plot(P_vq_xav2);
+	plt.plot(-P_vq_xav);
+	plt.show();	
 
-	v_nd = v_nd * AmpF_nd;
-	vq_full = v_nd * PV_full;
-	#for j in range(0,N):
-#		vQ[j,:,:] = v_nd[j,:,:] * PV_BG[j];
+# We conclude:
+# Including the extra grid-point doesn't affect the all-important contribution from vq,
+# but does improve the accuracy of the other fluxes (they're averages are closer to zero).
 
-	plt.subplot(131);
-	plt.contourf(vq_full[:,:,ts]);
-	plt.colorbar();
-	plt.subplot(132);
-	plt.contourf(vQ[:,:,ts]);
-	plt.colorbar();
-	plt.subplot(133);
-	plt.contourf(vq[:,:,ts]);
-	plt.colorbar();
-	plt.show();
 
+TEST3 = True;
+if TEST3:	
+	# NEED TO FINISH THIS TEST, BUT ITS NOT TOO IMPORTANT.
+	# Take vq, and evaluate [vq]_y0^1/2. Then integrate in x.
+	# Does this give the same result as the long-winded method?
+	vq_tav = diagnostics.timeAverage(vq,T_nd,Nt);
+
+	P_n = np.zeros(N+1);	P_y0 = np.zeros(N+1);	P_s = np.zeros(N+1);
+	P_n[0:N] = vq_tav[N-1,:];	P_y0[0:N] = vq_tav[y0_index,:];	P_s[0:N] = vq_tav[0,:];
+	P_n[N] = vq_tav[N-1,0];	P_y0[N] = vq_tav[y0_index,0];	P_s[N] = vq_tav[0,0];
+	P_n = np.trapz(P_n,x_nd,dx_nd);	P_y0 = np.trapz(P_y0,x_nd,dx_nd);	P_s = np.trapz(P_s,x_nd,dx_nd);
+
+	E1 = PV.EEF_vq(P_vq_xav,P_n,P_y0,P_s,y_nd,y0_nd,dy_nd,omega_nd,N);
+	E2 = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+	
+	print(E1);
+	print(E2);
+	print(E1[0] - E1[1]);
+	print(E2[0] - E2[1]);
 
 
 

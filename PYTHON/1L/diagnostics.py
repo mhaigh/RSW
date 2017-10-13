@@ -554,12 +554,12 @@ def timeAverage(u,T,Nt):
 	shape = np.shape(u);
 
 	# 
-	u1 = np.zeros((shape[0],shape[1],shape[2]+1));
-	u1[:,:,0:Nt] = u;
-	u1[:,:,Nt] = u[:,:,0];
+	u_new = np.zeros((shape[0],shape[1],shape[2]+1));
+	u_new[:,:,0:Nt] = u;
+	u_new[:,:,Nt] = u[:,:,0];
 
 	dt = T[1] - T[0];
-	u_tav = np.trapz(u1,T,dt,axis=2);
+	u_tav = np.trapz(u_new,T,dt,axis=2);
 	u_tav = u_tav / T[Nt];
 
 	return u_tav
