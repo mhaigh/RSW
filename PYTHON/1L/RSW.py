@@ -22,7 +22,7 @@ import numpy as np
 
 import diagnostics
 import PV
-import buoy
+import momentum
 import forcing_1L
 import solver
 import output
@@ -40,7 +40,9 @@ def RSW_main():
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 	elif FORCE_TYPE == 'DCTS':
-		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,dx,dy);
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+	elif FORCE_TYPE == 'DELTA':
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_delta(AmpF_nd,y0_index,dx_nd,N);
 	else:
 		sys.exit('ERROR: Invalid forcing option selected.');
 	#plotting.forcingPlot_save(x_grid,y_grid,F3_nd[:,0:N],FORCE,BG,Fpos,N);
@@ -126,6 +128,46 @@ def RSW_main():
 	eta = eta_nd * chi;
 
 	#====================================================
+
+	# Momentum footprints
+	#====================================================
+	
+	if doMomentum:
+		uu, uv, vv = momentum.fluxes(u_nd,v_nd);
+		Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
+		#plotting.MomFootprints(Mu,Mv,Mu_xav,Mv_xav);
+		
+		Mu = Mu / np.max(abs(Mu));
+		Mv = Mv / np.max(abs(Mv));	
+	
+		plt.subplot(221);
+		plt.pcolor(x_grid,y_grid,Mu,cmap='bwr', vmin=-1., vmax=1.);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+		plt.subplot(222);
+		plt.plot(Mu_xav,y_nd);
+
+		plt.subplot(223);
+		plt.pcolor(x_grid,y_grid,Mv,cmap='bwr', vmin=-1., vmax=1.);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+		plt.subplot(224);
+		plt.plot(Mv_xav,y_nd);
+
+		plt.tight_layout();
+		plt.show();
+		
+
 
 	# PV and PV footprints
 	#====================================================

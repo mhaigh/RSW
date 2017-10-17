@@ -42,13 +42,13 @@ c = np.sqrt(g*H);
 # Space parameters
 L = 3840.0 * 1000.0
 x = np.linspace(-L/2,L/2,N+1);
-x0 = 180.0 * 1000.0
+x0 = 1.2 * 90.0 * 1000.0
 K = np.fft.fftfreq(N,L/N);
 dx = x[1] - x[0];
 
 # Time parameters
 period_days = 1.0e-2;
-period = (L/(5.0*c));# * 24. * period_days;		# Periodicity of plunger (s)
+period = 1.5*(L/(4.*c));# * 24. * period_days;		# Periodicity of plunger (s)
 omega = 1. / (period);          		# Frequency of plunger, once every 50 days (e-6) (s-1)
 Nt = 200;								# Number of time samples
 T = np.linspace(0,period,Nt+1);			# Array of time samples across one forcing period (s)
@@ -56,9 +56,11 @@ dt = T[1] - T[0];						# Size of the timestep (s)
 ts = 100; 								# index at which the time-snapshot is taken
 t = T[ts];
 	
+print('Dist = ' + str(c*period/L));
+
 time_dep = np.cos(2. * np.pi * omega * T);
 # Plunger
-A = 10.0e-7
+A = 1.0e-7
 F_dcts = np.zeros(N);
 F_cts = np.zeros(N);
 for i in range(0,N):
@@ -70,12 +72,10 @@ F_wave = 1. * np.sin(2 * np.pi * 2.0 * x[0:N] / L);
 F_delta = np.zeros(N);
 F_delta[int(N/2)]=1.
 
+F = F_dcts;
 
-F = F_delta;
-
-
-plt.plot(F);
-plt.show();
+#plt.plot(F);
+#plt.show();
 
 
 # Solution via finite differences
@@ -95,6 +95,7 @@ val = np.zeros(N,dtype=float);			# N eigenvalues/frequencies. omega = c * k
 for i in range(0,N):
 	vec[:,i] = np.exp(2.0 * np.pi * I * K[i] * x[0:N]);
 	val[i] = c * K[i];
+	#print(1./val[i]);
 val_period_secs = 1. / val;
 val_period_days = 1. / (val * 24.0 * 3600.0);
 
@@ -105,9 +106,9 @@ dom_index = np.argsort(-theta_abs);
 vec = vec[:]		
 
 # Create a projection of Nm most dominant modes
-Nm = 4;
+Nm = 10*8;
 proj = theta[dom_index[0]] * vec[:,dom_index[0]];
-for mi in range(1,Nm):
+for mi in range(1,4):
 	di = dom_index[mi];
 	proj = proj + theta[di] * vec[:,di];
 print('Forcing period = ' + str(period));

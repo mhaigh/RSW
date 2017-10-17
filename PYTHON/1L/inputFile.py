@@ -20,11 +20,13 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# so that F1 and F2 are discontinous.
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
+							# 'DELTA' defines a delta-function type forcing, located at x=0, y=y0.
+							# By default, the forcing is on the continuity equation, while momentum forces are zero.
 
-Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'SOUTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -34,7 +36,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 128+1; 			# Number of gridpoints
+N = 64+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -63,7 +65,7 @@ for j in range(0,N2):
 dy = y[1] - y[0];     # Distance between gridpoints (m)
 dx = x[1] - x[0];
 
-y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+dx,dx)];
+y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+2*dx,dx)];
 
 K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 
@@ -79,7 +81,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 0.0;		# Kinematic viscosity (m2 s-1)
+nu = 100.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -251,6 +253,7 @@ errorSpec = False;		# Print error of spectral solutions
 doEnergy = False;				# Energy
 doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
+doMomentum = True;				# Calculate footprints of momentum
 doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = True;		# If true, calculates the footprint in terms of its components.
 
@@ -266,6 +269,7 @@ plotSol = True;
 plotPV = False;
 plotPV_av = False;
 plotFootprint = True;
+plotMomentumFootprint = True;
 plotPhaseAmp = False;
 
 #=======================================================

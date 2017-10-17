@@ -9,141 +9,46 @@ from diagnostics import diff, extend, timeAverage
 
 #=====================================================================
 
-# potentialVorticity
-def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd):
-# Calculate potential vorticity	
-
-	RV_full = np.zeros((N,N,Nt));
-	RV_prime = np.zeros((N,N,Nt));
-	for ti in range(0,Nt):
-		# Define the relative vorticities (RV_full=RV_BG+RV_prime, can always check this numerically)
-		RV_full[:,:,ti] = diff(v_nd[:,:,ti],1,1,dx_nd) - diff(u_full[:,:,ti],0,0,dy_nd);#;# 
-		RV_prime[:,:,ti] = diff(v_nd[:,:,ti],1,1,dx_nd) - diff(u_nd[:,:,ti],0,0,dy_nd);
-	RV_BG = - diff(U0_nd,2,0,dy_nd);	# This is defined outside the loop as it has no time-dependence.
-
-	PV_full = np.zeros((N,N,Nt));
-	PV_BG = np.zeros(N);
-	for j in range(0,N):
-		PV_BG[j] = (RV_BG[j] + f_nd[j]) / H0_nd[j];
-		for i in range(0,N):
-			for ti in range(0,Nt):
-				PV_full[j,i,ti] = (RV_full[j,i,ti] + f_nd[j]) / eta_full[j,i,ti];
-		
-	# Two options to define the PV induced in the forced system: (1) PV_full-PV_BG or (2) use the algebraic def. given in the report.
-	PV_prime = np.zeros((N,N,Nt));	
-	for j in range(1,N-1):
-		for i in range(0,N):
-			for ti in range(0,Nt):
-				PV_prime[j,i,ti] = PV_full[j,i,ti] - PV_BG[j];		# Option 1
-	#PV_prime = np.zeros((N,N,Nt));	# Option 2 - keep this commented out, just use it as a check.
-	#for j in range(0,N):
-	#	for i in range(0,N):
-	#		for ti in range(0,Nt):
-	#			PV_prime[j,i,ti] = (RV_full[j,i,ti] - f[j]) / (eta_full[j,i,ti]) - (f[j] - RV_BG[j]) / (H0_nd[j]);
-
-	return PV_prime, PV_full, PV_BG
-
-#====================================================
-
 # fluxes
-def fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt):
-# Calculates 6 PV flux terms
+def fluxes(u_nd,v_nd):
+# Calculates momentum flux terms.
+# For the purpose of EEFs of momentum, we only need three flux terms:
+# uu, uv, and vv.
 	
-	uq = u_nd * PV_prime
-	vq = v_nd * PV_prime
-		
-	Uq = np.zeros((N,N,Nt));	
-	uQ = np.zeros((N,N,Nt));
-	vQ = np.zeros((N,N,Nt));
-	for i in range(0,N):
-		for ti in range(0,Nt):
-			Uq[:,i,ti] = U0_nd[:] * PV_prime[:,i,ti];
-			uQ[:,i,ti] = u_nd[:,i,ti] * PV_BG[:];
-			vQ[:,i,ti] = v_nd[:,i,ti] * PV_BG[:];
+	uu = u_nd * u_nd;
+	uv = u_nd * v_nd;
+	vv = v_nd * v_nd;
 
-	UQ = U0_nd * PV_BG;
-
-	return uq, Uq, uQ, UQ, vq, vQ
+	return uu, uv, vv
 
 #====================================================
 
 # footprint
-# A function that calculates the PV footprint of the 1L SW solution as produced by RSW_1L.py
-def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
-# This code calculates the PV footprint, i.e. the PV flux convergence defined by
-# P = -(div(u*q,v*q)), where _av denotees the time average.
-# We will take the time average over one whole forcing period, and subtract this PV flux
-# convergence from the PV flux convergence at the end of one period.
-# To calculate footprints, we use the full PV and velocity profiles.
-		
-	uq_full = uq + Uq + uQ;		# Total zonal PV flux
-	#for j in range(0,N):
-		#qu_full[:,j,:] = qu_full[:,j,:] + UQ[j];
-	vq_full = vq + vQ;			# Total meridional PV flux	
+def footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
+# A function that calculates the momentum footprint of the 1L SW solution as produced by RSW.py	
 	
 	# Time-averaging
-	uq_full = timeAverage(uq_full,T_nd,Nt);
-	vq_full = timeAverage(vq_full,T_nd,Nt);
+	uu = timeAverage(uu,T_nd,Nt);
+	uv = timeAverage(uv,T_nd,Nt);
+	vv = timeAverage(vv,T_nd,Nt);
 
-	# Calculate the footprint.
-	P = - diff(uq_full,1,1,dx_nd) - diff(vq_full,0,0,dy_nd);
+	# Two footprint terms to calculate
+	Mu = - diff(uu,1,1,dx_nd) - diff(uv,0,0,dy_nd);
+	Mv = - diff(uv,1,1,dx_nd) - diff(vv,0,0,dy_nd);
+
+	Mu = extend(Mu);
+	Mv = extend(Mv);
 		
 	# We are interested in the zonal average of the footprint
-	P_xav = np.trapz(P,x_nd[0:N],dx_nd,axis=1);
+	Mu_xav = np.trapz(Mu,x_nd,dx_nd,axis=1);
+	Mv_xav = np.trapz(Mv,x_nd,dx_nd,axis=1);
 
-	return P, P_xav
-
-#====================================================
-
-# footprintComponents
-def footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
-# A function that calculates the PV footprint of the 1L SW solution in terms of its components, allowing for analysis.
-# The function calculates the following terms: (1) uq, (2) Uq, (3) uQ, (4) UQ, (5) vq and (6) vQ. (UQ has zero zonal derivative.)
-# The zonal/meridional derivative of the zonal/meridional PV flux is taken, averaged over one forcing period.
-# Lastly, the zonal averages are calculated and everything useful returned.
-
-	# Time averaging.
-	uq = timeAverage(uq,T_nd,Nt);
-	Uq = timeAverage(Uq,T_nd,Nt);
-	uQ = timeAverage(uQ,T_nd,Nt);
-	vq = timeAverage(vq,T_nd,Nt);
-	vQ = timeAverage(vQ,T_nd,Nt);
-
-	# Derivatives (no need to operate on UQ) and time-averaging.
-	P_uq = - diff(uq,1,1,dx_nd);
-	P_uQ = - diff(uQ,1,1,dx_nd);
-	P_Uq = - diff(Uq,1,1,dx_nd);
-	P_vQ = - diff(vQ,0,0,dy_nd);
-	P_vq = - diff(vq,0,0,dy_nd);
-
-	# Extend all arrays to include the final x gridpoint.
-	P_uq = extend(P_uq);
-	P_uQ = extend(P_uQ);
-	P_Uq = extend(P_Uq);
-	P_vQ = extend(P_vQ);
-	P_vq = extend(P_vq);
-
-	# Normalisation by AmpF_nd not needed if normalised quanities are passed into the function.
-
-	P = P_uq + P_uQ + P_Uq + P_vq + P_vQ;
-
-	# Zonal averaging 
-	P_uq_xav = np.trapz(P_uq,x_nd,dx_nd,axis=1);
-	P_uQ_xav = np.trapz(P_uQ,x_nd,dx_nd,axis=1);
-	P_Uq_xav = np.trapz(P_Uq,x_nd,dx_nd,axis=1);
-	P_vq_xav = np.trapz(P_vq,x_nd,dx_nd,axis=1);
-	P_vQ_xav = np.trapz(P_vQ,x_nd,dx_nd,axis=1);
-	
-	#P_xav = np.trapz(P_tav,x_nd[:N],dx_nd,axis=1);
-	P_xav = P_uq_xav + P_uQ_xav + P_Uq_xav + P_vq_xav + P_vQ_xav;
-	# Tests confirm that the multiple approaches for calculating P_xav and P_tav yield the same results.
-
-	return P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav;
+	return Mu, Mv, Mu_xav, Mv_xav
 
 #====================================================
 
-# EEF
-def EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
+# EEF_mom
+def EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
 # A function that calculates the equivalent eddy flux, given a zonally averaged footprint
 # The code works by calculating six integrals (three each side of the forcing) that make up each component of the equivalent eddy flux:
 # int1_north/south = int_{y > / < y0} P_xav dy;
@@ -194,192 +99,7 @@ def EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
 
 	return EEF_array;
 
-#====================================================
 
-# EEF_components
-def EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N):
-# This function works in the same way as the EEF function, but instead takes as input each individual component of the zonally averaged footprint
-# (of which there are five) and returns the EEF contribution in the north and south from each one.  
-# The five footprint components are (1) uq_xav, (2) Uq_xav, (3) uQ_xav, (4) vq_xav and (5) vQ_xav (UQ doesn't contribute - zero zonal derivative).
-
-	# Define two y arrays, with all gridpoints north and south of the forcing location
-	# and define 12 corresponding EEF component arrays. Two arrays are needed for the full footprint,
-	# so that we can calculate the normalisation integrals - the contribution from each footprint component
-	# is normalised by the same normalisation constant: norm1 / norm2.
-
-	# First initialise these arrays as empty lists.
-	# y
-	y_north = [];
-	y_south = [];
-	# uq
-	uq_north = [];
-	uq_south = [];
-	# Uq
-	Uq_north = [];
-	Uq_south = [];
-	# uQ
-	uQ_north = [];
-	uQ_south = [];
-	# vq
-	vq_north = [];
-	vq_south = [];
-	# vQ
-	vQ_north = [];
-	vQ_south = [];
-	# P
-	P_north = [];
-	P_south = [];
-
-	# Now assign the values to the appropriate lists
-	for j in range(0,N):
-		if y_nd[j] > y0_nd:
-			y_north.append(y_nd[j]);
-			uq_north.append(P_uq_xav[j]);
-			Uq_north.append(P_Uq_xav[j]);
-			uQ_north.append(P_uQ_xav[j]);
-			vq_north.append(P_vq_xav[j]);
-			vQ_north.append(P_vQ_xav[j]);
-			P_north.append(P_xav[j]);
-		else:
-			y_south.append(y_nd[j]);
-			uq_south.append(P_uq_xav[j]);
-			Uq_south.append(P_Uq_xav[j]);
-			uQ_south.append(P_uQ_xav[j]);
-			vq_south.append(P_vq_xav[j]);
-			vQ_south.append(P_vQ_xav[j]);
-			P_south.append(P_xav[j])
-
-	# Convert all to numpy arrays.
-	# y
-	y_north = np.array(y_north);
-	y_south = np.array(y_south);
-	# uq
-	uq_north = np.array(uq_north);	
-	uq_south = np.array(uq_south);
-	# Uq
-	Uq_north = np.array(Uq_north);	
-	Uq_south = np.array(Uq_south);
-	# uQ
-	uQ_north = np.array(uQ_north);	
-	uQ_south = np.array(uQ_south);
-	# vq
-	vq_north = np.array(vq_north);	
-	vq_south = np.array(vq_south);
-	# vQ
-	vQ_north = np.array(vQ_north);	
-	vQ_south = np.array(vQ_south);
-	# P
-	P_north = np.array(P_north);	
-	P_south = np.array(P_south);
-	
-	# Absolute values are needed for normalisation - only the full footprint P is needed here though.
-	yabs = abs(y_nd - y0_nd);
-	Pabs = abs(P_xav);
-
-	Pabs_north = abs(P_north);
-	Pabs_south = abs(P_south);
-	yabs_north = abs(y_north - y0_nd);
-	yabs_south = abs(y_south - y0_nd);
-
-	# The normalisation constants: norm_north & norm_south (to multiply the integrals of uq_north/south,...)
-	norm1_north = np.trapz(Pabs_north*yabs_north,y_north,dy_nd);
-	norm2_north = np.trapz(Pabs_north,y_north,dy_nd);
-	norm1_south = np.trapz(Pabs_south*yabs_south,y_south,dy_nd);
-	norm2_south = np.trapz(Pabs_south,y_south,dy_nd);
-
-
-	if norm2_north == 0:
-		norm_north = 1;
-	else:
-		norm_north = norm1_north / norm2_north;
-
-	if norm2_south == 0:
-		norm_south = 1;
-	else:
-		norm_south = norm1_south / norm2_south;	
-
-	# Now integrate uq_north/south etc. (overwrite the original variables, not needed), multiply by normalisation constant and forcing frequency.
-	# uq
-	uq_north = np.trapz(uq_north,y_north,dy_nd) * norm_north * omega_nd;
-	uq_south = np.trapz(uq_south,y_south,dy_nd) * norm_south * omega_nd;
-	# Uq
-	Uq_north = np.trapz(Uq_north,y_north,dy_nd) * norm_north * omega_nd;
-	Uq_south = np.trapz(Uq_south,y_south,dy_nd) * norm_south * omega_nd;
-	# uQ
-	uQ_north = np.trapz(uQ_north,y_north,dy_nd) * norm_north * omega_nd;
-	uQ_south = np.trapz(uQ_south,y_south,dy_nd) * norm_south * omega_nd;
-	# vq
-	vq_north = np.trapz(vq_north,y_north,dy_nd) * norm_north * omega_nd;
-	vq_south = np.trapz(vq_south,y_south,dy_nd) * norm_south * omega_nd;
-	# vQ
-	vQ_north = np.trapz(vQ_north,y_north,dy_nd) * norm_north * omega_nd;
-	vQ_south = np.trapz(vQ_south,y_south,dy_nd) * norm_south * omega_nd;
-
-	EEF_north = uq_north + Uq_north + uQ_north + vq_north + vQ_north;
-	EEF_south = uq_south + Uq_south + uQ_south + vq_south + vQ_south;	
-
-	# Define a single array to be returned by the function, containing all necessary information.	
-	EEF_array = np.zeros((6,2));
-	EEF_array[0,:] = [EEF_north, EEF_south]; EEF_array[1,:] = [uq_north,uq_south];
-	EEF_array[2,:] = [Uq_north, Uq_south]; EEF_array[3,:] = [uQ_north,uQ_south];
-	EEF_array[4,:] = [vq_north, vq_south]; EEF_array[5,:] = [vQ_north,vQ_south];
-
-#= np.array((,[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]));
-
-	return EEF_array;
-
-#====================================================
-
-# EEF_vq
-def EEF_vq(P_vq_xav,P_n,P_s,y_nd,y0_nd,dy_nd,omega_nd,N):
-# A function that calculates the equivalent eddy flux, given a zonally averaged footprint
-# The code works by calculating six integrals (three each side of the forcing) that make up each component of the equivalent eddy flux:
-# int1_north/south = int_{y > / < y0} P_xav dy;
-# int2_north/south = int_{y > / < y0} |y| |P_xav| dy;
-# int3_north/south = int_{y > / < y0} |P_xav| dy.
-
-	# Define two y arrays, with all gridpoints north and south of the forcing location.
-	# Define two corresponding P_xav arrays
-	y_north = [];
-	y_south = [];
-	P_north = [];
-	P_south = [];
-	for j in range(0,N):
-		if y_nd[j] > y0_nd:
-			y_north.append(y_nd[j]);
-			P_north.append(P_vq_xav[j]);
-		else:
-			y_south.append(y_nd[j]);
-			P_south.append(P_vq_xav[j]);
-
-	# Convert all to numpy arrays.
-	y_north = np.array(y_north);
-	y_south = np.array(y_south);
-	P_north = np.array(P_north);	
-	P_south = np.array(P_south);
-
-	Pabs = abs(P_vq_xav);
-	yabs = abs(y_nd - y0_nd);
-	
-	Pabs_north = abs(P_north);
-	Pabs_south = abs(P_south);
-	yabs_north = abs(y_north - y0_nd);
-	yabs_south = abs(y_south - y0_nd);
-
-	norm1_north = np.trapz(Pabs_north*yabs_north,y_north,dy_nd);
-	norm1_south = np.trapz(Pabs_south*yabs_south,y_south,dy_nd);
-	norm2_north = np.trapz(Pabs_north,y_north,dy_nd);
-	norm2_south = np.trapz(Pabs_south,y_south,dy_nd);
-	
-	# We use a manipulated form for the first term
-	EEF_north = (P_n * norm1_north / norm2_north) * omega_nd;
-	EEF_south = (P_s * norm1_south / norm2_south) * omega_nd;
-	
-	EEF_array = np.array([EEF_north, EEF_south]);	
-	
-	return EEF_array;
-
-#====================================================
  
 	
 	

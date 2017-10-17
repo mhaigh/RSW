@@ -177,6 +177,24 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_n
 
 #=======================================================
 
+# forcing_delta
+def forcing_delta(AmpF_nd,y0_index,dx_nd,N):
+	
+	F1_nd = np.zeros((N,N));
+	F2_nd = np.zeros((N,N));
+	Ftilde1_nd = np.zeros((N,N));
+	Ftilde2_nd = np.zeros((N,N));
+
+	F3_nd = np.zeros((N,N));
+	F3_nd[y0_index,int(N/2)] = AmpF_nd;
+	
+	Ftilde3_nd = np.ones((N,N));
+	#Ftilde3_nd[y0_index,:] = 1.0;
+	Ftilde3_nd = np.fft.hfft(F3_nd,N,axis=1) * dx_nd;
+
+	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
+
+#=======================================================
 
 # forcingInv
 def forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N):

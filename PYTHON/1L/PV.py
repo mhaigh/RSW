@@ -87,9 +87,11 @@ def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 
 	# Calculate the footprint.
 	P = - diff(uq_full,1,1,dx_nd) - diff(vq_full,0,0,dy_nd);
+
+	P = extend(P);
 		
 	# We are interested in the zonal average of the footprint
-	P_xav = np.trapz(P,x_nd[0:N],dx_nd,axis=1);
+	P_xav = np.trapz(P,x_nd,dx_nd,axis=1);
 
 	return P, P_xav
 

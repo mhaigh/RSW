@@ -16,7 +16,7 @@ FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
 
-FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
+FORCE_TYPE = 'DELTA';		# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
@@ -151,13 +151,14 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 r0 = 2*90.0 * 1000.0;  
 AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
-	y0 = Ly/4;#y[int(3*N/4)];
+	y0_index = int(3*N/4);
 elif Fpos == 'CENTER':
-	y0 = y[int(N/2)];
+	y0_index = int(N/2);
 elif Fpos == 'SOUTH':
-	y0 = y[int(N/4)];
+	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0 = y[N/2+2];
+	y0_index = 3;
+y0 = y[y0_index];
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
 
