@@ -146,12 +146,12 @@ def RSW_main():
 				P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 			if doEEFs:
 				if footprintComponents:
-					EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+					EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 					# This returns EEF_array, an array with the following structure:
 					# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
 					EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
 				else:
-					EEF_array = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+					EEF_array = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 					EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
 				print(EEF_north, EEF_south);
 			

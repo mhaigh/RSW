@@ -564,6 +564,34 @@ def timeAverage(u,T,Nt):
 
 	return u_tav
 
+#====================================================
+
+# split_y
+def split_y(y_nd,y0_index):
+# A function that splits the y domain into two, with a break at y0.
+# Useful for EEF calculations.
+
+
+	# Define two y arrays, with all gridpoints north and south of the forcing location.
+	# Define two corresponding P_xav arrays
+	y_north = [];
+	y_south = [];
+	for j in range(0,N):
+		if y_nd[j] > y0_nd:
+			y_north.append(y_nd[j]);
+		else:
+			y_south.append(y_nd[j]);
+
+	y_north = y_nd[y0_index:N];
+	y_south = y_nd[0:y0_index];
+
+
+
+
+	
+
+
+
 
 
 

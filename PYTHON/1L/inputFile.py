@@ -21,7 +21,7 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
 BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 256+1; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -79,7 +79,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 100.0;		# Kinematic viscosity (m2 s-1)
+nu = 0.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -168,7 +168,7 @@ y0 = y[y0_index];
 period_days = 60.;						# Periodicity of plunger (days)
 period = 3600. * 24. * period_days;		# Periodicity of plunger (s)
 omega = 1. / (period);          		# Frequency of plunger, once every 50 days (e-6) (s-1)
-Nt = 200;								# Number of time samples
+Nt = 240;								# Number of time samples
 T = np.linspace(0,period,Nt+1);			# Array of time samples across one forcing period (s)
 dt = T[1] - T[0];						# Size of the timestep (s)
 ts = Nt-1; 								# index at which the time-snapshot is taken
@@ -251,7 +251,7 @@ errorSpec = False;		# Print error of spectral solutions
 doEnergy = False;				# Energy
 doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
-doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
+doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = True;		# If true, calculates the footprint in terms of its components.
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
@@ -280,3 +280,10 @@ print('Ld = ' + str(Ld));
 print('N = ' + str(N));
 
 #=======================================================
+
+LD=np.sqrt(g*H)/f;
+plt.plot(y_nd,LD);
+plt.title('Rd');
+plt.xlabel('Latitude');
+plt.show()
+

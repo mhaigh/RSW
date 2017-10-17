@@ -1,4 +1,4 @@
-# diff_test.py
+# P_test.py
 #====================================================
 
 import PV
@@ -32,8 +32,8 @@ PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_ful
 uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
 
 P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
-plotting.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
-plotting.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
+#plotting.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
+#plotting.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
 
 # Why does the contribution from u^prime * q^prime disappear?
 # Is it because <d/dx(u^prime * q^prime)> = c * (u_prime * q^prime)?
@@ -80,20 +80,30 @@ if TEST3:
 	# NEED TO FINISH THIS TEST, BUT ITS NOT TOO IMPORTANT.
 	# Take vq, and evaluate [vq]_y0^1/2. Then integrate in x.
 	# Does this give the same result as the long-winded method?
-	vq_tav = diagnostics.timeAverage(vq,T_nd,Nt);
+	vq_tav = - diagnostics.timeAverage(vq,T_nd,Nt);
 
-	P_n = np.zeros(N+1);	P_y0 = np.zeros(N+1);	P_s = np.zeros(N+1);
-	P_n[0:N] = vq_tav[N-1,:];	P_y0[0:N] = vq_tav[y0_index,:];	P_s[0:N] = vq_tav[0,:];
-	P_n[N] = vq_tav[N-1,0];	P_y0[N] = vq_tav[y0_index,0];	P_s[N] = vq_tav[0,0];
-	P_n = np.trapz(P_n,x_nd,dx_nd);	P_y0 = np.trapz(P_y0,x_nd,dx_nd);	P_s = np.trapz(P_s,x_nd,dx_nd);
+	P_n = np.zeros(N+1); P_s = np.zeros(N+1);
+	P_y0n = np.zeros(N+1); P_y0s = np.zeros(N+1);
+	P_n[0:N] = vq_tav[N-1,:]; P_s[0:N] = vq_tav[0,:];
+	P_y0n[0:N] = vq_tav[y0_index+1,:]; P_y0s[0:N] = vq_tav[y0_index-1,:];
+	P_n[N] = vq_tav[N-1,0];	P_s[N] = vq_tav[0,0];
+	P_y0n[N] = vq_tav[y0_index+1,0]; P_y0s[N] = vq_tav[y0_index-1,0];
 
-	E1 = PV.EEF_vq(P_vq_xav,P_n,P_y0,P_s,y_nd,y0_nd,dy_nd,omega_nd,N);
-	E2 = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+
+	P_n = P_n - P_y0n;	P_s = P_y0s - P_s;
 	
+	P_n = np.trapz(P_n,x_nd,dx_nd);	P_s = np.trapz(P_s,x_nd,dx_nd);
+	print(P_n,P_s)
+
+	E1 = PV.EEF_vq(P_vq_xav,P_n,P_s,y_nd,y0_nd,dy_nd,omega_nd,N);
+	E2 = PV.EEF(P_vq_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+		
 	print(E1);
 	print(E2);
+	print(' ');
 	print(E1[0] - E1[1]);
 	print(E2[0] - E2[1]);
+
 
 
 

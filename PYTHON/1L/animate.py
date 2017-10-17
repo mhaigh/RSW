@@ -13,6 +13,7 @@ from inputFile import *
 plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg';
 
 filename = '/home/mike/Documents/GulfStream/RSW/DATA/1L/STOCH/u_nd.npy';
+filename = '/home/mike/Documents/GulfStream/RSW/PYTHON/1L/u_nd.npy';
 
 u_nd = np.load(filename);
 wn = np.shape(u_nd)[2];

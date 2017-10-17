@@ -38,10 +38,13 @@ if TEST == 'y0':
 	y0_min = y[0] + r0;					# We want to keep the forcing at least one gridpoint away from the boundary
 	y0_max = y[N-1] - r0;
 	y0_set = [];						# Initialise an empty set of forcing latitudes
+	y0_index_set = [];
 	for j in range(0,N):
 		if y0_min <= y[j] <= y0_max:
 			y0_set.append(y[j]);		# Build the set of forcing locations, all at least 1 gridpoint away from the boundary.	
+			y0_index_set.append(j);
 	y0_set = np.array(y0_set);
+	y0_index_set = np.array(y0_index_set);
 	nn = np.shape(y0_set)[0];
 	print(nn);
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
@@ -58,7 +61,7 @@ else:
 # Now start the loop over each forcing index.
 for ii in range(0,nn):
 	print(ii);
-
+	
 	if EEF_array[ii,0,0] == 0:
 
 		# If TEST==U0, linear problem has to be redefined each iteration.
@@ -69,6 +72,7 @@ for ii in range(0,nn):
 		# If TEST==y0, matrix only needs to be defined once, but forcing must be defined each iteration.
 		if TEST == 'y0':
 			y0 = y0_set[ii];				# Redefine y0 and the forcing in each run.
+			y0_index = y0_index_set[ii];
 			y0_nd = y0 / L;
 			# Forcing
 			if FORCE_TYPE == 'CTS':
@@ -111,10 +115,10 @@ for ii in range(0,nn):
 		# Do footprints
 		if footprintComponents:
 			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
-			EEF_array[ii,:,:] = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+			EEF_array[ii,:,:] = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		else: 
-			P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
-			EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+			EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 
 	np.save(filename,EEF_array);
 	
@@ -125,7 +129,10 @@ else:
 	# not written this nc function yet.
 	a=1;
 
-plt.plot(EEF_array[:,0,0] - EEF_array[:,0,1]);
+if footprintComponents:	
+	plt.plot(EEF_array[:,0,0] - EEF_array[:,0,1]);
+else:
+	plt.plot(EEF_array[:,0] - EEF_array[:,1]);
 plt.show();
 
 	

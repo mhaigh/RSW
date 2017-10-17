@@ -20,7 +20,7 @@ import solver
 import output
 import output_read
 
-from inputFile import *
+from inputFile_ref import *
 
 #====================================================
 
@@ -80,7 +80,7 @@ print('solved');
 #====================================================
 
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
-LOOP = 'PART';		# FULL, PART
+LOOP = 'FULL';		# FULL, PART
 
 Nm = 8;						# How many modes to use in the decomposition at each wavenumber (dim is maximum).
 if LOOP == 'FULL':
@@ -108,7 +108,9 @@ theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
 # ii indexes arrays storing information at ALL wavenumbers k
 # i indexes arrays storing information ONLY at wavenumbers used in the decomposition.
-for ii in loop:	 
+for ii in loop:	 	
+
+	print(' ');
 	print('ii = ' + str(ii));
 	k = K_nd[ii];
 	print('k = ' + str(k));

@@ -592,7 +592,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 	plt.figure(1,figsize=(15,7))
 	plt.subplot(121)
 	#plt.contourf(x_nd,y_nd,P,cmap='coolwarm')
-	plt.contourf(x_nd[0:N],y_nd,P)
+	plt.contourf(x_nd,y_nd,P)
 	plt.text(0.0,0.4,'PV FOOTPRINT',fontsize=22);
 	#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
 	#plt.text(0.15,0.4,'r0 = '+str(r0/1000) + ' km' ,fontsize=18);	
@@ -619,7 +619,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 	# These if loops are for constantly altering depending on the test being done.
 	if BG == 'GAUSSIAN':
 		plt.figure(2)
-		plt.contourf(x_nd[0:N],y_nd,P)
+		plt.contourf(x_nd,y_nd,P)
 		plt.plot(U*U0_nd/(1.5*Umag)-0.5,y_nd,'k--',linewidth=2);
 		plt.text(0.25,0.4,str(GAUSS),fontsize=18);
 		#plt.text(0.25,0.4,str(period_days)+' days',fontsize=18)
@@ -638,7 +638,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 		
 	if BG == 'UNIFORM':
 		plt.figure(2)
-		plt.contourf(x_nd[0:N],y_nd,P);
+		plt.contourf(x_nd,y_nd,P);
 		plt.text(0.25,0.4,'U0 = ' + str(U*U0_nd[0]),fontsize=18);
 		plt.colorbar()
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));

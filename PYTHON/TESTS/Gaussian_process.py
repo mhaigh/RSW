@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 #=================================================================
 
-N = 1*120;
+N = 2*120;
 period_days = 60.0
 tau = 60.0
 
@@ -31,7 +31,14 @@ for ti in range(1,N):
 	g = np.random.normal(0,1.0);
 	S[ti] = f * S[ti-1] + ff * g;
 
+np.save('time_series',S);
+
+S_tilde = np.fft.fft(S);
+
+plt.subplot(121);
 plt.plot(S);
+plt.subplot(122);
+plt.plot(S_tilde);
 plt.show();
 
 
