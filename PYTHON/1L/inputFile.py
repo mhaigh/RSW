@@ -23,10 +23,10 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'DELTA' defines a delta-function type forcing, located at x=0, y=y0.
 							# By default, the forcing is on the continuity equation, while momentum forces are zero.
 
-Fpos = 'SOUTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -110,7 +110,7 @@ elif BG == 'QUADRATIC':
 # Gaussian BG flow
 elif BG == 'GAUSSIAN':
 	if GAUSS == 'REF':
-		Umag = 0.4;
+		Umag = 0.8;
 		sigma = 0.03 * Ly;			# Increasing sigma decreases the sharpness of the jet
 	elif GAUSS == 'WIDE':
 		Umag = 0.2;
@@ -285,9 +285,6 @@ print('N = ' + str(N));
 
 #=======================================================
 
-LD=np.sqrt(g*H)/f;
-plt.plot(y_nd,LD);
-plt.title('Rd');
-plt.xlabel('Latitude');
-plt.show()
+plt.plot(U0_nd);
+plt.show();
 

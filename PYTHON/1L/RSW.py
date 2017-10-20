@@ -166,7 +166,10 @@ def RSW_main():
 
 		plt.tight_layout();
 		plt.show();
+
+		EEF_u, EEF_v = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
+		print(EEF_u, EEF_v);
 
 
 	# PV and PV footprints

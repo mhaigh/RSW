@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 import diagnostics
 import PV
+import momentum
 import forcing_1L
 import solver
 #import output
@@ -57,6 +58,9 @@ else:
 		EEF_array = np.zeros((nn,6,2));
 	else:
 		EEF_array = np.zeros((nn,2));
+
+EEF_u = np.zeros((nn,2));
+EEF_v = np.zeros((nn,2));
 
 # Now start the loop over each forcing index.
 for ii in range(0,nn):
@@ -120,6 +124,13 @@ for ii in range(0,nn):
 			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 			EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 
+		# Calculate momentum fluxes and footprints
+		uu, uv, vv = momentum.fluxes(u_nd,v_nd);
+		Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
+		EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
+		
+
+
 	np.save(filename,EEF_array);
 	
 if footprintComponents:
@@ -129,10 +140,15 @@ else:
 	# not written this nc function yet.
 	a=1;
 
+plt.subplot(131);
 if footprintComponents:	
 	plt.plot(EEF_array[:,0,0] - EEF_array[:,0,1]);
 else:
 	plt.plot(EEF_array[:,0] - EEF_array[:,1]);
+plt.subplot(132);
+plt.plot(EEF_u[:,0] - EEF_u[:,1]);
+plt.subplot(133);
+plt.plot(EEF_v[:,0] - EEF_v[:,1]);
 plt.show();
 
 	
