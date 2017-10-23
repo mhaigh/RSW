@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = 7;
+OPT = 5;
 
 N = 256;
 y = np.linspace(1,N,N);
@@ -193,12 +193,18 @@ if OPT == 5:
 	h1 = 300.0 * np.ones((N,N));
 	for j in range(0,N):
 		for i in range(0,N):
-			taux[j,i] = 0.5 * (1.0 + np.cos(2.0 * np.pi *(m * x[i] - y[j] - yf) / N));
+			taux[j,i] = 0.5 * (1.0 + np.cos(2.0 * np.pi *(m * x[i] - y[j] + yf) / (1.25*N)));
 			tauy[j,i] = m * taux[j,i];
 			if y[j] - yf - y_8 < m*x[i] < y[j] - yf + y_8:
 				h1[j,i] = 300.0 + np.sin(1.0 * np.pi * (m * x[i] - y[j] - yf) / y_8);
-
 	
+	axis = np.zeros(N);	
+	for i in range(0,N):
+		axis[i] = np.argsort(-taux[:,i])[0];
+		
+	plt.plot(taux[:,0]);
+	plt.show();
+
 	plt.contourf(h1);
 	plt.show();
 	
@@ -217,6 +223,7 @@ if OPT == 5:
 	plt.quiver(xv,yv,taux_vec,tauy_vec);
 	plt.subplot(122);
 	plt.contourf(taux);
+	plt.plot(axis);
 	plt.colorbar();
 	plt.show();
 	

@@ -6,6 +6,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 import diagnostics
 import PV
@@ -18,7 +19,11 @@ from inputFile import *
 
 #=======================================================
 
+start = time.time();
+
 filename = 'EEF_' + str(int(period_days));
+filename_u = 'EEF_u_' + str(int(period_days));
+filename_v = 'EEF_v_' + str(int(period_days));
 
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
 TEST = 'y0';
@@ -52,12 +57,12 @@ if TEST == 'y0':
 			
 # Initialise the array which stores the EEF values.
 if os.path.isfile(filename + '.npy'):
-	EEF_array = np.load(filename + '.npy');
+	EEF_PV = np.load(filename + '.npy');
 else:
 	if footprintComponents:
-		EEF_array = np.zeros((nn,6,2));
+		EEF_PV = np.zeros((nn,6,2));
 	else:
-		EEF_array = np.zeros((nn,2));
+		EEF_PV = np.zeros((nn,2));
 
 EEF_u = np.zeros((nn,2));
 EEF_v = np.zeros((nn,2));
@@ -66,7 +71,7 @@ EEF_v = np.zeros((nn,2));
 for ii in range(0,nn):
 	print(ii);
 	
-	if EEF_array[ii,0,0] == 0:
+	if EEF_PV[ii,0,0] == 0:
 
 		# If TEST==U0, linear problem has to be redefined each iteration.
 		if TEST == 'U0':
@@ -88,7 +93,7 @@ for ii in range(0,nn):
 	
 		# Solver
 		if BC == 'NO-SLIP':
-			solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
+			solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2);
 		if BC == 'FREE-SLIP':
 			solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	
@@ -115,41 +120,21 @@ for ii in range(0,nn):
 		# Calculate PV fields and PV fluxes.
 		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
 		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
-	
-		# Do footprints
-		if footprintComponents:
-			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
-			EEF_array[ii,:,:] = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
-		else: 
-			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
-			EEF_array[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
+		P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+		EEF_PV[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 
 		# Calculate momentum fluxes and footprints
 		uu, uv, vv = momentum.fluxes(u_nd,v_nd);
 		Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 		EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
-
-
-	np.save(filename,EEF_array);
+	np.save(filename,EEF_PV);
+	np.save(filename_u,EEF_u);
+	np.save(filename_v,EEF_v);
 	
-if footprintComponents:
-	#output.ncSaveEEF_y0_components(EEF_array,y0_set,period_days,nn);
-	np.save(filename,EEF_array);
-else:
-	# not written this nc function yet.
-	a=1;
-
-plt.subplot(131);
-if footprintComponents:	
-	plt.plot(EEF_array[:,0,0] - EEF_array[:,0,1]);
-else:
-	plt.plot(EEF_array[:,0] - EEF_array[:,1]);
-plt.subplot(132);
-plt.plot(EEF_u[:,0] - EEF_u[:,1]);
-plt.subplot(133);
-plt.plot(EEF_v[:,0] - EEF_v[:,1]);
-plt.show();
+elapsed = start - time.time();
+elapsed = np.ones(1) * elapsed;
+print(elapsed);
 
 	
 	

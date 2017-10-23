@@ -20,8 +20,6 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# so that F1 and F2 are discontinous.
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
-							# 'DELTA' defines a delta-function type forcing, located at x=0, y=y0.
-							# By default, the forcing is on the continuity equation, while momentum forces are zero.
 
 Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
@@ -36,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 64+1; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -65,7 +63,7 @@ for j in range(0,N2):
 dy = y[1] - y[0];     # Distance between gridpoints (m)
 dx = x[1] - x[0];
 
-y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+2*dx,dx)];
+y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+dx,dx)];
 
 K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 
@@ -81,7 +79,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 100.0;		# Kinematic viscosity (m2 s-1)
+nu = 10.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -113,20 +111,20 @@ elif BG == 'GAUSSIAN':
 		Umag = 0.8;
 		sigma = 0.03 * Ly;			# Increasing sigma decreases the sharpness of the jet
 	elif GAUSS == 'WIDE':
-		Umag = 0.2;
-		sigma = 0.4 * Ly;
+		Umag = 0.8;
+		sigma = 0.06 * Ly;
 	elif GAUSS == 'SHARP':
-		Umag = 0.2;
-		sigma = 0.2 * Ly;
-	elif GAUSS == 'SHARPER':
-		Umag = 0.2;
-		sigma = 0.15 * Ly;
+		Umag = 0.8;
+		sigma = 0.02 * Ly;
+	elif GAUSS == 'SHARPER':	# This option may result in errors for grids too coarse.
+		Umag = 0.8;
+		sigma = 0.01 * Ly;
 	elif GAUSS == 'STRONG':
-		Umag = 0.3;
-		sigma = 0.3 * Ly;
+		Umag = 1.2;
+		sigma = 0.03 * Ly;
 	elif GAUSS == 'WEAK':
-		Umag = 0.1;
-		sigma = 0.3 * Ly;
+		Umag = 0.4;
+		sigma = 0.03 * Ly;
 	# The rest of the parameters do not depend on the type of Gaussian flow we want
 	l = Ly / 2;
 	a = Umag / (np.exp(l**2 / sigma**2) - 1);	# Maximum BG flow velocity Umag
@@ -142,6 +140,8 @@ elif BG == 'NONE':
 		H0[j] = Hflat;
 
 H0_y = diff(H0,2,0,dy);
+plt.plot(U0);
+plt.show();
 
 # Calculate BG PV
 Q = (f + diff(U0,2,0,dy)) / H0;
@@ -150,7 +150,7 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 #=======================================================
 
 # Instead of defining the forcing amplitude in the forcing module, we define it here as other codes require this value for normalisation
-r0 = 90.0 * 1000.0;  
+r0 = 60.0 * 1000.0;  
 AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
 	y0_index = int(3*N/4);
@@ -159,7 +159,7 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = 3;
+	y0_index = int(N/2)-10;
 y0 = y[y0_index];
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
@@ -170,7 +170,7 @@ y0 = y[y0_index];
 period_days = 60.;						# Periodicity of plunger (days)
 period = 3600. * 24. * period_days;		# Periodicity of plunger (s)
 omega = 1. / (period);          		# Frequency of plunger, once every 50 days (e-6) (s-1)
-Nt = 240;								# Number of time samples
+Nt = 200;								# Number of time samples
 T = np.linspace(0,period,Nt+1);			# Array of time samples across one forcing period (s)
 dt = T[1] - T[0];						# Size of the timestep (s)
 ts = Nt-1; 								# index at which the time-snapshot is taken
@@ -187,7 +187,7 @@ t = T[ts];								# Time of the snapshot
 # geostrophic BG state U0 and H0.
 #=======================================================
 
-U = 1.0e0;
+U = 1.0e-2;
 H = Hflat;
 
 chi = f0 * U * Ly / g;
@@ -240,7 +240,7 @@ if nu != 0:
 	Re = L * U / nu;		# Reynolds number: measures inertial forces relative to viscous ones.
 else:
 	Re = None;				# Instead of defining it as infinity, define it as None.
-Ld = np.sqrt(g * r0) / f0;	# Rossby def radius.
+Ld = np.sqrt(g * Hflat) / f0;	# Rossby def radius.
 
 # Output
 #=======================================================
@@ -253,15 +253,15 @@ errorSpec = False;		# Print error of spectral solutions
 doEnergy = False;				# Energy
 doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
-doMomentum = True;				# Calculate footprints of momentum
-doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
+doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = True;		# If true, calculates the footprint in terms of its components.
+doMomentum = False;
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;
 
 # Plots
-#=======================================================
+#======================================================
 
 plotForcing = False;
 plotBG = False;
@@ -269,7 +269,6 @@ plotSol = True;
 plotPV = False;
 plotPV_av = False;
 plotFootprint = True;
-plotMomentumFootprint = True;
 plotPhaseAmp = False;
 
 #=======================================================
@@ -284,7 +283,15 @@ print('Ld = ' + str(Ld));
 print('N = ' + str(N));
 
 #=======================================================
+Rd = np.sqrt(H0_nd)/f_nd;
 
-plt.plot(U0_nd);
+plt.subplot(221);
+plt.plot(Q);
+plt.subplot(222);
+plt.plot(np.sqrt(g*H0_nd));
+plt.subplot(223);
+plt.plot(1./f);
+plt.subplot(224);
+plt.plot(Rd);
 plt.show();
 

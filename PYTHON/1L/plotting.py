@@ -587,6 +587,8 @@ def forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N)
 def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd,U,N):
 # Function that plots the forcing, and its Fourier representation.
 
+
+	Umag = np.max(U0_nd);
 	Plim = np.max(abs(P));
 
 	plt.figure(1,figsize=(15,7))

@@ -59,7 +59,8 @@ def RSW_main():
 	if BC == 'NO-SLIP':
 		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	if BC == 'FREE-SLIP':
-		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+		#solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+		solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2)
 
 	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 	u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
@@ -80,9 +81,17 @@ def RSW_main():
 		eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
 		u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
-	np.save('u_nd.npy',u_nd);
-	np.save('v_nd.npy',v_nd);
-	np.save('eta_nd.npy',eta_nd);
+	#np.save('u_nd.npy',u_nd);
+	#np.save('v_nd.npy',v_nd);
+	#np.save('eta_nd.npy',eta_nd);
+
+	#plt.subplot(121);
+	#plt.pcolor(x_grid,y_grid,u_full[:,:,ts],cmap='bwr');
+	#plt.colorbar();
+	#plt.subplot(122);
+	#plt.pcolor(x_grid,y_grid,eta_full[:,:,ts],cmap='bwr');
+	#plt.colorbar();
+	#plt.show();
 
 	#sys.exit();
 
@@ -182,6 +191,7 @@ def RSW_main():
 		# Keep these next two lines commented out unless testing effects of normalisation.
 		# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
 		# PV_prime, PV_full = PV_prime/AmpF_nd, PV_full/AmpF_nd;
+
 		if doFootprints:
 			if footprintComponents: 
 				P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
