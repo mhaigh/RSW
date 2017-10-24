@@ -21,10 +21,10 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'USER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 128+1; 			# Number of gridpoints
+N = 256+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.16;
+	Umag = 0.08;
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -109,7 +109,7 @@ elif BG == 'QUADRATIC':
 elif BG == 'GAUSSIAN':
 	if GAUSS == 'REF':
 		Umag = 0.8;
-		sigma = 0.03 * Ly;			# Increasing sigma decreases the sharpness of the jet
+		sigma = 0.02 * Ly;			# Increasing sigma decreases the sharpness of the jet
 	elif GAUSS == 'WIDE':
 		Umag = 0.8;
 		sigma = 0.06 * Ly;
@@ -127,21 +127,17 @@ elif BG == 'GAUSSIAN':
 		sigma = 0.03 * Ly;
 	# The rest of the parameters do not depend on the type of Gaussian flow we want
 	l = Ly / 2;
-	a = Umag / (np.exp(l**2 / sigma**2) - 1);	# Maximum BG flow velocity Umag
+	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1);	# Maximum BG flow velocity Umag
 	for j in range(0,N):
-		U0[j] = a * np.exp((l**2 - y[j]**2) / sigma**2) - a;		# -a ensures U0 is zero on the boundaries
-		H0[j] = - a * (np.sqrt(np.pi) * f0 * sigma * np.exp(l**2 / sigma**2) * erf(y[j] / sigma) / 2 
-					- beta * sigma**2 * np.exp((l**2 - y[j]**2) / sigma**2) / 2
-					- f0 * y[j] - beta * y[j]**2 / 2) / g + Hflat; #erf(0);
+		U0[j] = a * np.exp((l**2 - y[j]**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
+		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
+					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
+					+ f0 * y[j] + beta * y[j]**2 / 2) / g + Hflat; #erf(0);
 		
 elif BG == 'NONE':
 	for j in range(0,N):
 		Umag = 0;
 		H0[j] = Hflat;
-
-H0_y = diff(H0,2,0,dy);
-plt.plot(U0);
-plt.show();
 
 # Calculate BG PV
 Q = (f + diff(U0,2,0,dy)) / H0;
@@ -150,7 +146,7 @@ Q = (f + diff(U0,2,0,dy)) / H0;
 #=======================================================
 
 # Instead of defining the forcing amplitude in the forcing module, we define it here as other codes require this value for normalisation
-r0 = 60.0 * 1000.0;  
+r0 = 90.0 * 1000.0;  
 AmpF = 1.0e-7; 
 if Fpos == 'NORTH':
 	y0_index = int(3*N/4);
@@ -159,8 +155,9 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)-10;
+	y0_index = int(N/2)-int(2.0*N*sigma/L); # - sigma * 25./16.
 y0 = y[y0_index];
+print(y0_index);
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
 
@@ -187,7 +184,7 @@ t = T[ts];								# Time of the snapshot
 # geostrophic BG state U0 and H0.
 #=======================================================
 
-U = 1.0e-2;
+U = 1.0e0;
 H = Hflat;
 
 chi = f0 * U * Ly / g;
@@ -214,7 +211,6 @@ dx_nd = x_nd[1] - x_nd[0];
 K_nd = K * Ly ;		# The same as: K_nd = np.fft.fftfreq(N2,dx_nd)
 
 H0_nd = H0 / chi;	# The steady-state SSH scales the same way as eta.
-H0_y_nd = H0_y * Ly / chi;
 U0_nd = U0 / U;
 
 f0_nd = 1.0;					# =f0/f0      		 
@@ -283,6 +279,13 @@ print('Ld = ' + str(Ld));
 print('N = ' + str(N));
 
 #=======================================================
+
+H0_y = diff(H0_nd,2,0,dy_nd);
+fH0_y = - H0_y / f_nd;
+plt.plot(U0_nd);
+plt.plot(fH0_y);
+plt.show();
+
 Rd = np.sqrt(H0_nd)/f_nd;
 
 plt.subplot(221);

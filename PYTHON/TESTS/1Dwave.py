@@ -166,6 +166,10 @@ for ti in range(0,Nt):
 	theta_F[:,ti] = np.linalg.solve(vec_time[:,:,ti],F_time);
 	theta_u[:,ti] = np.linalg.solve(vec_time[:,:,ti],u_time);
 
+for k in range(0,N):
+	plt.plot(theta_F[k,:]);
+	plt.show();
+
 theta_F_norm = np.max(abs(theta_F));
 theta_u_norm = np.max(abs(theta_u));
 
