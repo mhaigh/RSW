@@ -19,13 +19,21 @@ import output
 import energy
 import plotting
 
-from inputFile_1L_ref import *
+from inputFile import *
 
 #=======================================================
 
-u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/REF/u_-16.npy');
-v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/REF/v_-16.npy');
-eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/REF/eta_-16.npy');
+#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/u_U0=32.npy');
+#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/v_U0=32.npy');
+#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta_U0=32.npy');
+
+u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=-2sigma/u_y0=-2sigma.npy');
+v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=-2sigma/v_y0=-2sigma.npy');
+eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=-2sigma/eta_y0=-2sigma.npy');
+
+#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/u_nd.npy');
+#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/v_nd.npy');
+#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/eta_nd.npy');
 
 #====================================================
 
@@ -139,9 +147,8 @@ if plotSol:
 	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
 
 # Plots of PV and zonally averaged PV
-if plotPV:
-	#plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
-	plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+#plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
+plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
 if plotPV_av:
 	plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 

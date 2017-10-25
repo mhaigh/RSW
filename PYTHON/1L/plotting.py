@@ -4,6 +4,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from diagnostics import extend
 
 #====================================================
 
@@ -136,7 +137,12 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_gr
 	v_nd = v_nd / vlim;
 	eta_nd = eta_nd / etalim
 
-	U0_str = r'$U_{0}=-0.16$';
+	u_nd = extend(u_nd);
+	v_nd = extend(v_nd);
+	eta_nd = extend(eta_nd);
+
+	#U0_str = r'$U_{0}=0.32$';
+	U0_str = r'$y_{0}=-2\sigma$';
 
 	if div:
 			
@@ -406,7 +412,12 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 	P = P / Plim; 
 	P_xav = P_xav / Plim;
 
-	U0_str = r'$U_{0}=-0.16$';
+	PV_full = extend(PV_full);
+	PV_prime = extend(PV_prime);
+
+	# Change this string as needed.
+	#U0_str = r'$U_{0}=0.32$';
+	U0_str = r'$y_{0}=-2\sigma$';
 
 	if div:
 
@@ -424,7 +435,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_full_' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.close();
 
-		plt.figure(1);
+		plt.figure(2);
 		plt.pcolor(x_grid, y_grid, PV_prime[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$q^{\prime}$',color='k',fontsize=26);
 		plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
@@ -438,7 +449,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_prime_' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.close();
 	
-		plt.figure(1);
+		plt.figure(3);
 		plt.pcolor(x_grid, y_grid, P, cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$P$',fontsize=26);
 		#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
@@ -453,7 +464,7 @@ def pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_
 		plt.xlabel('x',fontsize=18);
 		#plt.ylabel('y',fontsize=18);
 		plt.colorbar();
-		plt.tight_layout()
+		plt.tight_layout();
 		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/P_' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.close();
 		

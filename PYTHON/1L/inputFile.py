@@ -21,10 +21,10 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'USER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -63,7 +63,7 @@ for j in range(0,N2):
 dy = y[1] - y[0];     # Distance between gridpoints (m)
 dx = x[1] - x[0];
 
-y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+dx,dx)];
+y_grid, x_grid = np.mgrid[slice(-Ly/2,Ly/2+dy,dy),slice(-Lx/2,Lx/2+2.*dx,dx)];
 
 K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 
@@ -79,7 +79,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 10.0;		# Kinematic viscosity (m2 s-1)
+nu = 100.0;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.08;
+	Umag = 0.07;
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -155,9 +155,8 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)-int(2.0*N*sigma/L); # - sigma * 25./16.
+	y0_index = int(N/2)-int(2.*N*sigma/L); # - sigma * 25./16.
 y0 = y[y0_index];
-print(y0_index);
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
 
@@ -280,11 +279,14 @@ print('N = ' + str(N));
 
 #=======================================================
 
+
+
 H0_y = diff(H0_nd,2,0,dy_nd);
 fH0_y = - H0_y / f_nd;
-plt.plot(U0_nd);
-plt.plot(fH0_y);
-plt.show();
+
+#plt.plot(U0_nd);
+#plt.plot(fH0_y);
+#plt.show();
 
 Rd = np.sqrt(H0_nd)/f_nd;
 
