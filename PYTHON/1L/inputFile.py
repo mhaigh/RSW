@@ -21,10 +21,10 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'USER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 256+1; 			# Number of gridpoints
+N = 64+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -109,10 +109,10 @@ elif BG == 'QUADRATIC':
 elif BG == 'GAUSSIAN':
 	if GAUSS == 'REF':
 		Umag = 0.8;
-		sigma = 0.02 * Ly;			# Increasing sigma decreases the sharpness of the jet
+		sigma = 0.01 * Ly;			# Increasing sigma decreases the sharpness of the jet
 	elif GAUSS == 'WIDE':
 		Umag = 0.8;
-		sigma = 0.06 * Ly;
+		sigma = 0.025 * Ly;
 	elif GAUSS == 'SHARP':
 		Umag = 0.8;
 		sigma = 0.02 * Ly;
@@ -127,7 +127,7 @@ elif BG == 'GAUSSIAN':
 		sigma = 0.03 * Ly;
 	# The rest of the parameters do not depend on the type of Gaussian flow we want
 	l = Ly / 2;
-	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1);	# Maximum BG flow velocity Umag
+	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1.);	# Maximum BG flow velocity Umag
 	for j in range(0,N):
 		U0[j] = a * np.exp((l**2 - y[j]**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
 		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
@@ -155,7 +155,7 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)-int(2.*N*sigma/L); # - sigma * 25./16.
+	y0_index = int(N/2)-int(1.*N*sigma/L); # - sigma * 25./16.
 y0 = y[y0_index];
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
@@ -249,7 +249,7 @@ doEnergy = False;				# Energy
 doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
 doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
-footprintComponents = True;		# If true, calculates the footprint in terms of its components.
+footprintComponents = False;		# If true, calculates the footprint in terms of its components.
 doMomentum = False;
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
@@ -279,6 +279,14 @@ print('N = ' + str(N));
 
 #=======================================================
 
+u2=np.ones(N)*0.2;
+u5=np.ones(N)*0.4;
+u1=np.ones(N)*0.1;
+plt.plot(y,u2);
+plt.plot(y,u5);
+plt.plot(y,u1);
+plt.plot(y,U0);
+plt.show();
 
 
 H0_y = diff(H0_nd,2,0,dy_nd);

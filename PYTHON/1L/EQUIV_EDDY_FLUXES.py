@@ -21,18 +21,16 @@ from inputFile import *
 
 start = time.time();
 
-filename = 'EEF_' + str(int(period_days));
-filename_u = 'EEF_u_' + str(int(period_days));
-filename_v = 'EEF_v_' + str(int(period_days));
+filename = 'EEF_PV';
+filename_u = 'EEF_u';
+filename_v = 'EEF_v';
 
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
-TEST = 'y0';
-nn = 5;
+TEST = 'U0';
 
 if TEST == 'U0':
-	U0_set = np.linspace(0.2,0.25,nn);
-	U_ones = np.ones(N);
-	U0_nd_set = U0_set / U; 
+	nn = 10;
+	U0_set = np.linspace(-0.3,0.5,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 	elif FORCE_TYPE == 'DCTS':
@@ -52,7 +50,6 @@ if TEST == 'y0':
 	y0_set = np.array(y0_set);
 	y0_index_set = np.array(y0_index_set);
 	nn = np.shape(y0_set)[0];
-	print(nn);
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 			
 # Initialise the array which stores the EEF values.
@@ -71,11 +68,17 @@ EEF_v = np.zeros((nn,2));
 for ii in range(0,nn):
 	print(ii);
 	
-	if EEF_PV[ii,0,0] == 0:
+	if EEF_PV[ii,0] == 0:
 
 		# If TEST==U0, linear problem has to be redefined each iteration.
 		if TEST == 'U0':
-			U0_nd = U0_nd_set[ii] * U_ones;	# Redefine U0 in each run.
+			# Redefine U0 and H0 in each run.
+			for j in range(0,N):
+				U0[j] = U0_set[ii];
+				H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
+			U0_nd = U0 / U;
+			H0_nd = H0 / chi; 
+
 			a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 				
 		# If TEST==y0, matrix only needs to be defined once, but forcing must be defined each iteration.
@@ -128,11 +131,14 @@ for ii in range(0,nn):
 		Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 		EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
-	np.save(filename,EEF_PV);
-	np.save(filename_u,EEF_u);
-	np.save(filename_v,EEF_v);
+#np.save(filename,EEF_PV);
+#np.save(filename_u,EEF_u);
+#np.save(filename_v,EEF_v);
+
+plt.plot(EEF_PV[:,0]-EEF_PV[:,1]);
+plt.show();
 	
-elapsed = start - time.time();
+elapsed = time.time() - start;
 elapsed = np.ones(1) * elapsed;
 print(elapsed);
 

@@ -81,9 +81,9 @@ def RSW_main():
 		eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
 		u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
-	#np.save('u_nd.npy',u_nd);
-	#np.save('v_nd.npy',v_nd);
-	#np.save('eta_nd.npy',eta_nd);
+	np.save('u_nd.npy',u_nd);
+	np.save('v_nd.npy',v_nd);
+	np.save('eta_nd.npy',eta_nd);
 
 	#plt.subplot(121);
 	#plt.pcolor(x_grid,y_grid,u_full[:,:,ts],cmap='bwr');

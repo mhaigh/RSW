@@ -3,6 +3,7 @@
 
 # This code works in the same way as the master file RSW_1L.py, but does not solve the SW model.
 # Instead it takes saved solution (in .npy or .nc format), and then can perform all necessary diagnostics.
+# Should ensure that the input file is defined in the same way as it was for originally producing the saved npy files.
 
 #=======================================================
 
@@ -27,9 +28,9 @@ from inputFile import *
 #v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/v_U0=32.npy');
 #eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta_U0=32.npy');
 
-u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=-2sigma/u_y0=-2sigma.npy');
-v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=-2sigma/v_y0=-2sigma.npy');
-eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=-2sigma/eta_y0=-2sigma.npy');
+u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/u_y0=0.npy');
+v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/v_y0=0.npy');
+eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/eta_y0=0.npy');
 
 #u_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/u_nd.npy');
 #v_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/v_nd.npy');
