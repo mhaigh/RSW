@@ -68,6 +68,23 @@ def npyReadEEF_y0_components(npyFile):
 	vQ = vQ_north - vQ_south;
 
 	return EEF, uq, Uq,uQ, vq, vQ;
+
+#=======================================================
+
+def npyReadEEF_U0(npyFile):
+
+	EEF_array = np.load(npyFile);	# Read the NETCDF file
+
+	nn = np.shape(EEF_array)[0];
+
+	EEF_north = EEF_array[:,0]; EEF_south = EEF_array[:,1];
+
+	EEF = EEF_north - EEF_south;
+
+
+	return EEF;
+
+
 	
 
 	

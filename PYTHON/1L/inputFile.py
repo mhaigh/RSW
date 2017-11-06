@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 64+1; 			# Number of gridpoints
+N = 512+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -109,7 +109,7 @@ elif BG == 'QUADRATIC':
 elif BG == 'GAUSSIAN':
 	if GAUSS == 'REF':
 		Umag = 0.8;
-		sigma = 0.01 * Ly;			# Increasing sigma decreases the sharpness of the jet
+		sigma = 0.015 * Ly;			# Increasing sigma decreases the sharpness of the jet
 	elif GAUSS == 'WIDE':
 		Umag = 0.8;
 		sigma = 0.025 * Ly;
@@ -279,14 +279,7 @@ print('N = ' + str(N));
 
 #=======================================================
 
-u2=np.ones(N)*0.2;
-u5=np.ones(N)*0.4;
-u1=np.ones(N)*0.1;
-plt.plot(y,u2);
-plt.plot(y,u5);
-plt.plot(y,u1);
-plt.plot(y,U0);
-plt.show();
+
 
 
 H0_y = diff(H0_nd,2,0,dy_nd);

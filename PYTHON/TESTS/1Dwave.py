@@ -136,20 +136,6 @@ plt.plot(proj,label='PROJ');
 plt.legend();
 plt.show();
 
-#============================================
-
-# Analytic Fourier coefficients
-an = np.zeros(N);
-for ki in range(0,N):
-	k = K[ki];
-	if k != 0:
-		an[ki] = (4 * np.pi * k * x0**2 * L / (np.pi**2 * k**2 * x0**2 - L**2 * np.pi**2) + 2. / (k * np.pi) ) * np.sin(k * np.pi * x0 / L) ;
-	
-F_proj1 = an[1] * vec[1,:];
-for ki in range(2,N):
-	F_proj1[:] = F_proj1[:] + an[ki] * vec[ki,:];
-
-
 #=============================================
 
 # Project forcing onto eigenmodes at all times
@@ -166,20 +152,8 @@ for ti in range(0,Nt):
 	theta_F[:,ti] = np.linalg.solve(vec_time[:,:,ti],F_time);
 	theta_u[:,ti] = np.linalg.solve(vec_time[:,:,ti],u_time);
 
-for k in range(0,N):
-	plt.plot(theta_F[k,:]);
-	plt.show();
-
 theta_F_norm = np.max(abs(theta_F));
 theta_u_norm = np.max(abs(theta_u));
-
-plt.subplot(121);
-plt.plot(K,an/np.max(abs(an)));
-plt.title('an');
-plt.subplot(122);
-plt.plot(K,theta_F[:,1]/np.max(abs(theta_F[:,1])));
-plt.title('theta');
-plt.show();
 
 theta_F_av = np.zeros(N);
 theta_u_av = np.zeros(N);
@@ -200,6 +174,29 @@ print(dom_index);
 	
 tf_av = abs(theta_F_av) / np.max(abs(theta_F_av));
 tu_av = abs(theta_u_av) / np.max(abs(theta_u_av));
+
+# Average wavelength
+#=============================================
+
+k_av_F = np.zeros(Nt);
+k_av_u = np.zeros(Nt);
+for ti in range(0,Nt):
+	for wi in range(0,N):	
+		k_av_F[ti] = k_av_F[ti] + abs(K[wi]) * abs(theta_F[wi,ti]);
+		k_av_u[ti] = k_av_u[ti] + abs(K[wi]) * abs(theta_u[wi,ti]);
+	k_av_F[ti] = k_av_F[ti] / np.sum(abs(theta_F[:,ti]));
+	k_av_u[ti] = k_av_u[ti] / np.sum(abs(theta_u[:,ti]));
+
+plt.plot(k_av_F,label='forcing');
+plt.plot(k_av_u,label='sol');
+plt.legend();
+plt.show();
+
+print(sum(k_av_F)/Nt);
+print(sum(k_av_u)/Nt);
+
+# Plots
+#=============================================
 
 # Plot of average over time.
 plt.plot(K,tf_av,label='Forcing');
@@ -226,7 +223,8 @@ plt.xlabel('time');
 plt.title('solution');
 plt.show();
 
-for ti in range(0,Nt):
+
+for ti in range(0,0):
 	theta_u_max = np.max(abs(theta_u[:,ti]));
 	theta_F_max = np.max(abs(theta_F[:,ti]));
 	plt.plot(K,theta_u[:,ti]/theta_u_max,label='Sol');
