@@ -109,7 +109,7 @@ elif BG == 'QUADRATIC':
 elif BG == 'GAUSSIAN':
 	if GAUSS == 'REF':
 		Umag = 0.8;
-		sigma = 0.015 * Ly;			# Increasing sigma decreases the sharpness of the jet
+		sigma = 0.02 * Ly;			# Increasing sigma decreases the sharpness of the jet (~0.0133 smallest possible)
 	elif GAUSS == 'WIDE':
 		Umag = 0.8;
 		sigma = 0.025 * Ly;
@@ -130,14 +130,15 @@ elif BG == 'GAUSSIAN':
 	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1.);	# Maximum BG flow velocity Umag
 	for j in range(0,N):
 		U0[j] = a * np.exp((l**2 - y[j]**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
-		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
-					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
-					+ f0 * y[j] + beta * y[j]**2 / 2) / g + Hflat; #erf(0);
-		
+		#H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
+		#			- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
+		#			+ f0 * y[j] + beta * y[j]**2 / 2) / g + Hflat; #erf(0);
+	
 elif BG == 'NONE':
 	for j in range(0,N):
 		Umag = 0;
 		H0[j] = Hflat;
+
 
 # Calculate BG PV
 Q = (f + diff(U0,2,0,dy)) / H0;

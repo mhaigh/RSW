@@ -189,6 +189,9 @@ for ti in range(0,Nt):
 
 plt.plot(k_av_F,label='forcing');
 plt.plot(k_av_u,label='sol');
+plt.title('Average wavenumber vs time')
+plt.xlabel('time')
+plt.ylabel('Average wavenumber')
 plt.legend();
 plt.show();
 
