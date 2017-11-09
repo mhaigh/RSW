@@ -71,7 +71,7 @@ def npyReadEEF_y0_components(npyFile):
 
 #=======================================================
 
-def npyReadEEF_U0(npyFile):
+def npyReadEEF(npyFile):
 
 	EEF_array = np.load(npyFile);	# Read the NETCDF file
 

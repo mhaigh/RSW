@@ -130,9 +130,9 @@ elif BG == 'GAUSSIAN':
 	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1.);	# Maximum BG flow velocity Umag
 	for j in range(0,N):
 		U0[j] = a * np.exp((l**2 - y[j]**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
-		#H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
-		#			- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
-		#			+ f0 * y[j] + beta * y[j]**2 / 2) / g + Hflat; #erf(0);
+		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
+					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
+					+ f0 * y[j] + beta * y[j]**2 / 2) / g + Hflat; #erf(0);
 	
 elif BG == 'NONE':
 	for j in range(0,N):
@@ -290,15 +290,15 @@ fH0_y = - H0_y / f_nd;
 #plt.plot(fH0_y);
 #plt.show();
 
-Rd = np.sqrt(H0_nd)/f_nd;
+Rd = np.sqrt(g*H0)/f;
 
 plt.subplot(221);
 plt.plot(Q);
 plt.subplot(222);
-plt.plot(np.sqrt(g*H0_nd));
+plt.plot(np.sqrt(g*H0));
 plt.subplot(223);
 plt.plot(1./f);
 plt.subplot(224);
-plt.plot(Rd);
+plt.plot(Rd/1000.0);
 plt.show();
 
