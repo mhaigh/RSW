@@ -16,12 +16,12 @@ FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
 
-FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
+FORCE_TYPE = 'DELTA';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'USER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
 BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 512+1; 			# Number of gridpoints
+N = 256+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.07;
+	Umag = 0.16;
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -139,7 +139,6 @@ elif BG == 'NONE':
 		Umag = 0;
 		H0[j] = Hflat;
 
-
 # Calculate BG PV
 Q = (f + diff(U0,2,0,dy)) / H0;
 
@@ -184,7 +183,7 @@ t = T[ts];								# Time of the snapshot
 # geostrophic BG state U0 and H0.
 #=======================================================
 
-U = 1.0e0;
+U = 1.0e-2;
 H = Hflat;
 
 chi = f0 * U * Ly / g;
@@ -279,9 +278,7 @@ print('Ld = ' + str(Ld));
 print('N = ' + str(N));
 
 #=======================================================
-
-
-
+print(T_nd);
 
 H0_y = diff(H0_nd,2,0,dy_nd);
 fH0_y = - H0_y / f_nd;
