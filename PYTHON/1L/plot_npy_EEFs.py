@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from inputFile import *
 
-vs = 'U0';
+vs = 'y0';
 
 #BG = 'U0=Gaussian'
-#BG = 'U0=0';
+BG = 'U0=0';
 #BG = 'U0=16';
-BG = 'vsU0';
+#BG = 'vsU0';
 
-opt = 'w';
+opt = 'k';
 
 #=====================================================================================================================
 

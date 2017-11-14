@@ -16,7 +16,7 @@ FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
 
-FORCE_TYPE = 'DELTA';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
+FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
@@ -24,7 +24,7 @@ FORCE_TYPE = 'DELTA';			# 'DCTS' is the original forcing, in which F3 has a disc
 Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
 GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.16;
+	Umag = 0.0688;
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -278,7 +278,6 @@ print('Ld = ' + str(Ld));
 print('N = ' + str(N));
 
 #=======================================================
-print(T_nd);
 
 H0_y = diff(H0_nd,2,0,dy_nd);
 fH0_y = - H0_y / f_nd;
