@@ -37,10 +37,10 @@ a1,a2,a3,a4,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0
 	
 k_start = N-8;
 k_end = N-7;
-Nk = 6;
-#loop = range(k_start,k_end);#it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
-loop = range(k_start,k_end);
-#loop = range(0,N);
+Nk = 8;
+#loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
+#loop = range(k_start,k_end);
+loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
@@ -54,7 +54,7 @@ for ii in loop:
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24.0 * 3600.0);
 	iii=np.argsort(period_days);
-	print(period_days[iii]);
+
 	dim = np.size(val);
 	# count = number of zero-crossings by the eigenvector 
 	# i_count = set of indices ordering modes by their count

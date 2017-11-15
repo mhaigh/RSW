@@ -20,7 +20,7 @@ import solver
 import output
 import output_read
 
-from inputFile_ref import *
+from inputFile import *
 
 #====================================================
 
@@ -83,15 +83,15 @@ print('solved');
 #====================================================
 
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
-LOOP = 'FULL';		# FULL, PART
+LOOP = 'PART';		# FULL, PART
 
-Nm = 8;						# How many modes to use in the decomposition at each wavenumber (dim is maximum).
+Nm = N;						# How many modes to use in the decomposition at each wavenumber (dim is maximum).
 if LOOP == 'FULL':
 	loop = range(0,N);
 	Nk = N;
 	# 
-	Nk_neg = 6;
-	Nk_pos = 6;
+	Nk_neg = -9;
+	Nk_pos = 8;
 elif LOOP == 'PART':
 	Nk_neg = 6; Nk_pos = 6;		# How many positive/negative wavenumbers to perform this decomposition at.
 	loop = it.chain(range(0,Nk_pos+1),range(N-Nk_neg,N));
@@ -131,8 +131,10 @@ for ii in loop:
 			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,ii,False);
 			count = np.zeros(dim);
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
-		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/nu='+str(int(nu))+'/';
-		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N129.nc';
+		#path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/nu='+str(int(nu))+'/';
+		#ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N128.nc';
+		path =  '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/256/east/';
+		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N257.nc';
 		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
 	else:

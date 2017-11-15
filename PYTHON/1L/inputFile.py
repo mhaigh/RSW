@@ -34,7 +34,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 256+1; 			# Number of gridpoints
+N = 512+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.0688;
+	Umag = -0.0233; #0.0688, -0.0233, 0.0213
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
