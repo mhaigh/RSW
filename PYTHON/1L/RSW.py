@@ -50,7 +50,7 @@ def RSW_main():
 	#F1_nd, F2_nd, F3_nd = forcing_1L.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
 	#F1_nd, F2_nd = forcing_1L.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
 	#F3_nd = forcing_1L.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
-	plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
+	#plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
 	#sys.exit();
 	# Coefficients
@@ -68,11 +68,11 @@ def RSW_main():
 	u_nd = np.real(u_nd);
 	v_nd = np.real(v_nd);
 	eta_nd = np.real(eta_nd);
-
+	
 	# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-	u_nd = u_nd / AmpF_nd;
-	v_nd = v_nd / AmpF_nd;
-	eta_nd = eta_nd / AmpF_nd;
+	#u_nd = u_nd / AmpF_nd;
+	#v_nd = v_nd / AmpF_nd;
+	#eta_nd = eta_nd / AmpF_nd;
 
 	# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
 	eta_full = np.zeros((N,N,Nt));
@@ -81,9 +81,9 @@ def RSW_main():
 		eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
 		u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
-	np.save('u_nd.npy',u_nd);
-	np.save('v_nd.npy',v_nd);
-	np.save('eta_nd.npy',eta_nd);
+	#np.save('u_nd.npy',u_nd);
+	#np.save('v_nd.npy',v_nd);
+	#np.save('eta_nd.npy',eta_nd);
 
 	#plt.subplot(121);
 	#plt.pcolor(x_grid,y_grid,u_full[:,:,ts],cmap='bwr');
@@ -236,7 +236,7 @@ def RSW_main():
 	# Soltuion Plots
 	if plotSol:
 		plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,False);
-		plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+		#plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
 		#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
 	
 	# Plots of PV and zonally averaged PV

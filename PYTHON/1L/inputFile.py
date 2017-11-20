@@ -21,7 +21,7 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
 BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
@@ -92,7 +92,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = -0.0233; #0.0688, -0.0233, 0.0213
+	Umag = -0.16; #0.0688, -0.0233, 0.0213
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -248,7 +248,7 @@ errorSpec = False;		# Print error of spectral solutions
 doEnergy = False;				# Energy
 doPV = True;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
-doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
+doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = False;		# If true, calculates the footprint in terms of its components.
 doMomentum = False;
 

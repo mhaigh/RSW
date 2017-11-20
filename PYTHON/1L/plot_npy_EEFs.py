@@ -11,7 +11,7 @@ vs = 'U0';
 #BG = 'U0=-08';
 BG = 'vsU0';
 
-opt = 'k';
+opt = 'y0';
 
 #=====================================================================================================================
 
@@ -35,9 +35,9 @@ if vs == 'y0':
 			EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k50.npy');
 			EEF_1, uq_1, Uq_1, uQ_1, vq_1, vQ_1 = output_read.npyReadEEF_y0_components('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
 			EEF_2, uq_2, Uq_2, uQ_2, vq_2, vQ_2 = output_read.npyReadEEF_y0_components('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k200.npy');
-			l0 = r'Re = 2Re$_{1}$';
-			l1 = r'Re = Re$_{1}$';
-			l2 = r'Re = Re$_{1}/2$';
+			l0 = r'Re = 2Re$_{0}$';
+			l1 = r'Re = Re$_{0}$';
+			l2 = r'Re = Re$_{0}/2$';
 		elif opt == 'w':
 			EEF_0, uq_0, Uq_0, uQ_0, vq_0, vQ_0 = output_read.npyReadEEF_y0_components('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_om50.npy');
 			EEF_1, uq_1, Uq_1, uQ_1, vq_1, vQ_1 = output_read.npyReadEEF_y0_components('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
@@ -64,9 +64,9 @@ if vs == 'y0':
 			EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k50.npy');
 			EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
 			EEF_2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k200.npy');
-			l0 = r'Re = 2Re$_{1}$';
-			l1 = r'Re = Re$_{1}$';
-			l2 = r'Re = Re$_{1}$/2';
+			l0 = r'Re = 2Re$_{0}$';
+			l1 = r'Re = Re$_{0}$';
+			l2 = r'Re = Re$_{0}$/2';
 		elif opt == 'w':
 			EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_om50.npy');
 			EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
@@ -93,9 +93,9 @@ elif vs == 'U0':
 		EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_U0_k50.npy');
 		EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_U0.npy');
 		EEF_2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_U0_k200.npy');
-		l0 = r'Re = 2Re$_{1}$';
-		l1 = r'Re = Re$_{1}$';
-		l2 = r'Re = Re$_{1}$/2';
+		l0 = r'Re = 2Re$_{0}$';
+		l1 = r'Re = Re$_{0}$';
+		l2 = r'Re = Re$_{0}$/2';
 	elif opt == 'w':
 		EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_U0_om50.npy');
 		EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_U0.npy');
@@ -163,13 +163,13 @@ elif vs == 'U0':
 #plt.show();
 
 if opt == 'w':
-	EEF_0 = EEF_0 / w50;
-	EEF_1 = EEF_1 / w60;
-	EEF_2 = EEF_2 / w70;
+	EEF_0 = 10.**4 * EEF_0 / w50;
+	EEF_1 = 10.**4 * EEF_1 / w60;
+	EEF_2 = 10.**4 * EEF_2 / w70;
 else:
-	EEF_0 = EEF_0 / w60;
-	EEF_1 = EEF_1 / w60;
-	EEF_2 = EEF_2 / w60;
+	EEF_0 = 10.**4 * EEF_0 / w60;
+	EEF_1 = 10.**4 * EEF_1 / w60;
+	EEF_2 = 10.**4 * EEF_2 / w60;
 
 if vs == 'y0':
 	plt.figure(1);
@@ -178,22 +178,22 @@ if vs == 'y0':
 		plt.plot(y_forced_1,EEF_1,label=l1,linewidth=1.3);
 		plt.plot(y_forced_2,EEF_2,label=l2,linewidth=1.3);
 		if BG == 'U0=Gaussian':
-			plt.yticks((-0.0006,-0.0004,-0.0002,0.0,0.0002,0.0004,0.0006,0.0008,0.0010,0.0012));
+			plt.yticks((-6,-4,-2,0.0,2,4,6,8,10,12));
 		elif BG == 'U0=0':
-			plt.yticks((0.0,0.0002,0.0004,0.0006,0.0008,0.0010,0.0012));
+			plt.yticks((0,2,4,6,8,10,12));
 		elif BG == 'U0=16':
-			plt.yticks((0.0,0.0002,0.0004,0.0006,0.0008,0.0010,0.0012));
+			plt.yticks((0,2,4,6,8,10,12));
 		plt.ylabel('EEF',fontsize=18);
 	else:
 		plt.plot(y_forced,EEF_0,label=l0,linewidth=1.3);
 		plt.plot(y_forced,EEF_1,label=l1,linewidth=1.3);
 		plt.plot(y_forced,EEF_2,label=l2,linewidth=1.3);
 		if BG == 'U0=Gaussian':
-			plt.yticks((-0.0006,-0.0004,-0.0002,0.0,0.0002,0.0004,0.0006,0.0008,0.001,0.0012),fontsize=0);
+			plt.yticks((-6,-4,-2,0,2,4,6,8,10,12),fontsize=0);
 		elif BG == 'U0=0':
-			plt.yticks((0.0,0.0002,0.0004,0.0006,0.0008,0.0010,0.0012),fontsize=0);
+			plt.yticks((0,2,4,6,8,10,12),fontsize=0);
 		elif BG == 'U0=16':
-			plt.yticks((0.0,0.0002,0.0004,0.0006,0.0008,0.0010,0.0012),fontsize=0);
+			plt.yticks((0,2,4,6,8,10,12),fontsize=0);
 	plt.xlim(-0.5,0.5);
 	plt.xticks((-0.5,-0.25,0.0,0.25,0.5));
 	plt.xlabel('y0',fontsize=18);

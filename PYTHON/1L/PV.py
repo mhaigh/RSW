@@ -91,7 +91,7 @@ def footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 	P = extend(P);
 		
 	# We are interested in the zonal average of the footprint
-	P_xav = np.trapz(P,x_nd,dx_nd,axis=1);
+	P_xav = np.trapz(P,x_nd,dx_nd,axis=1); # / 1 not required.
 
 	return P, P_xav
 
@@ -145,7 +145,7 @@ def footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 #====================================================
 
 # EEF
-def EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N):
+def EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N):
 # A function that calculates the equivalent eddy flux, given a zonally averaged footprint
 # The code works by calculating six integrals (three each side of the forcing) that make up each component of the equivalent eddy flux:
 # int1_north/south = int_{y > / < y0} P_xav dy;
@@ -173,8 +173,8 @@ def EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N):
 	norm2_north = np.trapz(Pabs_north,y_north,dy_nd);
 	norm2_south = np.trapz(Pabs_south,y_south,dy_nd);
 
-	EEF_north = (int1_north * norm1_north / norm2_north) * omega_nd;
-	EEF_south = (int1_south * norm1_south / norm2_south) * omega_nd;
+	EEF_north = (int1_north * norm1_north / norm2_north);
+	EEF_south = (int1_south * norm1_south / norm2_south);
 	
 	EEF_array = np.array([EEF_north, EEF_south]);
 

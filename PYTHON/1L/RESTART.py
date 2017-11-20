@@ -24,13 +24,17 @@ from inputFile import *
 
 #=======================================================
 
-#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/u_U0=32.npy');
-#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/v_U0=32.npy');
-#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta_U0=32.npy');
+u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/u_U0=32.npy');
+v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/v_U0=32.npy');
+eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta_U0=32.npy');
 
-u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/u_y0=0.npy');
-v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/v_y0=0.npy');
-eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/eta_y0=0.npy');
+#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/u_y0=15sigma.npy');
+#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/v_y0=15sigma.npy');
+#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/eta_y0=15sigma.npy');
+
+#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/u_y0=0.npy');
+#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/v_y0=0.npy');
+#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/eta_y0=0.npy');
 
 #u_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/u_nd.npy');
 #v_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/v_nd.npy');
@@ -38,6 +42,13 @@ eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0
 
 #====================================================
 
+#plt.contourf(u_nd[:,:,ts]);
+#plt.colorbar();
+#plt.show();
+
+#plt.contourf(eta_nd[:,:,ts]);
+#plt.colorbar();
+#plt.show()
 
 # In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
 eta_full = np.zeros((N,N,Nt));
@@ -46,7 +57,18 @@ for j in range(0,N):
 	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
 	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 
+U0_str = r'$U_{0}=-0.16$';
+#U0_str = r'$y_{0}=-\sigma$';
+#U0_str = r'$y_{0}=0$';
+
 #====================================================
+
+# Soltuion Plots
+if plotSol:
+	#plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+	plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,True);
+	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
+
 
 # Energy
 
@@ -107,16 +129,6 @@ if doPV:
 		else: 
 			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);	
 		np.save('P.npy',P);		
-		if doEEFs:
-			if footprintComponents:
-				EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
-				# This returns EEF_array, an array with the following structure:
-				# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
-				EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
-			else:
-				EEF_array = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
-				EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
-			print(EEF_north, EEF_south);
 			
 # Buoyancy footprints
 #====================================================
@@ -141,15 +153,10 @@ if plotForcing:
 if plotBG:
 	plotting.bgPlots(y_nd,H0_nd,U0_nd,PV_BG);
 
-# Soltuion Plots
-if plotSol:
-	#plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
-	plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
-	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
 
 # Plots of PV and zonally averaged PV
 #plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
-plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,True);
 if plotPV_av:
 	plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 
