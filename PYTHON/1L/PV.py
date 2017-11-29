@@ -10,7 +10,7 @@ from diagnostics import diff, extend, timeAverage
 #=====================================================================
 
 # potentialVorticity
-def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd):
+def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro):
 # Calculate potential vorticity	
 
 	RV_full = np.zeros((N,N,Nt));
@@ -141,6 +141,23 @@ def footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt):
 	# Tests confirm that the multiple approaches for calculating P_xav and P_tav yield the same results.
 
 	return P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav;
+
+#====================================================
+
+# footprint_shift
+def footprint_shift(P,y_nd,dy_nd,x_nd,dx_nd,N):
+# This function finds the extent of the zonal shift of the footprint.
+
+	P_av = np.trapz(np.abs(P),y_nd,dy_nd,axis=0);
+
+	x_shift = np.trapz(P_av*x_nd,x_nd,dx_nd) / np.trapz(P_av,x_nd,dx_nd);
+
+	#indices = np.argsort(-P_av);
+	#index = indices[0];
+	#x_shift = x_nd[index];
+
+	return x_shift;	
+
 
 #====================================================
 

@@ -65,14 +65,23 @@ def RSW_main():
 	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 	u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
+	np.save('u_nd_complex.npy',u_nd[:,:,ts]);
+	np.save('v_nd_complex.npy',v_nd[:,:,ts]);
+	np.save('eta_nd_complex.npy',eta_nd[:,:,ts]);
+
+	plotting.solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
+	plotting.solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
+
+	sys.exit();
+
 	u_nd = np.real(u_nd);
 	v_nd = np.real(v_nd);
 	eta_nd = np.real(eta_nd);
 	
 	# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-	#u_nd = u_nd / AmpF_nd;
-	#v_nd = v_nd / AmpF_nd;
-	#eta_nd = eta_nd / AmpF_nd;
+	u_nd = u_nd / AmpF_nd;
+	v_nd = v_nd / AmpF_nd;
+	eta_nd = eta_nd / AmpF_nd;
 
 	# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
 	eta_full = np.zeros((N,N,Nt));
@@ -186,7 +195,7 @@ def RSW_main():
 
 	# Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
 	if doPV:
-		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
 		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
 		# Keep these next two lines commented out unless testing effects of normalisation.
 		# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
@@ -206,15 +215,16 @@ def RSW_main():
 					# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
 					EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
 				else:
-					EEF_array = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
+					EEF_array = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
 					EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
-				print(EEF_north, EEF_south);
+					EEF = EEF_north - EEF_south;
+				print(EEF_north - EEF_south, EEF_north, EEF_south);
 			
 	# Buoyancy footprints
 	#====================================================
 	
 	# Should these be zero, according to conservation of mass?
-	#Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);
+	#Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,JET);
 
 	#====================================================
 
@@ -224,6 +234,9 @@ def RSW_main():
 	#====================================================
 	#====================================================
 	
+	#plotting.vqPlot(x_grid,y_grid,v_nd,PV_prime,EEF,U0,ts);
+	#sys.exit();
+
 	# Call the function that plots the forcing in physical and physical-spectral space.
 	if plotForcing:
 		plotting.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
@@ -248,7 +261,7 @@ def RSW_main():
 			plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 		if doFootprints:
 			if plotFootprint:
-				plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd,U,N);
+				plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,JET,FORCE,nu,r0,period_days,U0_nd,U,N);
 	
 	# Phase and amplitude
 	if plotPhaseAmp:

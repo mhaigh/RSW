@@ -21,13 +21,15 @@ FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discon
 							# 'CTS' redefines the 'DCTS' forcing so that all forcing terms are continuous,
 							# while still retaining the essential properties of the forcing. 
 
-Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'USER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 							
 
-BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'GAUSSIAN';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
 
-GAUSS = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
+JET = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
 							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
+
+JET_POS = 'CENTER';
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
@@ -79,7 +81,7 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
 gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 100.0;		# Kinematic viscosity (m2 s-1)
+nu = 100.;		# Kinematic viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
@@ -92,7 +94,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = -0.16; #0.0688, -0.0233, 0.0213
+	Umag = -0.08; #0.0688, -0.0233, 0.0213
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -107,33 +109,43 @@ elif BG == 'QUADRATIC':
 
 # Gaussian BG flow
 elif BG == 'GAUSSIAN':
-	if GAUSS == 'REF':
+	# Shape of jet
+	if JET == 'REF':
 		Umag = 0.8;
 		sigma = 0.02 * Ly;			# Increasing sigma decreases the sharpness of the jet (~0.0133 smallest possible)
-	elif GAUSS == 'WIDE':
+	elif JET == 'WIDE':
 		Umag = 0.8;
 		sigma = 0.025 * Ly;
-	elif GAUSS == 'SHARP':
+	elif JET == 'SHARP':
 		Umag = 0.8;
 		sigma = 0.02 * Ly;
-	elif GAUSS == 'SHARPER':	# This option may result in errors for grids too coarse.
+	elif JET == 'SHARPER':	# This option may result in errors for grids too coarse.
 		Umag = 0.8;
 		sigma = 0.01 * Ly;
-	elif GAUSS == 'STRONG':
+	elif JET == 'STRONG':
 		Umag = 1.2;
 		sigma = 0.03 * Ly;
-	elif GAUSS == 'WEAK':
+	elif JET == 'WEAK':
 		Umag = 0.4;
 		sigma = 0.03 * Ly;
+	# Position of jet
+	if JET_POS == 'CENTER':
+		y0_jet = 0;
+	elif JET_POS == 'NORTH':
+		y0_jet = 0.25 * Ly;
+	elif JET_POS == 'SOUTH':
+		y0_jet = - 0.25 * Ly;
 	# The rest of the parameters do not depend on the type of Gaussian flow we want
 	l = Ly / 2;
 	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1.);	# Maximum BG flow velocity Umag
 	for j in range(0,N):
-		U0[j] = a * np.exp((l**2 - y[j]**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
-		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
-					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
-					+ f0 * y[j] + beta * y[j]**2 / 2) / g + Hflat; #erf(0);
+		yy0 = y[j] - y0_jet;
+		U0[j] = a * np.exp((l**2 - yy0**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
+		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - yy0**2) / (2.0 * sigma**2))
+					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(yy0 / (np.sqrt(2) * sigma))
+					+ f0 * yy0 + beta * yy0**2 / 2) / g + Hflat; #erf(0);
 	
+# No BG flow.
 elif BG == 'NONE':
 	for j in range(0,N):
 		Umag = 0;
@@ -155,8 +167,9 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)-int(1.*N*sigma/L); # - sigma * 25./16.
+	y0_index = int(N/2)+int(1.5*N*sigma/L);# - int(N/4); # - sigma * 25./16.
 y0 = y[y0_index];
+
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
 

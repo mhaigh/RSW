@@ -24,9 +24,12 @@ from inputFile import *
 
 #=======================================================
 
-u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/u_U0=32.npy');
-v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/v_U0=32.npy');
-eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta_U0=32.npy');
+path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/';
+
+u_nd = np.load(path + 'u_U0=32.npy');
+v_nd = np.load(path + 'v_U0=32.npy');
+eta_nd = np.load(path + 'eta_U0=32.npy');
+P = np.load(path + 'P_U0=-16.npy');
 
 #u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/u_y0=15sigma.npy');
 #v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/v_y0=15sigma.npy');
@@ -42,6 +45,10 @@ eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta
 
 #====================================================
 
+x_shift = PV.footprint_shift(P,y_nd,dy_nd,x_nd,dx_nd,N);
+print(x_shift);
+sys.exit();
+
 #plt.contourf(u_nd[:,:,ts]);
 #plt.colorbar();
 #plt.show();
@@ -49,6 +56,8 @@ eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/eta
 #plt.contourf(eta_nd[:,:,ts]);
 #plt.colorbar();
 #plt.show()
+
+#====================================================
 
 # In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
 eta_full = np.zeros((N,N,Nt));

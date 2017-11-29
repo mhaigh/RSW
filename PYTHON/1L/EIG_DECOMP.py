@@ -83,14 +83,14 @@ print('solved');
 #====================================================
 
 VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
-LOOP = 'PART';		# FULL, PART
+LOOP = 'FULL';		# FULL, PART
 
 Nm = N;						# How many modes to use in the decomposition at each wavenumber (dim is maximum).
 if LOOP == 'FULL':
 	loop = range(0,N);
 	Nk = N;
 	# 
-	Nk_neg = -9;
+	Nk_neg = 9;
 	Nk_pos = 8;
 elif LOOP == 'PART':
 	Nk_neg = 6; Nk_pos = 6;		# How many positive/negative wavenumbers to perform this decomposition at.
@@ -103,10 +103,16 @@ theta = np.zeros((Nm,Nk),dtype=complex); 	# Initialise the set of weights; these
 proj = np.zeros((dim,N),dtype=complex);		# The projection. Sums the Nm most dominant modes, each of length dim, for Nk i-values.
 dom_index = np.zeros((Nm,Nk),dtype=int);	# To store the indices of the Nm-most dominant modes.
 
+var = np.zeros((Nk));
+mean = np.zeros((Nk));
+
 scatter_k = np.zeros(Nm * Nk);		# An empty array for saving k-values, for use in the scatter plot of dominant modes.
 scatter_l = np.zeros(Nm * Nk);		# An empty array for storing the count, psuedo-wavenumber l.
-scatter_p = np.zeros(Nm * Nk);	# An empty array for storing periods of the dominant wavenumbers.
+scatter_p = np.zeros(Nm * Nk);		# An empty array for storing periods of the dominant wavenumbers.
+theta_abs = np.zeros((Nm,Nk));		# For storing the absolute value of each weight.
 theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
+c = np.zeros((Nm,Nk));				# For storing the zonal phase speed of each mode.
+p = np.zeros(Nk);					# For storing weighted phase speed at each wavenumber.
 
 # Loop over desired wavenumbers (for tests, this may not be the full range of wavenumbers)
 # ii indexes arrays storing information at ALL wavenumbers k
@@ -117,7 +123,7 @@ for ii in loop:
 	print('ii = ' + str(ii));
 	k = K_nd[ii];
 	print('k = ' + str(k));
-	i = k % Nk
+	i = k % Nk;
 	print('i = ' + str(i));
 	i = int(i+0.01);
 
@@ -133,7 +139,8 @@ for ii in loop:
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
 		#path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/nu='+str(int(nu))+'/';
 		#ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N128.nc';
-		path =  '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/256/east/';
+		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/EIG/256/16/'
+		#path =  '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/256/west/';
 		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N257.nc';
 		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
@@ -144,8 +151,7 @@ for ii in loop:
 	# Expresses the eigenvalues (frequencies) in terms of periods.
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24. * 3600.);
-	print(np.transpose(period_days[dom_index[0:Nm,0]]));
-
+	
 	# This section returns three arrays: 1. val, 2. vec, 3. count
 	# 1.) val = val[0:dim] stores the eigenvalues/frequencies.
 	# 2.) vec = vec[]
@@ -170,13 +176,28 @@ for ii in loop:
 		#print(np.abs(theta_tmp[dom_index_tmp[mi]]));
 		dom_index[mi,i] = dom_index_tmp[mi];
 		theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
+		# All weights are now ordered in terms of their absolute value.
+
+		# For statistics.
+		theta_abs[mi,i] = np.abs(theta[mi,i]);		# Absolute value of each mode
+		c[mi,i] = freq[dom_index[mi,i]] / k;		# Phase speed of each mode	
+	
+		# The projection.
 		proj[:,ii] = proj[:,ii] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
+		
+		# Scatter plot arrays.
 		scatter_k[i*Nm+mi] = k;	
 		scatter_l[i*Nm+mi] = count[dom_index[mi,i]];
 		scatter_p[i*Nm+mi] = period_days[dom_index[mi,i]];
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
 		#plt.ylim(-0.5,0.5);
 		#plt.show();
+
+	# Statistics: mean, variance, weighted average 
+	# Should normalise so that all have the same mean (i.e. mean = 1/Nm);
+	mean[i] = theta_abs_tot[i] / Nm;
+	var[i] = sum((theta_abs[:,i] - mean[i])**2) / (Nm * mean[i]**2);
+	p[i] = sum((theta_abs[:,i] * c[:,i])) / theta_abs_tot[i];
 
 	#plt.subplot(121);
 	#plt.plot(np.real(proj[0:N,i]),y_nd);
@@ -186,6 +207,19 @@ for ii in loop:
 	#plt.plot(vec[0:N,dom_index_tmp[0:Nm]],y_nd);
 	#plt.ylim(-0.5,0.5);
 	#plt.show();
+
+plt.plot(K_nd,p);
+plt.show();
+
+
+plt.plot(K_nd,mean);
+plt.ylabel('MEAN ABS WEIGHT');
+plt.xlabel('WAVENUMBER');
+plt.show();
+plt.plot(K_nd,var);
+plt.ylabel('VARIANCE');
+plt.xlabel('WAVENUMBER');
+plt.show();
 
 #====================================================
 
@@ -223,9 +257,17 @@ for i in range(0,N):
 
 #====================================================
 
+
+
+
+#====================================================
+
 eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u_nd[:,:,ts],v_nd[:,:,ts],eta_nd[:,:,ts],x_nd,y_nd,x_grid,y_grid,True);
 
 #====================================================
+
+# We know that the selection of modes is dominated by factors other than the forcing freqeuncy.
+sys.exit();
 
 eigDiagnostics.scatterWeight(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
 eigDiagnostics.scatterPeriod(scatter_k,scatter_l,scatter_p,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	

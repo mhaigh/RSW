@@ -35,12 +35,12 @@ I = np.complex(0.0,1.0);
 # Define the coefficients required by the solver
 a1,a2,a3,a4,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-k_start = N-8;
-k_end = N-7;
+k_start = N-24;
+k_end = N;
 Nk = 8;
 #loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
-#loop = range(k_start,k_end);
-loop = range(0,N);
+loop = range(k_start,k_end);
+#loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	

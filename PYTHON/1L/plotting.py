@@ -8,6 +8,45 @@ from diagnostics import extend
 
 #====================================================
 
+# vqPlot
+def vqPlot(x_grid,y_grid,v_nd,PV_prime,EEF,U0,ts):
+	
+	U0 = max(U0);		
+	EEF = round(EEF,5);
+	
+	vlim = np.max(abs(v_nd[:,:,ts]));
+	PVlim = np.max(abs(PV_prime[:,:,ts]));	
+
+	plt.figure(1,figsize=[12,6]);
+	plt.subplot(121);
+	plt.pcolor(x_grid,y_grid,v_nd[:,:,ts],cmap='bwr',vmin=-vlim,vmax=vlim);
+	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
+	plt.text(-0.4,-0.4,'U0='+str(U0),fontsize=18);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.colorbar();
+
+	plt.subplot(122);
+	plt.pcolor(x_grid,y_grid,PV_prime[:,:,ts],cmap='bwr',vmin=-PVlim,vmax=PVlim);
+	plt.text(0.4,0.4,r'$q^{\prime}$',fontsize=26);
+	plt.text(-0.4,-0.4,'E='+str(EEF),fontsize=18);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+
+	plt.tight_layout();
+	plt.savefig('vq_U0=' + str(U0) + '.png');
+	plt.show();
+
+	
+	
+
+#====================================================
+
 # forcingPlot_save
 def forcingPlot_save(x_grid,y_grid,F3_nd,FORCE,BG,Fpos,N):
 
@@ -291,63 +330,115 @@ def footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_gri
 
 # solutionPlotsAmp
 # Plots of amplitude 
-def solutionPlotsAmp(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
+def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
 
-	plt.figure(1);
+	ulim = np.max(abs(u_nd[:,:,ts]));
+	vlim = np.max(abs(v_nd[:,:,ts]));
+	etalim = np.max(abs(eta_nd[:,:,ts]));
 
+	u_nd = u_nd / ulim;
+	v_nd = v_nd / vlim;
+	eta_nd = eta_nd / etalim
+
+	u_nd = extend(u_nd);
+	v_nd = extend(v_nd);
+	eta_nd = extend(eta_nd);
+
+	U0_str = r'$U_{0}=-0.16$';
+	#U0_str = r'$y_{0}=-\sigma$';
+	#U0_str = r'$y_{0}=0$';
+	
+	plt.figure(1,figsize=(22,6.4));
+	
 	plt.subplot(131);
-	plt.contourf(x_nd,y_nd,np.absolute(u_nd[:,:,ts]));
+	plt.pcolor(x_grid, y_grid, np.absolute(u_nd[:,:,ts]), vmin=0., vmax=1.);
+	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26,color='w');
+	plt.text(-0.45,0.4,U0_str,fontsize=22,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.xlabel('x',fontsize=16);
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-
+	
 	plt.subplot(132);
-	plt.contourf(x_nd,y_nd,np.absolute(v_nd[:,:,ts]));
+	plt.pcolor(x_grid, y_grid, np.absolute(v_nd[:,:,ts]), vmin=0., vmax=1.);
+	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.xlabel('x',fontsize=16);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-
+	
 	plt.subplot(133);
-	plt.contourf(x_nd,y_nd,np.absolute(eta_nd[:,:,ts]));
+	plt.pcolor(x_grid, y_grid, np.absolute(eta_nd[:,:,ts]), vmin=0., vmax=1.);
+	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xlabel('x',fontsize=16);
+	plt.ylabel('y',fontsize=16);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 	plt.colorbar();
 
-	plt.tight_layout()
-	plt.show()
+	plt.tight_layout();
+	plt.show();
 
 #====================================================
 
 # solutionPlotsPhase
 # Plots of phase 
-def solutionPlotsPhase(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
+def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
 
-	plt.figure(1)
+	ulim = np.max(abs(u_nd[:,:,ts]));
+	vlim = np.max(abs(v_nd[:,:,ts]));
+	etalim = np.max(abs(eta_nd[:,:,ts]));
 
+	u_nd = u_nd / ulim;
+	v_nd = v_nd / vlim;
+	eta_nd = eta_nd / etalim
+
+	u_nd = extend(u_nd);
+	v_nd = extend(v_nd);
+	eta_nd = extend(eta_nd);
+
+	U0_str = r'$U_{0}=-0.16$';
+	#U0_str = r'$y_{0}=-\sigma$';
+	#U0_str = r'$y_{0}=0$';
+
+	plt.figure(1,figsize=(22,6.4));
+	
 	plt.subplot(131);
-	plt.contourf(x_nd,y_nd,np.angle(u_nd[:,:,ts]));
-	plt.text(0.05,0.4,'u PHASE',color='w',fontsize=12);
+	plt.pcolor(x_grid, y_grid, np.angle(u_nd[:,:,ts]), vmin=-1., vmax=1.);
+	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26,color='w');
+	plt.text(-0.45,0.4,U0_str,fontsize=22,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.xlabel('x',fontsize=16);
+	plt.ylabel('y',fontsize=16);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 
 	plt.subplot(132);
-	plt.contourf(x_nd,y_nd,np.angle(v_nd[:,:,ts]));
+	plt.pcolor(x_grid, y_grid, np.angle(v_nd[:,:,ts]), vmin=-1., vmax=1.);
+	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xlabel('x',fontsize=16);
+	plt.ylabel('y',fontsize=16);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 
 	plt.subplot(133);
-	plt.contourf(x_nd,y_nd,np.angle(eta_nd[:,:,ts]));
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));
+	plt.pcolor(x_grid, y_grid, np.angle(eta_nd[:,:,ts]), vmin=-1., vmax=1.);
+	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
+	plt.xticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.xlabel('x',fontsize=16);
+	plt.ylabel('y',fontsize=16);
+	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
 
-	plt.tight_layout()
-	plt.show()
+	plt.tight_layout();
+	plt.show();
 
 #====================================================
 
