@@ -330,11 +330,11 @@ def footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_gri
 
 # solutionPlotsAmp
 # Plots of amplitude 
-def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
+def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 
-	ulim = np.max(abs(u_nd[:,:,ts]));
-	vlim = np.max(abs(v_nd[:,:,ts]));
-	etalim = np.max(abs(eta_nd[:,:,ts]));
+	ulim = np.max(abs(u_nd));
+	vlim = np.max(abs(v_nd));
+	etalim = np.max(abs(eta_nd));
 
 	u_nd = u_nd / ulim;
 	v_nd = v_nd / vlim;
@@ -344,54 +344,53 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
 	v_nd = extend(v_nd);
 	eta_nd = extend(eta_nd);
 
-	U0_str = r'$U_{0}=-0.16$';
-	#U0_str = r'$y_{0}=-\sigma$';
-	#U0_str = r'$y_{0}=0$';
-	
-	plt.figure(1,figsize=(22,6.4));
-	
-	plt.subplot(131);
-	plt.pcolor(x_grid, y_grid, np.absolute(u_nd[:,:,ts]), vmin=0., vmax=1.);
+	plt.pcolor(x_grid, y_grid, np.absolute(u_nd), vmin=0., vmax=1.);
 	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26,color='w');
 	plt.text(-0.45,0.4,U0_str,fontsize=22,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 	plt.xlabel('x',fontsize=16);
+	plt.ylabel('y',fontsize=16);
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_Amp_' + U0_name + '.png');
+	plt.close();
 	
-	plt.subplot(132);
-	plt.pcolor(x_grid, y_grid, np.absolute(v_nd[:,:,ts]), vmin=0., vmax=1.);
+	plt.pcolor(x_grid, y_grid, np.absolute(v_nd), vmin=0., vmax=1.);
 	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);	
 	plt.xlabel('x',fontsize=16);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	
-	plt.subplot(133);
-	plt.pcolor(x_grid, y_grid, np.absolute(eta_nd[:,:,ts]), vmin=0., vmax=1.);
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_Amp_' + U0_name + '.png');
+	plt.close();
+
+	plt.pcolor(x_grid, y_grid, np.absolute(eta_nd), vmin=0., vmax=1.);
 	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
 	plt.xlabel('x',fontsize=16);
-	plt.ylabel('y',fontsize=16);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 	plt.colorbar();
-
 	plt.tight_layout();
-	plt.show();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_Amp_' + U0_name + '.png');
+	plt.close();
+
 
 #====================================================
 
 # solutionPlotsPhase
 # Plots of phase 
-def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
+def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 
-	ulim = np.max(abs(u_nd[:,:,ts]));
-	vlim = np.max(abs(v_nd[:,:,ts]));
-	etalim = np.max(abs(eta_nd[:,:,ts]));
+	ulim = np.max(abs(u_nd));
+	vlim = np.max(abs(v_nd));
+	etalim = np.max(abs(eta_nd));
 
 	u_nd = u_nd / ulim;
 	v_nd = v_nd / vlim;
@@ -401,44 +400,41 @@ def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N):
 	v_nd = extend(v_nd);
 	eta_nd = extend(eta_nd);
 
-	U0_str = r'$U_{0}=-0.16$';
-	#U0_str = r'$y_{0}=-\sigma$';
-	#U0_str = r'$y_{0}=0$';
-
-	plt.figure(1,figsize=(22,6.4));
-	
-	plt.subplot(131);
-	plt.pcolor(x_grid, y_grid, np.angle(u_nd[:,:,ts]), vmin=-1., vmax=1.);
-	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26,color='w');
-	plt.text(-0.45,0.4,U0_str,fontsize=22,color='w');
+	plt.pcolor(x_grid, y_grid, np.angle(u_nd), vmin=-1., vmax=1.);
+	plt.text(0.4,-0.4,r'$u^{\prime}$',fontsize=26,color='w');
+	plt.text(-0.45,-0.4,U0_str,fontsize=22,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
-	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.yticks((-1./2,-1./4,0,1./4,1./2),);	
 	plt.xlabel('x',fontsize=16);
 	plt.ylabel('y',fontsize=16);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_Phase_' + U0_name + '.png');
+	plt.close();
 
-	plt.subplot(132);
-	plt.pcolor(x_grid, y_grid, np.angle(v_nd[:,:,ts]), vmin=-1., vmax=1.);
-	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26,color='w');
+	plt.pcolor(x_grid, y_grid, np.angle(v_nd), vmin=-1., vmax=1.);
+	plt.text(0.4,-0.4,r'$v^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
 	plt.xlabel('x',fontsize=16);
-	plt.ylabel('y',fontsize=16);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.tight_layout();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_Phase_' + U0_name + '.png');
+	plt.close();
 
-	plt.subplot(133);
-	plt.pcolor(x_grid, y_grid, np.angle(eta_nd[:,:,ts]), vmin=-1., vmax=1.);
-	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
+	plt.pcolor(x_grid, y_grid, np.angle(eta_nd), vmin=-1., vmax=1.);
+	plt.text(0.4,-0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));	
+	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
 	plt.xlabel('x',fontsize=16);
-	plt.ylabel('y',fontsize=16);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 	plt.colorbar();
-
 	plt.tight_layout();
-	plt.show();
+	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/eta_Phase_' + U0_name + '.png');
+	plt.close();
 
 #====================================================
 
@@ -962,3 +958,23 @@ def plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N)
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) + '/P_uv_' + str(Fpos) + str(N) + '.png')
 
 #====================================================
+
+# plot_xshift
+def plot_xshift():
+
+	xshift=np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/Paper1/xshift.npy');	
+
+	N = len(xshift);
+	U0 = np.linspace(-0.5,0.5,N);
+
+	plt.plot(U0,xshift,'k',linewidth=2);
+	plt.ylim(-.12,.12);
+	plt.xlim(-0.5,0.5);
+	plt.xticks((-0.5,-.4,-.3,-.2,-.1,0.,0.1,0.2,0.3,0.4,0.5));
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.xlabel('U0',fontsize=18)
+	plt.ylabel('Footprint zonal shift',fontsize=18);
+	plt.show();	
+
+
+

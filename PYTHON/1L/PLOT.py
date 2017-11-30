@@ -19,14 +19,26 @@ from inputFile import *
 
 # UNIFORM
 
-path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/'
-U0_name = 'U0=16';
-U0_str = r'$U_{0}=0.16$';
+path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/Paper1/';
 
-u_nd = np.load(path+'u_'+U0_name+'.npy');
-v_nd = np.load(path+'v_'+U0_name+'.npy');
-eta_nd = np.load(path+'eta_'+U0_name+'.npy');
-P = np.load(path+'P_'+U0_name+'.npy');
+#U0_name = 'U0=-08';
+#U0_str = r'$U_{0}=-0.08$';
+U0_name = 'y0=-sigma';
+U0_str = r'$y_{0}=-\sigma$';
+
+#u_nd = np.load(path+'u_'+U0_name+'.npy');
+#v_nd = np.load(path+'v_'+U0_name+'.npy');
+#eta_nd = np.load(path+'eta_'+U0_name+'.npy');
+#P = np.load(path+'P_'+U0_name+'.npy');
+
+u_nd = np.load(path+'u_nd_complex_' + U0_name + '.npy');
+v_nd = np.load(path+'v_nd_complex_' + U0_name + '.npy');
+eta_nd = np.load(path+'eta_nd_complex_' + U0_name + '.npy');
+
+plotting.solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N);
+plotting.solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N);
+
+sys.exit();
 
 #=======================================================
 

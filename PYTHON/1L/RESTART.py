@@ -45,10 +45,6 @@ P = np.load(path + 'P_U0=-16.npy');
 
 #====================================================
 
-x_shift = PV.footprint_shift(P,y_nd,dy_nd,x_nd,dx_nd,N);
-print(x_shift);
-sys.exit();
-
 #plt.contourf(u_nd[:,:,ts]);
 #plt.colorbar();
 #plt.show();
