@@ -39,8 +39,8 @@ k_start = N-24;
 k_end = N;
 Nk = 8;
 #loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
-loop = range(k_start,k_end);
-#loop = range(0,N);
+#loop = range(k_start,k_end);
+loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
@@ -69,18 +69,14 @@ for ii in loop:
 	period_days = period_days[i_count];
 
 	# Before saving the modes, they need to be normalised by their energy.
-	energy=0;
-	if energy==1:
+	ENERGY = 1;
+	if ENERGY ==1:
 		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 		E = np.zeros(dim);	
 		for wi in range(0,dim):
-			print(str(wi+1) + ' / ' + str(dim));		
-			KE_av_tot, PE_av_tot = energy.E_from_spec(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],Ro,k,x_nd,y_nd,100,N,'av_tot');
-			E[wi] = KE_av_tot + PE_av_tot;
-			print('Energy = ' + str(E[wi]));
-
-		#plt.plot(E);
-		#plt.show();
+			#print(str(wi+1) + ' / ' + str(dim));	
+			EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
+			u_vec[:,wi], v_vec[:,wi], eta_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), eta_vec[:,wi] / np.sqrt(EE);
 
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 

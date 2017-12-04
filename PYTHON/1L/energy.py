@@ -47,17 +47,17 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 	# instead we only need to sample 'times' from a interval of unit length, with Nt entries,
 	# the frequency omega cancels out with the period T.
 
-	u = np.zeros((N,N,Nt));
-	v = np.zeros((N,N,Nt));
-	eta = np.zeros((N,N,Nt));
+	u = np.zeros((N,N+1,Nt));
+	v = np.zeros((N,N+1,Nt));
+	eta = np.zeros((N,N+1,Nt));
 
 	omega_t = np.linspace(0,1,Nt);
 
-	for ti in range(0,Nt):
+	for ti in range(0,Nt+1):
 		for j in range(0,N):
-			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
-			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
-			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd[0:N] - omega_t[ti])));
+			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd - omega_t[ti])));
+			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd - omega_t[ti])));
+			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * (k_nd * x_nd - omega_t[ti])));
 	
 	# 1. Temporally averaged KE
 	if output == 'av':
@@ -71,12 +71,10 @@ def KE_from_spec(u_tilde,v_tilde,eta_tilde,k_nd,x_nd,y_nd,Nt,N,output):
 	elif output == 'av_tot':
 		dx_nd = x_nd[1] - x_nd[0];
 		dy_nd = y_nd[1] - y_nd[0];
-		KE = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
-		KE_av_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		for ti in range(1,Nt):
-			KE = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
-			KE_av_tot = KE_av_tot + np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		KE_av_tot = KE_av_tot / Nt;
+		KE = 0.5 * (u**2 + v**2) * eta;
+		KE_av = np.trapz(np.trapz(KE,x_nd,dx_nd,1),y_nd,dy_nd,0);
+		KE_av_tot = np.trapz(KE_av,T_nd,dt_nd,0);
+
 		return KE_av_tot;
 	
 	# 3. Time-dependent KE
@@ -154,7 +152,7 @@ def PE_from_spec(eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
 #=========================================================
 
 # E_from_spec
-def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
+def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,T_nd,Nt,omega_nd,N,output):
 # A function that takes the spectral representation of the solution at only one wavenumber k, indexed by i,
 # and calculates the energy (both KE and PE) at that wavenumber.
 # Because of the linearity of the system, the energy outputted from this function can be summed over all wavenumbers
@@ -173,22 +171,18 @@ def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
 	# instead we only need to sample 'times' from a interval of unit length, with Nt entries,
 	# the frequency omega cancels out with the period T.
 
-	u = np.zeros((N,N,Nt));
-	v = np.zeros((N,N,Nt));
-	eta = np.zeros((N,N,Nt));
-	
-	omega_t = np.linspace(0,1,Nt);
+	u = np.zeros((N,N+1,Nt+1));
+	v = np.zeros((N,N+1,Nt+1));
+	eta = np.zeros((N,N+1,Nt+1));	
 
-	for ti in range(0,Nt):
+	dt_nd = T_nd[1] - T_nd[0];
+
+	for ti in range(0,Nt+1):
 		for j in range(0,N):
-			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * I * (k_nd * x_nd[0:N] - omega_t[ti])));
-			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * I *(k_nd * x_nd[0:N] - omega_t[ti])));
-			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * I * (k_nd * x_nd[0:N] - omega_t[ti])));
+			u[j,:,ti] = np.real(u_tilde[j] * np.exp(2 * np.pi * I * (k_nd * x_nd - omega_nd * T_nd[ti])));
+			v[j,:,ti] = np.real(v_tilde[j] * np.exp(2 * np.pi * I *(k_nd * x_nd - omega_nd * T_nd[ti])));
+			eta[j,:,ti] = np.real(eta_tilde[j] * np.exp(2 * np.pi * I * (k_nd * x_nd - omega_nd * T_nd[ti])));
 	
-	#plt.contourf(u[:,:,10]);
-	#plt.colorbar();
-	#plt.show();
-
 	# 1. Temporally averaged KE and PE
 	if output == 'av':
 		KE_av = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
@@ -204,17 +198,17 @@ def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
 	elif output == 'av_tot':
 		dx_nd = x_nd[1] - x_nd[0];
 		dy_nd = y_nd[1] - y_nd[0];
-		KE = 0.5 * (u[:,:,0]**2 + v[:,:,0]**2) * eta[:,:,0];
-		KE_av_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		PE = 0.5 * eta[:,:,0]**2 / Ro;
-		PE_av_tot = np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		for ti in range(1,Nt):
-			KE = 0.5 * (u[:,:,ti]**2 + v[:,:,ti]**2) * eta[:,:,ti];
-			KE_av_tot = KE_av_tot + np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-			PE = 0.5 * eta[:,:,ti]**2 / Ro;
-			PE_av_tot = PE_av_tot + np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,1),y_nd,dy_nd,0);
-		KE_av_tot = KE_av_tot / Nt;
-		PE_av_tot = PE_av_tot / Nt;
+
+		KE = 0.5 * (u**2 + v**2) * eta;
+		KE_av = np.trapz(np.trapz(KE,x_nd,dx_nd,1),y_nd,dy_nd,0);
+		KE_av_tot = np.trapz(KE_av,T_nd,dt_nd,0) / T_nd[Nt];
+
+		PE = 0.5 * eta**2 / Ro;
+		PE_av = np.trapz(np.trapz(PE,x_nd,dx_nd,1),y_nd,dy_nd,0);
+		plt.plot(PE_av);
+		plt.show();
+		PE_av_tot = np.trapz(PE_av,T_nd,dt_nd,0) / T_nd[Nt];
+
 		return KE_av_tot, PE_av_tot;
 	
 	# 3. Time-dependent KE and PE
@@ -232,6 +226,21 @@ def E_from_spec(u_tilde,v_tilde,eta_tilde,Ro,k_nd,x_nd,y_nd,Nt,N,output):
 
 #=========================================================
 
+# E_anomaly_EIG
+def E_anomaly_EIG(u_vec,v_vec,eta_vec,H0_nd,U0_nd,Ro,y_nd,dy_nd):
+# This function calculates the energy anomaly as derived in the notes.
+
+	E1 = 0.25 * H0_nd * (np.real(u_vec)**2 + np.imag(u_vec)**2 + np.real(v_vec)**2 + np.imag(v_vec)**2);
+	E2 = 0.5 * U0_nd * (np.real(u_vec) * np.real(eta_vec) + np.imag(u_vec) * np.imag(eta_vec));
+	E3 = 0.25 * (np.real(eta_vec)**2 + np.imag(eta_vec)**2) / Ro;
+
+	E = E1 + E2 + E3;
+
+	E = np.trapz(E,y_nd,dy_nd,0);
+
+	return E;
+
+#=========================================================
 # KE
 def KE(u_full,v_nd,eta_full,x_nd,y_nd,dx_nd,dy_nd,N):
 # Outputs the KE at a moment in time, by taking as input as time-snapshot of the solution u,v,eta.
@@ -258,7 +267,7 @@ def PE(eta_full,Ro,x_nd,y_nd,dx_nd,dy_nd,N):
 
 
 	
-	
+#=========================================================
 
 
 

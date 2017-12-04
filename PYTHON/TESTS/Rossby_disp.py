@@ -7,7 +7,7 @@ Ln = 10.;
 K = np.linspace(-Ln/2,Ln/2,(N+1));
 L = np.linspace(-Ln/2,Ln/2,(N+1))
 
-U = 0.01;
+U = 0.00;
 
 beta = 2.0e-11;
 

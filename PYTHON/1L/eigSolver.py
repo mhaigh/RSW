@@ -35,9 +35,9 @@ def EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N):
 
 	a3 = Ro * diff(U0_nd,2,0,dy_nd) - f_nd;		# For uniform U0_nd, the first term is zero	
 
-	c2 = diff(H0_nd,2,0,dy_nd);					# For zero BG flow, H0_nd=Hflat=const, i.e. c2=0
+	c2 = Ro * diff(H0_nd,2,0,dy_nd);					# For zero BG flow, H0_nd=Hflat=const, i.e. c2=0
 	
-	c3 = H0_nd / (2. * dy_nd);
+	c3 = Ro * H0_nd / (2. * dy_nd);
 
 	# a3, c2 and c3 have length N, so when used in defining u and v equations in the matrix below,
 	# we must add 1 to each index in order to skip out the dead gridpoint.
@@ -51,8 +51,8 @@ def EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N):
 	for i in range(0,N):
 		for j in range(0,N):
 			a1[j,i] = 2. * np.pi * I * U0_nd[j] * K_nd[i] * Ro + 4. * np.pi**2 * K_nd[i]**2 * Ro_Re + gamma_nd;
-			c1[j,i] = 2. * np.pi * I * K_nd[i] * H0_nd[j];
-			c4[j,i] = 2. * np.pi * I * U0_nd[j] * K_nd[i];
+			c1[j,i] = 2. * np.pi * I * K_nd[i] * H0_nd[j] * Ro;
+			c4[j,i] = 2. * np.pi * I * U0_nd[j] * K_nd[i] * Ro;
 
 	return a1,a2,a3,a4,b4,c1,c2,c3,c4;
 
@@ -246,9 +246,9 @@ def FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,i,VECS):
 	A[0,N2+N] = a4[i];				# eta[0] 
 	# North
 	A[N-1,N-1] = a1[N-1,i]- 2 * a2;	# u[N-1]
-	A[N-1,N-2] = a2;					# u[N-2]
+	A[N-1,N-2] = a2;				# u[N-2]
 	#A[N-1,N-3]=a2;
-	A[N-1,2*N+N2-1] = a4[i];			# eta[N-1]
+	A[N-1,2*N+N2-1] = a4[i];		# eta[N-1]
 
 	# v equation BCs
 	# South
@@ -267,7 +267,7 @@ def FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,i,VECS):
 	# eta equation BCs (Here we have to define BCs at j=N+N2,N+N2+1,3*N-3,3*N-4)
 	# South
 	A[N+N2,0] = c1[0,i];				# u[0]		# Again, see documentation for BC reasoning
-	A[N+N2,N] = c3[0];				# v[1] (factor of 2 because we use one-sided FD for v_y at the boundaries)
+	A[N+N2,N] = c3[0];					# v[1] (factor of 2 because we use one-sided FD for v_y at the boundaries)
 	A[N+N2,N+N2] = c4[0,i];				# eta[0]
 	A[N+N2+1,1] = c1[1,i];				# u[1]
 	A[N+N2+1,N] = c2[1];				# v[1]
@@ -519,7 +519,7 @@ def FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,uBC,etaBC,N,N2,i,VECS):
 
 # eigDecomp
 #=======================================================
-def eigDecomp(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,BC,VEC,Phi):
+def eigDecomp(VEC,Phi):
 # A fucntion that calculates the weights for an eigenmode decomposition of a forced solution as calculated by RSW_1L.py
 # The eigenmodes and forced solutions (in (k,y)-space) can be calculated anew (NEW) or from a numpy array file (FILE),
 # or an eigenvector can be passed in the place of VEC. 

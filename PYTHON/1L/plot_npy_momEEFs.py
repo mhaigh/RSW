@@ -5,15 +5,15 @@ from inputFile import *
 
 mom = 'u'
 
-vs = 'y0';
+vs = 'U0';
 
 #BG = 'U0=Gaussian'
 #BG = 'U0=0';
-BG = 'U0=16';
+#BG = 'U0=16';
 #BG = 'U0=-08';
-#BG = 'vsU0';
+BG = 'vsU0';
 
-opt = 'k';
+opt = 'y0';
 
 #=====================================================================================================================
 
@@ -147,14 +147,14 @@ elif vs == 'U0':
 #plt.plot(y_forced,EEF_0/Rd2);
 #plt.show();
 
-if opt == 'w':
-	EEF_0 = 10.**4 * EEF_0 / w50;
-	EEF_1 = 10.**4 * EEF_1 / w60;
-	EEF_2 = 10.**4 * EEF_2 / w70;
-else:
-	EEF_0 = 10.**4 * EEF_0 / w60;
-	EEF_1 = 10.**4 * EEF_1 / w60;
-	EEF_2 = 10.**4 * EEF_2 / w60;
+#if opt == 'w':
+#	EEF_0 = 10.**4 * EEF_0 / w50;
+#	EEF_1 = 10.**4 * EEF_1 / w60;
+#	EEF_2 = 10.**4 * EEF_2 / w70;
+#else:
+#	EEF_0 = 10.**4 * EEF_0 / w60;
+#	EEF_1 = 10.**4 * EEF_1 / w60;
+#	EEF_2 = 10.**4 * EEF_2 / w60;
 
 if vs == 'y0':
 	plt.figure(1);
@@ -194,8 +194,11 @@ elif vs == 'U0':
 	plt.xlim(-0.3,0.5);	
 	plt.ylabel('EEF',fontsize=18)
 plt.grid(b=True, which='both', color='0.65',linestyle='--');
-#plt.title(BG+', '+k)
-plt.legend();
+#plt.title(BG+', '+k);
+if mom == 'u':
+	plt.legend(loc=4)
+else:	
+	plt.legend();
 plt.tight_layout();
 plt.show();
 

@@ -28,6 +28,7 @@ import solver
 import output
 import energy
 import plotting
+import buoy
 
 from inputFile import *
 
@@ -65,14 +66,14 @@ def RSW_main():
 	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 	u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
-	np.save('u_nd_complex.npy',u_nd[:,:,ts]);
-	np.save('v_nd_complex.npy',v_nd[:,:,ts]);
-	np.save('eta_nd_complex.npy',eta_nd[:,:,ts]);
+	#np.save('u_nd_complex.npy',u_nd[:,:,ts]);
+	#np.save('v_nd_complex.npy',v_nd[:,:,ts]);
+	#np.save('eta_nd_complex.npy',eta_nd[:,:,ts]);
 
-	plotting.solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
-	plotting.solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
+	#plotting.solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
+	#plotting.solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
 
-	sys.exit();
+	#sys.exit();
 
 	u_nd = np.real(u_nd);
 	v_nd = np.real(v_nd);
@@ -224,7 +225,7 @@ def RSW_main():
 	#====================================================
 	
 	# Should these be zero, according to conservation of mass?
-	#Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,JET);
+	Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,N,Nt);
 
 	#====================================================
 
@@ -256,7 +257,7 @@ def RSW_main():
 	if doPV:
 		if plotPV:
 			#plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
-			plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
+			plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,True);
 		if plotPV_av:
 			plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 		if doFootprints:

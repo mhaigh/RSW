@@ -739,7 +739,6 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 	plt.ylim(-0.5,0.5)
 	plt.xlim(-1.1*np.max(abs(P_xav)),1.1*np.max(abs(P_xav)));
 	plt.tight_layout()
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_nu=' + str(nu) + '.png');
 	plt.show();
 	
 	# These if loops are for constantly altering depending on the test being done.
@@ -760,8 +759,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd
 		plt.xlabel('x');
 		plt.ylabel('y');
 		plt.tight_layout()
-		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/TEST/FOOTPRINT_' + str(GAUSS) + '.png');
-		
+
 	if BG == 'UNIFORM':
 		plt.figure(2)
 		plt.contourf(x_nd,y_nd,P);

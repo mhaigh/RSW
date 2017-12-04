@@ -49,7 +49,7 @@ if SOL == 'NEW':
 		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
 	elif BC == 'FREE-SLIP':
 		uBC, etaBC = solver.BC_COEFFICIENTS(Ro,Re,f_nd,H0_nd,dy_nd,N);
-		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+		solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	else:
 		sys.exit('ERROR: choose valid BC');
 
@@ -137,17 +137,23 @@ for ii in loop:
 			val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,ii,False);
 			count = np.zeros(dim);
 	elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
+
+		# Low-res
+		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/east/';
 		#path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/nu='+str(int(nu))+'/';
-		#ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N128.nc';
+		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N129.nc';
+	
+		# High-res
 		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/EIG/256/16/'
 		#path =  '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/256/west/';
-		ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N257.nc';
+		#ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N257.nc';
 		print('Reading from ' + ncFile + '...');
 		val, vec, count = output_read.ncReadEigenmodes(ncFile);
 	else:
 		sys.exit('VEC must be FILE or NEW');
 	
-	val = val / (-2 * np.pi * I * Ro);
+	val = val / (2 * np.pi * I * Ro);
+	
 	# Expresses the eigenvalues (frequencies) in terms of periods.
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24. * 3600.);
@@ -192,6 +198,8 @@ for ii in loop:
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
 		#plt.ylim(-0.5,0.5);
 		#plt.show();
+	plt.plot(theta_abs[:,i]);
+	plt.show();
 
 	# Statistics: mean, variance, weighted average 
 	# Should normalise so that all have the same mean (i.e. mean = 1/Nm);
@@ -208,7 +216,7 @@ for ii in loop:
 	#plt.ylim(-0.5,0.5);
 	#plt.show();
 
-plt.plot(K_nd,p);
+plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p*U));
 plt.show();
 
 

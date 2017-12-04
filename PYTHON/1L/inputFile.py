@@ -36,7 +36,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 512+1; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -94,7 +94,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = -0.08; #0.0688, -0.0233, 0.0213
+	Umag = 0.0213; #0.0688, -0.0233, 0.0213
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -106,6 +106,16 @@ elif BG == 'QUADRATIC':
 	for j in range(0,N):
 		U0[j] = A * (Ly**2 / 4 - y[j]**2);		# A quadratic eastward (positve amplitude) 'jet' with no flow on the boundaries
 		H0[j] = A / g * (beta * y[j]**4 / 4 + f0 * y[j]**3 / 3 - Ly**2 * beta * y[j]**2 / 8 - Ly**2 * f0 * y[j] / 4) + Hflat;
+
+elif BG == 'SHEAR':
+	Umag = 0.2;
+	b = 0.0;
+	# Do not edit these variables
+	l = Ly / 2;
+	a = Umag / l
+	for j in range(0,N):
+		U0[j] = a * y[j] + b;
+		H0[j] = - (f0 * b * y[j] + 0.5 * (f0 * a + beta * b) * y[j]**2 + a * beta * y[j]**3 / 3.) / g + Hflat;
 
 # Gaussian BG flow
 elif BG == 'GAUSSIAN':
@@ -301,13 +311,14 @@ fH0_y = - H0_y / f_nd;
 
 Rd = np.sqrt(g*H0)/f;
 
-plt.subplot(221);
-plt.plot(Q);
-plt.subplot(222);
-plt.plot(np.sqrt(g*H0));
-plt.subplot(223);
-plt.plot(1./f);
-plt.subplot(224);
-plt.plot(Rd/1000.0);
-plt.show();
-
+if False:
+	plt.subplot(221);
+	plt.plot(Q);
+	plt.subplot(222);
+	plt.plot(np.sqrt(g*H0));
+	plt.subplot(223);
+	plt.plot(1./f);
+	plt.subplot(224);
+	plt.plot(Rd/1000.0);
+	plt.show();
+	
