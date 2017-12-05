@@ -295,7 +295,7 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftild
 # Called by RSW_1L.py if BC = 'FREE-SLIP'.
 # This is the better performing FREE-SLIP option.
 # This solver assumes two things: 1. u[-1] = 0 and 2. one-sided fd approximation of v at the boundaries.
-
+# This assumption can be more precisely motivated. u_y=v=v_yy=0.
 
 	dim = N2 + 2 * N;
 	#print(dim);
@@ -316,13 +316,13 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftild
 	
 		# u equation BCs
 		# South
-		A[0,0] = a1[0,i]- 2 * a2;		# u[0]		# See documentation for reasoning behind BCs here
-		A[0,1] = a2;					# u[1]
+		A[0,0] = a1[0,i] - 2 * a2;		# u[0]		# See documentation for reasoning behind BCs here
+		A[0,1] = 2. * a2;				# u[1]
 		#A[0,2]=a2;
 		A[0,N2+N] = a4[i];				# eta[0] 
 		# North
 		A[N-1,N-1] = a1[N-1,i]- 2 * a2;	# u[N-1]
-		A[N-1,N-2] = a2;					# u[N-2]
+		A[N-1,N-2] = 2. * a2;			# u[N-2]
 		#A[N-1,N-3]=a2;
 		A[N-1,2*N+N2-1] = a4[i];			# eta[N-1]
 
@@ -393,9 +393,9 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftild
 			
 		solution[:,i] = np.linalg.solve(A,F);
 		
-		#import matplotlib.pyplot as plt
-		#plt.plot(solution[2*N:3*N,i]);
-		#plt.show();
+		import matplotlib.pyplot as plt
+		plt.plot(solution[2*N:3*N,i]);
+		plt.show();
 	
 	return solution;
 
@@ -405,7 +405,7 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftild
 #=======================================================
 def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2):
 # Called by RSW_1L.py if BC = 'FREE-SLIP'.
-# Currently uses the ghost point idea for dealing with boundary terms in the u eq, goes to 1-sided fd for v in eta eq
+# Imposes that v=v_yy=u_y=0.
 
 	dim = N2 + 2 * N;
 	#print(dim);
@@ -426,13 +426,11 @@ def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftild
 	
 		# u equation BCs
 		# South
-		A[0,0] = a1[0,i] - 2 * a2;		# u[0]		# See documentation for reasoning behind BCs here
-		A[0,1] = a2;					# u[1]
+		A[0,0] = a1[0,i];				# u[0]		# See documentation for reasoning behind BCs here
 		A[0,N2+N] = a4[i];				# eta[0] 
 		# North
-		A[N-1,N-1] = a1[N-1,i] - 2 * a2;	# u[N-1]
-		A[N-1,N-2] = a2;					# u[N-2]
-		A[N-1,2*N+N2-1] = a4[i];			# eta[N-1]
+		A[N-1,N-1] = a1[N-1,i];			# u[N-1]
+		A[N-1,2*N+N2-1] = a4[i];		# eta[N-1]
 
 		# v equation BCs
 		# South
@@ -500,9 +498,9 @@ def FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,uBC,etaBC,Ftilde1_nd,Ftild
 			F[N2+N+j] = Ftilde3_nd[j,i];
 			
 		solution[:,i] = np.linalg.solve(A,F);
-		
+
 		#import matplotlib.pyplot as plt
-		#plt.plot(solution[2*N:3*N,i]);
+		#plt.plot(solution[0:N,i]);
 		#plt.show();
 	
 	return solution;

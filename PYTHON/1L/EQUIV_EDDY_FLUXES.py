@@ -13,6 +13,7 @@ import PV
 import momentum
 import forcing_1L
 import solver
+import thickness
 #import output
 
 from inputFile import *
@@ -24,12 +25,13 @@ start = time.time();
 filename = 'EEF_PV';
 filename_u = 'EEF_u';
 filename_v = 'EEF_v';
+filename_eta = 'EEF_eta';
 
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
 TEST = 'U0';
 
 if TEST == 'U0':
-	nn = 10;
+	nn = 11;
 	U0_set = np.linspace(-0.3,0.5,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
@@ -63,10 +65,11 @@ else:
 
 EEF_u = np.zeros((nn,2));
 EEF_v = np.zeros((nn,2));
+EEF_eta = np.zeros((nn,2));
 
 # Now start the loop over each forcing index.
 for ii in range(0,nn):
-	print(ii);
+	#print(ii);
 	
 	if EEF_PV[ii,0] == 0:
 
@@ -98,7 +101,7 @@ for ii in range(0,nn):
 		if BC == 'NO-SLIP':
 			solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2);
 		if BC == 'FREE-SLIP':
-			solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+			solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	
 		utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 		u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
@@ -121,22 +124,26 @@ for ii in range(0,nn):
 			u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 	
 		# Calculate PV fields and PV fluxes.
-		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
-		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
-		P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
-		EEF_PV[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
+		#PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+		#uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+		#P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+		#EEF_PV[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
+
+		# Buoyancy EEF
+		uh, uH, Uh, UH, vh, vH = thickness.fluxes(u_nd,v_nd,eta_nd,U0_nd,H0_nd,N,Nt);
+		B, B_xav = thickness.footprint(uh,uH,Uh,vh,vH,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,N,Nt);			
+		EEF_eta[ii,:] = thickness.EEF(B_xav,y_nd,y0_nd,y0_index,dy_nd,N);
 
 		# Calculate momentum fluxes and footprints
-		uu, uv, vv = momentum.fluxes(u_nd,v_nd);
-		Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
-		EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
+		#uu, uv, vv = momentum.fluxes(u_nd,v_nd);
+		#Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
+		#EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
 #np.save(filename,EEF_PV);
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
+np.save(filename_eta,EEF_eta);
 
-plt.plot(EEF_PV[:,0]-EEF_PV[:,1]);
-plt.show();
 	
 elapsed = time.time() - start;
 elapsed = np.ones(1) * elapsed;

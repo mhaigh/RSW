@@ -19,26 +19,27 @@ from inputFile import *
 
 # UNIFORM
 
-path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/Paper1/';
+#path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/Paper1/';
+path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/';
 
-#U0_name = 'U0=-08';
-#U0_str = r'$U_{0}=-0.08$';
-U0_name = 'y0=-sigma';
-U0_str = r'$y_{0}=-\sigma$';
+U0_name = 'U0=16';
+U0_str = r'$U_{0}=0.16$';
+#U0_name = 'y0=15sigma';
+#U0_str = r'$y_{0}=1.5\sigma$';
 
-#u_nd = np.load(path+'u_'+U0_name+'.npy');
-#v_nd = np.load(path+'v_'+U0_name+'.npy');
-#eta_nd = np.load(path+'eta_'+U0_name+'.npy');
-#P = np.load(path+'P_'+U0_name+'.npy');
+u_nd = np.load(path+'u_'+U0_name+'.npy');
+v_nd = np.load(path+'v_'+U0_name+'.npy');
+eta_nd = np.load(path+'eta_'+U0_name+'.npy');
+P = np.load(path+'P_'+U0_name+'.npy');
 
-u_nd = np.load(path+'u_nd_complex_' + U0_name + '.npy');
-v_nd = np.load(path+'v_nd_complex_' + U0_name + '.npy');
-eta_nd = np.load(path+'eta_nd_complex_' + U0_name + '.npy');
+#u_nd = np.load(path+'u_nd_complex_' + U0_name + '.npy');
+#v_nd = np.load(path+'v_nd_complex_' + U0_name + '.npy');
+#eta_nd = np.load(path+'eta_nd_complex_' + U0_name + '.npy');
 
-plotting.solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N);
-plotting.solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N);
+#plotting.solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N);
+#plotting.solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N);
 
-sys.exit();
+#sys.exit();
 
 #=======================================================
 
@@ -61,29 +62,28 @@ sys.exit();
 #=======================================================
 
 
-ss = 0;
-if ss == 1:
-	u_nd = u_nd*0.01;
-	v_nd = v_nd*0.01;
-	eta_nd = eta_nd*0.01;
-	P = P * 1.0e-8;
-	np.save(path+'u_U0='+U0_name+'.npy',u_nd);
-	np.save(path+'v_U0='+U0_name+'.npy',v_nd);
-	np.save(path+'eta_U0='+U0_name+'.npy',eta_nd);
-	np.save(path+'P_U0='+U0_name+'.npy',P);
+#ss = 0;
+#if ss == 1:
+#	u_nd = u_nd*0.01;
+#	v_nd = v_nd*0.01;
+#	eta_nd = eta_nd*0.01;
+#	P = P * 1.0e-8;
+#	np.save(path+'u_U0='+U0_name+'.npy',u_nd);
+#	np.save(path+'v_U0='+U0_name+'.npy',v_nd);
+#	np.save(path+'eta_U0='+U0_name+'.npy',eta_nd);
+#	np.save(path+'P_U0='+U0_name+'.npy',P);
 
-#sys.exit();
 P_xav = np.trapz(P,x_nd,dx_nd,axis=1);
 
 #=======================================================
 
 #plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,True);
-#plotting.footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid);
+plotting.footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid);
 
-EEF_array = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
-EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
-print(EEF_north, EEF_south);
-print(EEF_north-EEF_south);
+#EEF_array = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
+#EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
+#print(EEF_north, EEF_south);
+#print(EEF_north-EEF_south);
 
 
 

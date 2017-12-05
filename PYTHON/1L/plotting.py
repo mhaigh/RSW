@@ -284,12 +284,14 @@ def footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_gri
 	Plim = np.max(abs(P));
 
 	P = P / Plim; 
+
+	#P=np.log(P+1.);
 	P_xav = P_xav * 1.0e5;
 
 	P_str = 'max=' + str(round(Plim,2));
 
 	plt.figure(1);
-	plt.pcolor(x_grid, y_grid, P, cmap='bwr', vmin=-1., vmax=1.);
+	plt.pcolor(x_grid, y_grid, P, cmap='bwr',vmin=-0.5,vmax=0.5);
 	plt.text(0.4,0.4,r'$P$',fontsize=26);
 	#plt.text(-0.45,-0.4,P_str,color='k',fontsize=18);
 	#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
@@ -344,7 +346,7 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 	v_nd = extend(v_nd);
 	eta_nd = extend(eta_nd);
 
-	plt.pcolor(x_grid, y_grid, np.absolute(u_nd), vmin=0., vmax=1.);
+	plt.pcolor(x_grid, y_grid, np.absolute(u_nd), vmin=0., vmax=0.5);
 	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26,color='w');
 	plt.text(-0.45,0.4,U0_str,fontsize=22,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
@@ -358,7 +360,7 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_Amp_' + U0_name + '.png');
 	plt.close();
 	
-	plt.pcolor(x_grid, y_grid, np.absolute(v_nd), vmin=0., vmax=1.);
+	plt.pcolor(x_grid, y_grid, np.absolute(v_nd), vmin=0., vmax=0.5);
 	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);	
@@ -369,7 +371,7 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_Amp_' + U0_name + '.png');
 	plt.close();
 
-	plt.pcolor(x_grid, y_grid, np.absolute(eta_nd), vmin=0., vmax=1.);
+	plt.pcolor(x_grid, y_grid, np.absolute(eta_nd), vmin=0., vmax=0.5);
 	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
@@ -388,21 +390,13 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 # Plots of phase 
 def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 
-	ulim = np.max(abs(u_nd));
-	vlim = np.max(abs(v_nd));
-	etalim = np.max(abs(eta_nd));
-
-	u_nd = u_nd / ulim;
-	v_nd = v_nd / vlim;
-	eta_nd = eta_nd / etalim
-
 	u_nd = extend(u_nd);
 	v_nd = extend(v_nd);
 	eta_nd = extend(eta_nd);
 
-	plt.pcolor(x_grid, y_grid, np.angle(u_nd), vmin=-1., vmax=1.);
-	plt.text(0.4,-0.4,r'$u^{\prime}$',fontsize=26,color='w');
-	plt.text(-0.45,-0.4,U0_str,fontsize=22,color='w');
+	plt.pcolor(x_grid, y_grid, np.angle(u_nd)/np.pi, vmin=-1., vmax=1.);
+	plt.text(0.4,-0.4,r'$u^{\prime}$',fontsize=26,color='k');
+	plt.text(-0.45,-0.4,U0_str,fontsize=22,color='k');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),);	
 	plt.xlabel('x',fontsize=16);
@@ -413,8 +407,8 @@ def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_Phase_' + U0_name + '.png');
 	plt.close();
 
-	plt.pcolor(x_grid, y_grid, np.angle(v_nd), vmin=-1., vmax=1.);
-	plt.text(0.4,-0.4,r'$v^{\prime}$',fontsize=26,color='w');
+	plt.pcolor(x_grid, y_grid, np.angle(v_nd)/np.pi, vmin=-1., vmax=1.);
+	plt.text(0.4,-0.4,r'$v^{\prime}$',fontsize=26,color='k');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
 	plt.xlabel('x',fontsize=16);
@@ -424,8 +418,8 @@ def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_Phase_' + U0_name + '.png');
 	plt.close();
 
-	plt.pcolor(x_grid, y_grid, np.angle(eta_nd), vmin=-1., vmax=1.);
-	plt.text(0.4,-0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
+	plt.pcolor(x_grid, y_grid, np.angle(eta_nd)/np.pi,vmin=-1.,vmax=1.);
+	plt.text(0.4,-0.4,r'$\eta^{\prime}$',fontsize=26,color='k');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));	
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
 	plt.xlabel('x',fontsize=16);

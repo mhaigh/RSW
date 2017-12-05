@@ -40,6 +40,8 @@ if SOL == 'NEW':
 	# Forcing
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+	elif FORCE_TYPE == 'DCTS':
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd)
 	elif FORCE_TYPE == 'DELTA':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_delta(AmpF_nd,y0_index,dx_nd,N);
 	# Coefficients
@@ -198,8 +200,8 @@ for ii in loop:
 		#plt.plot(vec[0:N,dom_index_tmp[mi]],y_nd);
 		#plt.ylim(-0.5,0.5);
 		#plt.show();
-	plt.plot(theta_abs[:,i]);
-	plt.show();
+	#plt.plot(theta_abs[:,i]);
+	#plt.show();
 
 	# Statistics: mean, variance, weighted average 
 	# Should normalise so that all have the same mean (i.e. mean = 1/Nm);
@@ -217,6 +219,9 @@ for ii in loop:
 	#plt.show();
 
 plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p*U));
+plt.xlabel('k');
+plt.ylabel('Weighted phase speed');
+plt.grid();
 plt.show();
 
 
