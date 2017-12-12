@@ -36,7 +36,7 @@ BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundari
 # Domain
 #=======================================================
 
-N = 512+1; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 					# For NO-SLIP: 44, 172, 684
 					# For FREE-SLIP: 86, 342
 N2 = N-2;			# Number of 'live' gridpoints for u and v, depending on BCs.	
@@ -73,7 +73,7 @@ K = np.fft.fftfreq(N,Lx/N); 		 # Array of x-gridpoints in wavenumber space
 #=======================================================
 
 f0 = 0.83e-4;      		# Base value of Coriolis parameter (s-1)
-beta = 2e-11;     		# Planetary vorticity gradient (m-1 s-1)
+beta = 2.0e-11;     		# Planetary vorticity gradient (m-1 s-1)
 f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 # Other physical parameters
@@ -177,7 +177,7 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)-int(1.*N*sigma/L);# - int(N/4); # - sigma * 25./16.
+	y0_index = int(N/2)-int(0.*N*sigma/L);# - int(N/4); # - sigma * 25./16.
 y0 = y[y0_index];
 
 
@@ -274,6 +274,7 @@ doFootprints = True;			# Calculate footprints, requires findPV = True.
 doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = False;		# If true, calculates the footprint in terms of its components.
 doMomentum = False;
+doThickness = False;
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;

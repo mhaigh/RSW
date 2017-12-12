@@ -197,6 +197,7 @@ def RSW_main():
 	# Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
 	if doPV:
 		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+		PV_prime1, PV_prime2, PV_prime3 = PV.potentialVorticity_linear(u_nd,v_nd,eta_nd,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
 		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
 		# Keep these next two lines commented out unless testing effects of normalisation.
 		# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
@@ -224,8 +225,9 @@ def RSW_main():
 	# Buoyancy footprints
 	#====================================================
 	
-	# Should these be zero, according to conservation of mass?
-	Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,N,Nt);
+	if doThickness:
+		# Should these be zero, according to conservation of mass?
+		Pb, Pb_xav = thickness.footprint(u_full,v_nd,eta_full,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,N,Nt);
 
 	#====================================================
 
@@ -235,8 +237,68 @@ def RSW_main():
 	#====================================================
 	#====================================================
 	
-	#plotting.vqPlot(x_grid,y_grid,v_nd,PV_prime,EEF,U0,ts);
-	#sys.exit();
+	plt.subplot(221);	
+	plt.contourf(PV_prime1[:,:,ts]);
+	plt.colorbar();
+	plt.subplot(222);
+	plt.contourf(PV_prime2[:,:,ts]);
+	plt.colorbar();
+	plt.subplot(223);	
+	plt.contourf(PV_prime1[:,:,ts]+PV_prime2[:,:,ts]);
+	plt.colorbar();
+	plt.subplot(224);
+	plt.contourf(PV_prime[:,:,ts]);
+	plt.colorbar();
+	plt.show();
+
+	vq1 = v_nd * PV_prime1;
+	vq2 = v_nd * PV_prime2;
+	
+	vq1 = diagnostics.timeAverage(vq1,T_nd,Nt);
+	vq2 = diagnostics.timeAverage(vq2,T_nd,Nt);
+
+	vq1_y = - diagnostics.diff(vq1,0,0,dy_nd);
+	vq2_y = - diagnostics.diff(vq2,0,0,dy_nd);
+
+	uq_x = diagnostics.timeAverage(uq,T_nd,Nt);
+	uq_x = - diagnostics.diff(uq_x,1,1,dx_nd);
+
+	if True:	
+		plt.subplot(221);
+		plt.contourf(vq1_y);
+		plt.colorbar();
+		plt.title('vq1_y');
+		plt.subplot(222);
+		plt.contourf(vq2_y);
+		plt.colorbar();
+		plt.title('vq2_y');
+		plt.subplot(223);
+		plt.contourf(vq1_y+vq2_y+uq_x);
+		plt.colorbar();
+		plt.title('vq1+vq2');
+		plt.subplot(224);
+		plt.contourf(P);
+		plt.colorbar();
+		plt.title('P');
+		plt.show();
+
+	vq1_y = diagnostics.extend(vq1_y);
+	vq2_y = diagnostics.extend(vq2_y);
+	uq_x = diagnostics.extend(uq_x);
+
+	vq1 = np.trapz(vq1_y,x_nd,dx_nd,axis=1);
+	vq2 = np.trapz(vq2_y,x_nd,dx_nd,axis=1);
+	uq = np.trapz(uq_x,x_nd,dx_nd,axis=1);
+	
+	plt.plot(vq1,label='vq1');
+	plt.plot(vq2,label='vq2');
+	plt.plot(uq,label='uq');
+	plt.legend();
+	plt.show();
+
+	vq = diagnostics.timeAverage(vq,T_nd,Nt);
+	plotting.vqPlot(x_grid,y_grid,y_nd,v_nd,PV_prime,vq,P,P_xav,EEF,U0,ts);
+	sys.exit();
 
 	# Call the function that plots the forcing in physical and physical-spectral space.
 	if plotForcing:

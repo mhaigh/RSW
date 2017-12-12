@@ -43,6 +43,34 @@ def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,d
 
 	return PV_prime, PV_full, PV_BG
 
+#=====================================================================
+# potentialVorticity_linear
+def potentialVorticity_linear(u_nd,v_nd,eta_nd,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro):
+# Calculate linear potential vorticity.
+# Return two components of linear PV anomaly.
+
+	RV_prime1 = np.zeros((N,N,Nt));
+	RV_prime2 = np.zeros((N,N,Nt));
+	for ti in range(0,Nt):
+		RV_prime1[:,:,ti] = diff(v_nd[:,:,ti],1,1,dx_nd);
+		RV_prime2[:,:,ti] = - diff(u_nd[:,:,ti],0,0,dy_nd);
+	RV_BG = - diff(U0_nd,2,0,dy_nd);
+
+	PV_BG = np.zeros(N);
+	for j in range(0,N):
+		PV_BG[j] = (RV_BG[j] + f_nd[j] / Ro) / H0_nd[j];
+
+	PV_prime1 = np.zeros((N,N,Nt));
+	PV_prime2 = np.zeros((N,N,Nt));
+	PV_prime3 = np.zeros((N,N,Nt));
+	for i in range(0,N):
+		for ti in range(0,Nt):
+			PV_prime1[:,i,ti] = RV_prime1[:,i,ti] / H0_nd[:];
+			PV_prime2[:,i,ti] = RV_prime2[:,i,ti] / H0_nd[:];
+			PV_prime3[:,i,ti] = - PV_BG[:] * eta_nd[:,i,ti] / H0_nd[:];
+
+	return PV_prime1, PV_prime2, PV_prime3
+
 #====================================================
 
 # fluxes
