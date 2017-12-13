@@ -23,12 +23,13 @@ from inputFile import *
 start = time.time();
 
 filename = 'EEF_PV';
+filename_l = 'l_PV';
 
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
 TEST = 'U0';
 
 if TEST == 'U0':
-	nn = 10;
+	nn = 1;
 	U0_set = np.linspace(-0.03,-0.02,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
@@ -38,6 +39,7 @@ if TEST == 'U0':
 		sys.exit('ERROR: Invalid forcing option selected.');
 
 EEF_PV = np.zeros((nn,2));
+l_PV = np.zeros((nn,2));
 P_xav = np.zeros((nn,N))
 
 # Now start the loop over each forcing index.
@@ -101,15 +103,17 @@ for ii in range(0,nn):
 	vq2_y = - diagnostics.diff(vq2,0,0,dy_nd);
 	vq2_y = diagnostics.extend(vq2_y);
 	P_xav[ii,:] = np.trapz(vq2_y,x_nd,dx_nd,axis=1);
-	EEF_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N)
+	EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N)
 
 #np.save(filename,EEF_PV);
 
-plt.contourf(P_xav);
-plt.show();
-
-plt.plot(EEF_PV);
-plt.show();
+if False:
+	plt.contourf(P_xav);
+	plt.show();
+	plt.plot(l_PV[:,0]);
+	plt.show();
+	plt.plot(EEF_PV);
+	plt.show();
 
 elapsed = time.time() - start;
 elapsed = np.ones(1) * elapsed;

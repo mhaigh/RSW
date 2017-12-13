@@ -18,17 +18,14 @@
 
 import sys
 
+from core import solver, PV, momentum, thickness, energy
+
 import numpy as np
 
 import diagnostics
-import PV
-import momentum
-import forcing_1L
-import solver
 import output
-import energy
 import plotting
-import thickness
+
 
 from inputFile import *
 
@@ -38,19 +35,12 @@ from inputFile import *
 
 def RSW_main():
 	# Forcing
-	if FORCE_TYPE == 'CTS':
-		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
-	elif FORCE_TYPE == 'DCTS':
-		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
-	elif FORCE_TYPE == 'DELTA':
-		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_delta(AmpF_nd,y0_index,dx_nd,N);
-	else:
-		sys.exit('ERROR: Invalid forcing option selected.');
+
 	#plotting.forcingPlot_save(x_grid,y_grid,F3_nd[:,0:N],FORCE,BG,Fpos,N);
 
-	#F1_nd, F2_nd, F3_nd = forcing_1L.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
-	#F1_nd, F2_nd = forcing_1L.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
-	#F3_nd = forcing_1L.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
+	#F1_nd, F2_nd, F3_nd = forcing.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
+	#F1_nd, F2_nd = forcing.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
+	#F3_nd = forcing.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
 	#plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
 	#sys.exit();

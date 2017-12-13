@@ -58,6 +58,7 @@ else:
 		EEF_array = np.zeros((nn,6,2));
 	else:
 		EEF_array = np.zeros((nn,2));
+		l_array = np.zeros((nn,2));
 
 def EEF_y0(y0_set,pi):
 	from inputFile_1L import *
@@ -117,7 +118,7 @@ def EEF_y0(y0_set,pi):
 				EEF_array[yi,:,:] = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
 			else: 
 				P, P_xav = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
-				EEF_array[yi,:] = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
+				EEF_array[yi,:], l_array[yi,:] = PV.EEF(P_xav,y_nd,y0_nd,dy_nd,omega_nd,N);
 
 	filename = 'EEF_array_' + str(pi);
 	exec('np.save(filename,EEF_array)');

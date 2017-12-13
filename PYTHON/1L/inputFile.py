@@ -7,6 +7,7 @@ import numpy as np
 from scipy.special import erf
 
 from diagnostics import diff
+from initialisation import forcing
 import matplotlib.pyplot as plt
 
 #=======================================================
@@ -25,9 +26,10 @@ Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 
 							
 
 BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
-
-JET = 'REF';			# If GAUSSIAN is selected, here are options for some predefined parameters.
-							# Choices are REF,WIDE,SHARP,SHARPER,STRONG,WEAK
+Umag = 0.16; #0.0688, -0.0233, 0.0213
+Umag = 0.8;
+sigma = 0.02 * 3840000.0;
+shear = 1.0
 
 JET_POS = 'CENTER';
 
@@ -94,7 +96,7 @@ H0 = np.zeros(N);
 
 # Uniform zonal BG flow
 if BG == 'UNIFORM':
-	Umag = 0.0213; #0.0688, -0.0233, 0.0213
+	Umag = 0.16; #0.0688, -0.0233, 0.0213
 	for j in range(0,N):
 		U0[j] = Umag; 			# (m s-1)
 		H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
@@ -179,6 +181,7 @@ elif Fpos == 'SOUTH':
 elif Fpos == 'USER':
 	y0_index = int(N/2)-int(0.*N*sigma/L);# - int(N/4); # - sigma * 25./16.
 y0 = y[y0_index];
+
 
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
@@ -318,8 +321,25 @@ if False:
 	plt.subplot(222);
 	plt.plot(np.sqrt(g*H0));
 	plt.subplot(223);
-	plt.plot(1./f);
+	plt.plot(f/H0);
 	plt.subplot(224);
 	plt.plot(Rd/1000.0);
 	plt.show();
+
+
+# No need to edit from here.
+# Remainder initialises RSW.py
+
+#=======================================================
+#=======================================================
+#=======================================================
+
+if FORCE_TYPE == 'CTS':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+elif FORCE_TYPE == 'DCTS':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+elif FORCE_TYPE == 'DELTA':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_delta(AmpF_nd,y0_index,dx_nd,N);
+else:
+	sys.exit('ERROR: Invalid forcing option selected.');
 	
