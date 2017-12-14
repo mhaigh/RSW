@@ -13,12 +13,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
 
-import eigSolver
-import eigDiagnostics
-import diagnostics
-import solver
-import output
-import output_read
+from eig import eigSolver, eigDiagnostics
+from core import diagnostics, solver
+from output import output, output_read
 
 from inputFile import *
 

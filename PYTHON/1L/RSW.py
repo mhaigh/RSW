@@ -18,14 +18,11 @@
 
 import sys
 
-from core import solver, PV, momentum, thickness, energy
-
 import numpy as np
+import matplotlib.pyplot as plt
 
-import diagnostics
-import output
-import plotting
-
+from core import solver, PV, momentum, thickness, energy, diagnostics
+from output import plotting
 
 from inputFile import *
 

@@ -9,13 +9,10 @@ import sys
 
 import numpy as np
 import matplotlib.pyplot as plt
-
 import itertools as it
-import diagnostics
-import eigDiagnostics
-import PV
-import eigSolver
-import energy
+
+from eig import eigDiagnostics, eigSolver
+from core import diagnostics, PV, energy
 from output import ncSaveEigenmodes
 
 from inputFile import *

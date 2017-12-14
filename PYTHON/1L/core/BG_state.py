@@ -3,6 +3,8 @@
 
 # This module contains functions which define the background flow, the background SSH, and the background PV.
 
+import numpy as np
+
 #=======================================================
 
 def BG_uniform(Umag,Hflat,f0,beta,g,y,N):
@@ -24,7 +26,7 @@ def BG_shear(Umag,shear,Hflat,f0,beta,g,y,Ly,N):
 	U0 = np.zeros(N);
 	H0 = np.zeros(N);
 	l = Ly / 2;
-	a = Umag / l
+	a = Umag / l;
 	for j in range(0,N):
 		U0[j] = a * y[j] + shear;
 		H0[j] = - (f0 * shear * y[j] + 0.5 * (f0 * a + beta * shear) * y[j]**2 + a * beta * y[j]**3 / 3.) / g + Hflat;
@@ -57,11 +59,13 @@ def BG_Gaussian(Umag,shear,Hflat,f0,beta,g,y,Ly,N):
 					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(yy0 / (np.sqrt(2) * sigma))
 					+ f0 * yy0 + beta * yy0**2 / 2) / g + Hflat; #erf(0);
 
+	
+
 	return U0, H0
 
 #=======================================================
 	
-def BG_zero(Hflat,N):
+def BG_zero(Hflat,chi,N):
 	"Zero BG flow"
 
 	U0 = np.zeros(N);

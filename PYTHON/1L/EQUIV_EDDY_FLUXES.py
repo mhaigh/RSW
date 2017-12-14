@@ -8,13 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-import diagnostics
-import PV
-import momentum
-import forcing_1L
-import solver
-import thickness
-#import output
+from core import diagnostics, PV, momentum, solver, thickness
+from initialisation import forcing
 
 from inputFile import *
 

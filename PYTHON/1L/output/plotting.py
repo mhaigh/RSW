@@ -4,7 +4,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from diagnostics import extend
 
 #====================================================
 
@@ -879,5 +878,32 @@ def forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N)
 	plt.colorbar()
 
 	plt.show();
+
+
+#====================================================
+
+# extend
+def extend(f):
+# A function used to replace the extra x-gridpoint on a solution.
+
+	dimx = np.shape(f)[1];
+	dimy = np.shape(f)[0];
+	if f.size != dimx * dimy:
+		dimt = np.shape(f)[2];
+
+		f_new = np.zeros((dimy,dimx+1,dimt),dtype=f.dtype);
+		for i in range(0,dimx):
+			f_new[:,i,:] = f[:,i,:];
+	
+		f_new[:,dimx,:] = f[:,0,:];
+	
+	else:
+		f_new = np.zeros((dimy,dimx+1),dtype=f.dtype);
+		for i in range(0,dimx):
+			f_new[:,i] = f[:,i];
+	
+		f_new[:,dimx] = f[:,0];
+
+	return f_new
 
 
