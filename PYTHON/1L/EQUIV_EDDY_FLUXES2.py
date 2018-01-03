@@ -24,7 +24,7 @@ filename_l = 'l_PV';
 TEST = 'U0';
 
 if TEST == 'U0':
-	nn = 1;
+	nn = 5;
 	U0_set = np.linspace(-0.03,-0.02,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
@@ -102,7 +102,7 @@ for ii in range(0,nn):
 
 #np.save(filename,EEF_PV);
 
-if False:
+if True:
 	plt.contourf(P_xav);
 	plt.show();
 	plt.plot(l_PV[:,0]);

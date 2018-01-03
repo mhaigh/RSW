@@ -220,72 +220,51 @@ def RSW_main():
 
 	#output.ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_full,PV_prime,PV_BG,Pq,EEFq,N,Nt);
 
+
+
+	#====================================================
+
+	# Take relevant derivatives
+	v_y = np.zeros((N,N,Nt));
+	u_y = np.zeros((N,N,Nt));
+	u_yy = np.zeros((N,N,Nt));
+	for ti in range(0,Nt):
+		v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
+		u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
+		u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
+	
+	# Define initial footprint contributions (include SSH terms later)
+	P1 = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
+	P2 = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
+	P3 = diagnostics.timeAverage(v_nd*u_y,T_nd,Nt);
+
+	# Account for H0_nd terms
+	#H0_y = diagnostics.diff(H0_nd,2,0,dy_nd);
+	#for i in range(0,N):
+	#	P1[:,i] = P1[:,i] / H0_nd[:];
+	#	P2[:,i] = P2[:,i] / H0_nd[:];
+	#	P3[:,i] = P3[:,i] * H0_y[:] / H0_nd[:]**2;
+	
+	P1 = diagnostics.extend(P1);
+	P2 = diagnostics.extend(P2);
+	P3 = diagnostics.extend(P3);
+
+	P1 = np.trapz(P1,x_nd,dx_nd,axis=1);
+	P2 = np.trapz(P2,x_nd,dx_nd,axis=1);
+	P3 = np.trapz(P3,x_nd,dx_nd,axis=1);
+
+	plt.subplot(121);
+	plt.plot(P1);
+	plt.plot(-P2);
+	plt.subplot(122);
+	plt.plot(H0_nd*P_xav);
+	plt.plot(P1+P2+P3);
+	plt.show();
+
 	# Plots
 	#====================================================
 	#====================================================
 	
-	plt.subplot(221);	
-	plt.contourf(PV_prime1[:,:,ts]);
-	plt.colorbar();
-	plt.subplot(222);
-	plt.contourf(PV_prime2[:,:,ts]);
-	plt.colorbar();
-	plt.subplot(223);	
-	plt.contourf(PV_prime1[:,:,ts]+PV_prime2[:,:,ts]);
-	plt.colorbar();
-	plt.subplot(224);
-	plt.contourf(PV_prime[:,:,ts]);
-	plt.colorbar();
-	plt.show();
-
-	vq1 = v_nd * PV_prime1;
-	vq2 = v_nd * PV_prime2;
-	
-	vq1 = diagnostics.timeAverage(vq1,T_nd,Nt);
-	vq2 = diagnostics.timeAverage(vq2,T_nd,Nt);
-
-	vq1_y = - diagnostics.diff(vq1,0,0,dy_nd);
-	vq2_y = - diagnostics.diff(vq2,0,0,dy_nd);
-
-	uq_x = diagnostics.timeAverage(uq,T_nd,Nt);
-	uq_x = - diagnostics.diff(uq_x,1,1,dx_nd);
-
-	if True:	
-		plt.subplot(221);
-		plt.contourf(vq1_y);
-		plt.colorbar();
-		plt.title('vq1_y');
-		plt.subplot(222);
-		plt.contourf(vq2_y);
-		plt.colorbar();
-		plt.title('vq2_y');
-		plt.subplot(223);
-		plt.contourf(vq1_y+vq2_y+uq_x);
-		plt.colorbar();
-		plt.title('vq1+vq2');
-		plt.subplot(224);
-		plt.contourf(P);
-		plt.colorbar();
-		plt.title('P');
-		plt.show();
-
-	vq1_y = diagnostics.extend(vq1_y);
-	vq2_y = diagnostics.extend(vq2_y);
-	uq_x = diagnostics.extend(uq_x);
-
-	vq1 = np.trapz(vq1_y,x_nd,dx_nd,axis=1);
-	vq2 = np.trapz(vq2_y,x_nd,dx_nd,axis=1);
-	uq = np.trapz(uq_x,x_nd,dx_nd,axis=1);
-	
-	plt.plot(vq1,label='vq1');
-	plt.plot(vq2,label='vq2');
-	plt.plot(uq,label='uq');
-	plt.legend();
-	plt.show();
-
-	vq = diagnostics.timeAverage(vq,T_nd,Nt);
-	plotting.vqPlot(x_grid,y_grid,y_nd,v_nd,PV_prime,vq,P,P_xav,EEF,U0,ts);
-	sys.exit();
 
 	# Call the function that plots the forcing in physical and physical-spectral space.
 	if plotForcing:
@@ -311,7 +290,7 @@ def RSW_main():
 			plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
 		if doFootprints:
 			if plotFootprint:
-				plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,JET,FORCE,nu,r0,period_days,U0_nd,U,N);
+				plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,FORCE,nu,r0,period_days,U0_nd,U,N);
 	
 	# Phase and amplitude
 	if plotPhaseAmp:

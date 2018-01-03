@@ -543,7 +543,7 @@ def footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_gri
 
 # forcingPlots
 # Forcing plots 
-def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd,U,N):
+def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,FORCE,nu,r0,period_days,U0_nd,U,N):
 # Function that plots the forcing, and its Fourier representation.
 
 	Umag = np.max(U0_nd);

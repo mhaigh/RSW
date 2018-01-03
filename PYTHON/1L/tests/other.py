@@ -325,5 +325,71 @@ elif option == 10000:
 	plt.contourf(vq[:,:,100]);
 	plt.show()
 
+#===================
+
+#this code can be copied into RSW to test different PV contributions on the result of the footprint.
+
+	plt.subplot(221);	
+	plt.contourf(PV_prime1[:,:,ts]);
+	plt.colorbar();
+	plt.subplot(222);
+	plt.contourf(PV_prime2[:,:,ts]);
+	plt.colorbar();
+	plt.subplot(223);	
+	plt.contourf(PV_prime1[:,:,ts]+PV_prime2[:,:,ts]);
+	plt.colorbar();
+	plt.subplot(224);
+	plt.contourf(PV_prime[:,:,ts]);
+	plt.colorbar();
+	plt.show();
+
+	vq1 = v_nd * PV_prime1;
+	vq2 = v_nd * PV_prime2;
+	
+	vq1 = diagnostics.timeAverage(vq1,T_nd,Nt);
+	vq2 = diagnostics.timeAverage(vq2,T_nd,Nt);
+
+	vq1_y = - diagnostics.diff(vq1,0,0,dy_nd);
+	vq2_y = - diagnostics.diff(vq2,0,0,dy_nd);
+
+	uq_x = diagnostics.timeAverage(uq,T_nd,Nt);
+	uq_x = - diagnostics.diff(uq_x,1,1,dx_nd);
+
+	if True:	
+		plt.subplot(221);
+		plt.contourf(vq1_y);
+		plt.colorbar();
+		plt.title('vq1_y');
+		plt.subplot(222);
+		plt.contourf(vq2_y);
+		plt.colorbar();
+		plt.title('vq2_y');
+		plt.subplot(223);
+		plt.contourf(vq1_y+vq2_y+uq_x);
+		plt.colorbar();
+		plt.title('vq1+vq2');
+		plt.subplot(224);
+		plt.contourf(P);
+		plt.colorbar();
+		plt.title('P');
+		plt.show();
+
+	vq1_y = diagnostics.extend(vq1_y);
+	vq2_y = diagnostics.extend(vq2_y);
+	uq_x = diagnostics.extend(uq_x);
+
+	vq1 = np.trapz(vq1_y,x_nd,dx_nd,axis=1);
+	vq2 = np.trapz(vq2_y,x_nd,dx_nd,axis=1);
+	uq = np.trapz(uq_x,x_nd,dx_nd,axis=1);
+	
+	plt.plot(vq1,label='vq1');
+	plt.plot(vq2,label='vq2');
+	plt.plot(uq,label='uq');
+	plt.legend();
+	plt.show();
+
+	vq = diagnostics.timeAverage(vq,T_nd,Nt);
+	plotting.vqPlot(x_grid,y_grid,y_nd,v_nd,PV_prime,vq,P,P_xav,EEF,U0,ts);
+	sys.exit();
 
 

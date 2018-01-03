@@ -8,8 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
-from core import diagnostics, PV, momentum, solver, thickness
-from initialisation import forcing
+from core import solver, PV, momentum, thickness, energy, diagnostics
 
 from inputFile import *
 
@@ -25,13 +24,17 @@ filename_eta = 'EEF_eta';
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
 TEST = 'U0';
 
+#=======================================================
+
+# Initialise tests
+
 if TEST == 'U0':
-	nn = 1;
+	nn = 3;
 	U0_set = np.linspace(-0.3,0.5,nn);
 	if FORCE_TYPE == 'CTS':
-		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 	elif FORCE_TYPE == 'DCTS':
-		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 	else:
 		sys.exit('ERROR: Invalid forcing option selected.');
 
@@ -48,20 +51,21 @@ if TEST == 'y0':
 	y0_index_set = np.array(y0_index_set);
 	nn = np.shape(y0_set)[0];
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
-			
+		
+
 # Initialise the array which stores the EEF values.
 if os.path.isfile(filename + '.npy'):
 	EEF_PV = np.load(filename + '.npy');
 else:
-	if footprintComponents:
-		EEF_PV = np.zeros((nn,6,2));
-	else:
-		EEF_PV = np.zeros((nn,2));
-		l_PV = np.zeros((nn,2));
+	EEF_PV = np.zeros((nn,2));
+	l_PV = np.zeros((nn,2));
+	P_xav = np.zeros((nn,N));
 
 EEF_u = np.zeros((nn,2));
 EEF_v = np.zeros((nn,2));
 EEF_eta = np.zeros((nn,2));
+	
+#=======================================================
 
 # Now start the loop over each forcing index.
 for ii in range(0,nn):
@@ -122,8 +126,8 @@ for ii in range(0,nn):
 		# Calculate PV fields and PV fluxes.
 		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
 		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
-		P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
-		EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
+		P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+		EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
 
 		# Buoyancy EEF
 		#uh, uH, Uh, UH, vh, vH = thickness.fluxes(u_nd,v_nd,eta_nd,U0_nd,H0_nd,N,Nt);
@@ -135,7 +139,9 @@ for ii in range(0,nn):
 		#Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 		#EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
-#np.save(filename,EEF_PV);
+np.save(filename,EEF_PV);
+np.save('EEF_l',l_PV);
+np.save('P_xav',P_xav);
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
 #np.save(filename_eta,EEF_eta);

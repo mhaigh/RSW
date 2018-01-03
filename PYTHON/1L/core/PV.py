@@ -47,7 +47,7 @@ def potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,d
 # potentialVorticity_linear
 def potentialVorticity_linear(u_nd,v_nd,eta_nd,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro):
 # Calculate linear potential vorticity.
-# Return two components of linear PV anomaly.
+# Return three components of linear PV anomaly.
 
 	RV_prime1 = np.zeros((N,N,Nt));
 	RV_prime2 = np.zeros((N,N,Nt));

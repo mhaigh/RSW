@@ -8,7 +8,7 @@ from scipy.special import erf
 
 from core.diagnostics import diff
 from core import forcing, BG_state
-
+import matplotlib.pyplot as plt
 #=======================================================
 #=======================================================
 
@@ -38,10 +38,10 @@ nu = 100.;		# Kinematic viscosity (m2 s-1)
 
 # Keep the unused options commented out.
 
-BG = 'UNIFORM';			# Options: UNIFORM, QUADRATIC, GAUSSIAN, NONE.
+BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-Umag = 0.16; #0.0688, -0.0233, 0.0213
+Umag = 0.0688; #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
 #Umag = 0.8;		# Jet max speed
@@ -62,7 +62,7 @@ FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 
-Fpos = 'NORTH';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
+Fpos = 'CENTER';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
 							
 r0 = 90.0 * 1000.0;  		# Forcing radius
 AmpF = 1.0e-7; 				# Forcing amplitude
@@ -106,8 +106,9 @@ plotPV_av = False;
 plotFootprint = True;
 plotPhaseAmp = False;
 
-#=======================================================
-#=======================================================
+#======================================================================================================================================================================================================
+#======================================================================================================================================================================================================
+
 
 # Only edit from here to alter USER defined routines.
 # Remainder initialises RSW.py
@@ -154,13 +155,16 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 if BG == 'UNIFORM':
 	U0, H0 = BG_state.BG_uniform(Umag,Hflat,f0,beta,g,y,N);	
-elif BG == 'GAUSSIAN':
-	U0, H0 = BG_state.BG_Gaussian(Umag,shear,Hflat,f0,beta,g,y,Ly,N);
 elif BG == 'SHEAR':
 	U0, H0 = BG_state.BG_shear(Umag,shear,Hflat,f0,beta,g,y,Ly,N);
+elif BG == 'GAUSSIAN':
+	U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N);
+elif BG == 'LAPGAUSS':
+	U0, H0 = BG_state.BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N);
 elif BG == 'ZERO':
 	U0, H0 = BG_state.BG_zero(Hflat,N);
-
+else:
+	raise ValueError('Invalid BG flow option selected');
 # Forcing
 #=======================================================
 
@@ -171,7 +175,7 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)-int(0.*N*sigma/L);# - int(N/4); # - sigma * 25./16.
+	y0_index = int(N/2)-int(1.*N*sigma/Ly);# - int(N/4); # - sigma * 25./16.
 y0 = y[y0_index];
 
 # Note that the forcing itself is defined in terms of dimensionless parameters, so is defined at the end of initialisation. Need to do the same for the background flow.
@@ -270,3 +274,13 @@ print('Re = ' + str(Re));
 print('Ld = ' + str(Ld));
 print('N = ' + str(N));
 	
+
+#dH0 = - g * diff(H0,2,0,dy) / f;
+
+#plt.subplot(121);
+#plt.plot(dH0);
+#plt.plot(U0);
+#plt.subplot(122);
+#plt.plot(H0);
+#plt.show();
+

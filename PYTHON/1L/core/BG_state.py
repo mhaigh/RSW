@@ -4,6 +4,7 @@
 # This module contains functions which define the background flow, the background SSH, and the background PV.
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 #=======================================================
 
@@ -35,7 +36,7 @@ def BG_shear(Umag,shear,Hflat,f0,beta,g,y,Ly,N):
 
 #=======================================================
 
-def BG_Gaussian(Umag,shear,Hflat,f0,beta,g,y,Ly,N):
+def BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N):
 	"Gaussian BG flow"
 
 	from scipy.special import erf
@@ -56,12 +57,47 @@ def BG_Gaussian(Umag,shear,Hflat,f0,beta,g,y,Ly,N):
 		yy0 = y[j] - y0_jet;
 		U0[j] = a * np.exp((l**2 - yy0**2) / (2. * sigma**2)) - a;		# -a ensures U0 is zero on the boundaries
 		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - yy0**2) / (2.0 * sigma**2))
-					- np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(yy0 / (np.sqrt(2) * sigma))
-					+ f0 * yy0 + beta * yy0**2 / 2) / g + Hflat; #erf(0);
+					- np.sqrt(np.pi/2.) * sigma * y0_jet * beta * np.exp(l**2 / (2. * sigma**2)) * erf(yy0 / (np.sqrt(2.) * sigma))
+					- np.sqrt(np.pi/2.) * sigma * f0 * np.exp(l**2 / (2. * sigma**2)) * erf(yy0 / (np.sqrt(2) * sigma))
+					+ f0 * y[j] + beta * y[j]**2 / 2.) / g + Hflat; #erf(0);
 
-	
 
 	return U0, H0
+	
+
+#=======================================================
+
+def BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N):
+	"Laplacian-Gaussian background flow"
+
+	from scipy.special import erf
+
+	U0 = np.zeros(N);
+	H0 = np.zeros(N);
+
+	#if JET_POS == 'CENTER':
+	#	y0_jet = 0;
+	#elif JET_POS == 'NORTH':
+	#	y0_jet = 0.25 * Ly;
+	#elif JET_POS == 'SOUTH':
+	#	y0_jet = - 0.25 * Ly;
+	
+	l = Ly / 2;
+	a = Umag / (np.exp(l**2 / (2. * sigma**2)) - 1.);	# Maximum BG flow velocity Umag
+	for j in range(0,N):
+		U0[j] = a * (1. - y[j]**2 / (2.*sigma**2)) * (np.exp((l**2 - y[j]**2) / (2. * sigma**2)) - 1.);
+		H0[j] = a * (beta * sigma**2 * np.exp((l**2 - y[j]**2) / (2.0 * sigma**2))
+					- np.sqrt(np.pi/2.) * sigma * f0 * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
+					# Extra recirculation terms herein.
+					- 0.5 * f0 * y[j] * np.exp((l**2 - y[j]**2) / (2. * sigma**2))
+					+ 0.5 * np.sqrt(np.pi/2.) * f0 * sigma * np.exp(l**2 / (2. * sigma**2)) * erf(y[j] / (np.sqrt(2) * sigma))
+					- 0.5 * beta * (y[j]**2 + 2 * sigma**2) * np.exp((l**2 - y[j]**2) / (2. * sigma**2))
+					# Adjusted Coriolis contribution herein.
+					+ f0 * (y[j] - y[j]**3 / (6.0 * sigma**2)) + beta * (y[j]**2 / 2. - y[j]**4 / (8.0 * sigma**2))) / g + Hflat; #erf(0);
+
+
+	return U0, H0
+	
 
 #=======================================================
 	

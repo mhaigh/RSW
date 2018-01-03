@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-OPT = 5;
+OPT = 4;
 
 N = 256;
 y = np.linspace(1,N,N);
