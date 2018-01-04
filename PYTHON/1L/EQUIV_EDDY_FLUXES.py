@@ -60,6 +60,8 @@ else:
 	EEF_PV = np.zeros((nn,2));
 	l_PV = np.zeros((nn,2));
 	P_xav = np.zeros((nn,N));
+	P1 = np.zeros((nn,N));
+	P2 = np.zeros((nn,N));
 
 EEF_u = np.zeros((nn,2));
 EEF_v = np.zeros((nn,2));
@@ -129,6 +131,32 @@ for ii in range(0,nn):
 		P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 		EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
 
+		#===
+
+		# These next few lines compute dominant components of the footprint zonal average.
+		# Comment out if not required.
+
+		# Take relevant derivatives
+		v_y = np.zeros((N,N,Nt));
+		u_y = np.zeros((N,N,Nt));
+		u_yy = np.zeros((N,N,Nt));
+		for ti in range(0,Nt):
+			v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
+			u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
+			u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
+	
+		# Define initial footprint contributions (include SSH terms later)
+		P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
+		P2_tmp = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
+
+		P1_tmp = diagnostics.extend(P1_tmp);
+		P2_tmp = diagnostics.extend(P2_tmp);
+
+		P1[ii,:] = np.trapz(P1_tmp,x_nd,dx_nd,axis=1) / H0_nd;
+		P2[ii,:] = np.trapz(P2_tmp,x_nd,dx_nd,axis=1) / H0_nd;
+
+		#===
+
 		# Buoyancy EEF
 		#uh, uH, Uh, UH, vh, vH = thickness.fluxes(u_nd,v_nd,eta_nd,U0_nd,H0_nd,N,Nt);
 		#B, B_xav = thickness.footprint(uh,uH,Uh,vh,vH,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,N,Nt);			
@@ -142,6 +170,8 @@ for ii in range(0,nn):
 np.save(filename,EEF_PV);
 np.save('EEF_l',l_PV);
 np.save('P_xav',P_xav);
+np.save('P1',P1);
+np.save('P2',P2);
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
 #np.save(filename_eta,EEF_eta);

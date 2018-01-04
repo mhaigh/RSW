@@ -233,10 +233,62 @@ def RSW_main():
 		u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
 		u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
 	
+	uv1 = v_y * u_y;
+	uv2 = v_nd * u_yy;
+	uv3 = v_nd * u_y
+
+
+	plt.subplot(131);
+	plt.contourf(x_nd[0:N],y_nd,v_nd[:,:,ts]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.subplot(132);
+	plt.contourf(x_nd[0:N],y_nd,u_yy[:,:,ts]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.subplot(133);
+	plt.contourf(x_nd[0:N],y_nd,uv2[:,:,ts]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.show()
+
+	plt.subplot(221);
+	plt.contourf(x_nd[0:N],y_nd,uv1[:,:,20]);
+	plt.colorbar();
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.subplot(222);
+	plt.contourf(x_nd[0:N],y_nd,uv1[:,:,100]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.subplot(223);
+	plt.contourf(x_nd[0:N],y_nd,uv2[:,:,20]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.subplot(224);
+	plt.contourf(x_nd[0:N],y_nd,uv2[:,:,100]);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.show();
+
 	# Define initial footprint contributions (include SSH terms later)
-	P1 = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
-	P2 = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
-	P3 = diagnostics.timeAverage(v_nd*u_y,T_nd,Nt);
+	P1 = diagnostics.timeAverage(uv1,T_nd,Nt);
+	P2 = diagnostics.timeAverage(uv2,T_nd,Nt);
+	P3 = diagnostics.timeAverage(uv3,T_nd,Nt);
+	
+
+	P1 = diagnostics.extend(P1);
+	P2 = diagnostics.extend(P2);
+	P3 = diagnostics.extend(P3);
+
+	plt.subplot(121);
+	plt.contourf(x_nd,y_nd,P1);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.subplot(122);	
+	plt.contourf(x_nd,y_nd,P2);
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	plt.colorbar();
+	plt.show();
 
 	# Account for H0_nd terms
 	#H0_y = diagnostics.diff(H0_nd,2,0,dy_nd);
@@ -245,17 +297,16 @@ def RSW_main():
 	#	P2[:,i] = P2[:,i] / H0_nd[:];
 	#	P3[:,i] = P3[:,i] * H0_y[:] / H0_nd[:]**2;
 	
-	P1 = diagnostics.extend(P1);
-	P2 = diagnostics.extend(P2);
-	P3 = diagnostics.extend(P3);
+
 
 	P1 = np.trapz(P1,x_nd,dx_nd,axis=1);
 	P2 = np.trapz(P2,x_nd,dx_nd,axis=1);
 	P3 = np.trapz(P3,x_nd,dx_nd,axis=1);
 
 	plt.subplot(121);
-	plt.plot(P1);
-	plt.plot(-P2);
+	#plt.plot(P1,label='P1');
+	plt.plot(P2,label='P2');
+	plt.legend();
 	plt.subplot(122);
 	plt.plot(H0_nd*P_xav);
 	plt.plot(P1+P2+P3);
