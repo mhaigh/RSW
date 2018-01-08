@@ -1,44 +1,51 @@
-# forcing_2L
+# forcing
 #=======================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
 from diagnostics import diff, extend
+
 # Forcing 
 #=======================================================
 
 # This function is used to define the three forcing terms on the 2-L SW equations.
-# F1 is the forcing in physical space applied to the zonal momentum equation.
-# F2 is the forcing in physical space applied to the meridional momentum equation.
-# F3 is the forcing in physical space applied to the continuity equation.
-# These forcings should be defined in normalised form (i.e. sum(Fi=1)), so that they are
-# dimensionless and their amplitudes and dimensions are stored in the alphai coefficients.
-# For geostrophically balanced forcing, the alphai are functionally related.
+# F1,4 are the forcings in physical space applied to the zonal momentum equations.
+# F2,5 are the forcings in physical space applied to the meridional momentum equations.
+# F3,6 are the forcings in physical space applied to the continuity equations.
 
 #=======================================================
 
-def Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
-	
+# Forcing
+def Forcing(x,y,K,y0,r0,N,FORCE1,FORCE2,AmpF,g,f,f0,U,L,rho1_nd,rho2_nd,dx,dy):
+# Takes input defined in the 2-layer input file.
+
 	I = np.complex(0,1);
 
-	F1 = np.zeros((N,N+1));
-	F2 = np.zeros((N,N+1));
-	F3 = np.zeros((N,N+1));
+	F1 = np.zeros((N,N+1));	# u1
+	F2 = np.zeros((N,N+1));	# v1
+	F3 = np.zeros((N,N+1));	# h1
+	F4 = np.zeros((N,N+1));	# u2
+	F5 = np.zeros((N,N+1));	# v2
+	F6 = np.zeros((N,N+1));	# h2
 
-	if FORCE == 'BALANCED':
+	if FORCE1 == 'BALANCED':
 		count = 0;
 		mass = 0;
 		for i in range(0,N+1):
 			for j in range(0,N):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
-				if r < r0:
+				if r < r0:	
 					count = count + 1;
-					F1[j,i] = AmpF * np.pi * g * (y[j]-y0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-					F2[j,i] = - AmpF * np.pi * g * x[i] / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-					F3[j,i] = AmpF * np.cos((np.pi / 2) * r / r0);
+					if r == 0:
+						F1[j,i] = 0;
+						F2[j,i] = 0;
+					else:
+						F1[j,i] = AmpF * np.pi * g * (y[j]-y0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
+						F2[j,i] = - AmpF * np.pi * g * x[i] / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
+					F3[j,i] = AmpF * np.cos((np.pi / 2) * r / r0) / rho2_nd;
 					mass = mass + F3[j,i];
-		mass = mass / (N**2 - count);
-		for i in range(0,N):
+		mass = mass / (N*(N+1) - count);
+		for i in range(0,N+1):
 			for j in range(0,N):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
 				if r >= r0:
@@ -48,43 +55,48 @@ def Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 		#for j in range(0,N):
 		#	F1[j,:] = - g * F3y[j,:] / f[j];
 		#	F2[j,:] = g * F3x[j,:] / f[j];
+
+	F6 = - rho1_nd * F3
 			
 
-	if FORCE == 'BUOYANCY':
+	if FORCE1 == 'BUOYANCY':
 		count = 0;
 		mass = 0;
-		for i in range(0,N):
+		for i in range(0,N+1):
 			for j in range(0,N):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
 				if r<r0:
 					count = count + 1;
 					F3[j,i] = AmpF * np.cos((np.pi / 2) * r / r0);
 					mass = mass + F3[j,i];
-		mass = mass / (N**2 - count);
-		for i in range(0,N):
+		mass = mass / (N*(N+1) - count);
+		for i in range(0,N+1):
 			for j in range(0,N):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
 				if r >= r0:
 					F3[j,i] = - mass;
 		
 
-	if FORCE == 'VORTICITY':
-		for i in range(0,N):
+	if FORCE1 == 'VORTICITY':
+		for i in range(0,N+1):
 			for j in range(0,N):
 				r = np.sqrt(x[i]**2 + (y[j]-y0)**2);
 				if r<r0:
 					F1[j,i] = AmpF * np.pi * g * (y[j]-y0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
-					F2[j,i] = - AmpF * np.pi * g * x[i] / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
+					F2[j,i] = - AmpF * np.pi * g * (x[i]-x0) / (2 * r0 * f[j] * r) * np.sin((np.pi / 2) * r / r0);
 	
 	
 	# Lastly, Fourier transform the three forcings in the x-direction
 		
-	Ftilde1 = dx * np.fft.hfft(F1[:N],N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
-	Ftilde3 = dx * np.fft.hfft(F3[:N],N,axis=1); 
+	Ftilde1 = dx * np.fft.hfft(F1,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3 = dx * np.fft.hfft(F3,N,axis=1); 
 	Ftilde2 = np.zeros((N,N),dtype=complex);
 	for j in range(0,N):
 		for i in range(0,N):
-			Ftilde2[j,i] = 2 * np.pi * g * I * K[i] * Ftilde3[j,i] / f[j];
+			Ftilde2[j,i] = 2 * np.pi * rho2_nd * g * I * K[i] * Ftilde3[j,i] / f[j];
+	Ftilde4 = dx * np.fft.fft(F4,N,axis=1);
+	Ftilde5 = dx * np.fft.fft(F5,N,axis=1);
+	Ftilde6 = - rho1_nd * Ftilde3;
 
 	# Nondimensionalise forcing terms
 	#=======================================================
@@ -92,12 +104,21 @@ def Forcing(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,U,L,dx,dy):
 	F1_nd = F1 / (f0 * U);
 	F2_nd = F2 / (f0 * U);
 	F3_nd = F3 * g / (f0 * U**2); 
+	F4_nd = F4 / (f0*U);
+	F5_nd = F5 / (f0*U);
+	F6_nd = F6 * g / (f0 * U**2);
 
 	Ftilde1_nd = Ftilde1 / (f0 * U * L);
 	Ftilde2_nd = Ftilde2 / (f0 * U * L);
 	Ftilde3_nd = Ftilde3 * g / (f0 * U**2 * L);
+	Ftilde4_nd = Ftilde4 / (f0 * U * L);
+	Ftilde5_nd = Ftilde5 / (f0 * U * L);
+	Ftilde6_nd = Ftilde6 * g / (f0 * U**2 * L);
 
-	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
+
+	return F1_nd, F2_nd, F3_nd, F4_nd, F5_nd, F6_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd, Ftilde4_nd, Ftilde5_nd, Ftilde6_nd;
+
+#=======================================================
 
 # A function that calculates the inverse of the forcing the check that the original forcing is found.
 def forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N):

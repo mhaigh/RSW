@@ -566,24 +566,49 @@ def timeAverage(u,T,Nt):
 
 #====================================================
 
-# split_y
-def split_y(y_nd,y0_index):
-# A function that splits the y domain into two, with a break at y0.
-# Useful for EEF calculations.
+# arrayCorr
+def arrayCorr(u,v):
+# Takes as input a pair of 2D arrays (e.g. solution snapshots), 
+# and calculates their correlation by rewriting them as 1D lists.
 
+	Ny, Nx = np.shape(u);
+	
+	dim = Ny * Nx;
 
-	# Define two y arrays, with all gridpoints north and south of the forcing location.
-	# Define two corresponding P_xav arrays
-	y_north = [];
-	y_south = [];
-	for j in range(0,N):
-		if y_nd[j] > y0_nd:
-			y_north.append(y_nd[j]);
-		else:
-			y_south.append(y_nd[j]);
+	u_list = np.zeros((dim));
+	v_list = np.zeros((dim));
 
-	y_north = y_nd[y0_index:N];
-	y_south = y_nd[0:y0_index];
+	# Rearrange square arrays into lists.
+	for i in range(0,Nx):
+		for j in range(0,Ny):
+			u_list[i*Nx+j] = u[j,i];
+			v_list[i*Nx+j] = v[j,i];
+
+	# Correlation between two lists.
+	corr = np.corrcoef(u_list,v_list)[0,1];
+	
+	return corr
+
+#====================================================
+
+# arrayCorrTime
+def arrayCorrTime(u,v):
+# Uses the above-defined function to calculate the average correlation between two time-dependent arrays.
+	
+	Nt = np.shape(u)[2];
+	
+	# Initialise the correlation.
+	corr = 0;
+
+	# Add the correlation between u and v at each time step.
+	for ti in range(0,Nt):
+		corr = corr + arrayCorr(u[:,:,ti],v[:,:,ti]);
+	
+	# Average.
+	corr = corr / Nt;
+
+	return corr
+
 
 
 

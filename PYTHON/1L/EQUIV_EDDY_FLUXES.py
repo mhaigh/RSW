@@ -5,7 +5,6 @@
 
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 import time
 
 from core import solver, PV, momentum, thickness, energy, diagnostics
@@ -29,8 +28,8 @@ TEST = 'U0';
 # Initialise tests
 
 if TEST == 'U0':
-	nn = 3;
-	U0_set = np.linspace(-0.3,0.5,nn);
+	nn = 21;
+	U0_set = np.linspace(-0.1,0.1,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 	elif FORCE_TYPE == 'DCTS':
@@ -66,6 +65,11 @@ else:
 EEF_u = np.zeros((nn,2));
 EEF_v = np.zeros((nn,2));
 EEF_eta = np.zeros((nn,2));
+
+corr = np.zeros(nn);
+corr_yy = np.zeros(nn);
+cs = N / 4; 
+ce = N - N / 4;
 	
 #=======================================================
 
@@ -117,7 +121,7 @@ for ii in range(0,nn):
 		u_nd = u_nd / AmpF_nd;
 		v_nd = v_nd / AmpF_nd;
 		eta_nd = eta_nd / AmpF_nd;
-	
+
 		# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
 		eta_full = np.zeros((N,N,Nt));
 		u_full = np.zeros((N,N,Nt));
@@ -126,10 +130,10 @@ for ii in range(0,nn):
 			u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 	
 		# Calculate PV fields and PV fluxes.
-		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
-		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
-		P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
-		EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
+		#PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+		#uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+		#P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+		#EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
 
 		#===
 
@@ -137,23 +141,26 @@ for ii in range(0,nn):
 		# Comment out if not required.
 
 		# Take relevant derivatives
-		v_y = np.zeros((N,N,Nt));
+		#v_y = np.zeros((N,N,Nt));
 		u_y = np.zeros((N,N,Nt));
 		u_yy = np.zeros((N,N,Nt));
 		for ti in range(0,Nt):
-			v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
+		#	v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
 			u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
 			u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
+
+		corr[ii] = diagnostics.arrayCorrTime(u_nd[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:])
+		corr_yy[ii] = diagnostics.arrayCorrTime(u_yy[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:])
 	
 		# Define initial footprint contributions (include SSH terms later)
-		P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
-		P2_tmp = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
+		#P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
+		#P2_tmp = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
 
-		P1_tmp = diagnostics.extend(P1_tmp);
-		P2_tmp = diagnostics.extend(P2_tmp);
+		#P1_tmp = diagnostics.extend(P1_tmp);
+		#P2_tmp = diagnostics.extend(P2_tmp);
 
-		P1[ii,:] = np.trapz(P1_tmp,x_nd,dx_nd,axis=1) / H0_nd;
-		P2[ii,:] = np.trapz(P2_tmp,x_nd,dx_nd,axis=1) / H0_nd;
+		#P1[ii,:] = np.trapz(P1_tmp,x_nd,dx_nd,axis=1) / H0_nd;
+		#P2[ii,:] = np.trapz(P2_tmp,x_nd,dx_nd,axis=1) / H0_nd;
 
 		#===
 
@@ -167,14 +174,18 @@ for ii in range(0,nn):
 		#Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 		#EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
-np.save(filename,EEF_PV);
-np.save('EEF_l',l_PV);
-np.save('P_xav',P_xav);
-np.save('P1',P1);
-np.save('P2',P2);
+#np.save(filename,EEF_PV);
+#np.save('EEF_l',l_PV);
+#np.save('P_xav',P_xav);
+#np.save('P1',P1);
+#np.save('P2',P2);
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
 #np.save(filename_eta,EEF_eta);
+import matplotlib.pyplot as plt
+plt.plot(U0_set,corr);
+plt.plot(U0_set,corr_yy);
+plt.show();
 
 	
 elapsed = time.time() - start;

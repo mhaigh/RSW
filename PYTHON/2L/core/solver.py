@@ -249,10 +249,6 @@ def NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f
 			F[4*N2+j] = Ftilde3_nd[j,i];	# Forcing the h1 equation
 			F[4*N2+N+j] = Ftilde6_nd[j,i];	# Forcing the h2 equation
 
-		if i == 2: 
-			import scipy.io as sio
-			sio.savemat('/home/mike/Documents/GulfStream/Code/DATA/1L/A' ,{'A':A});
-
 		solution[:,i] = np.linalg.solve(A,F);
 
 	u1tilde_nd = np.zeros((N,N),dtype=complex);

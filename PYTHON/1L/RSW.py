@@ -71,7 +71,14 @@ def RSW_main():
 	v_nd = v_nd / AmpF_nd;
 	eta_nd = eta_nd / AmpF_nd;
 
-	# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
+	# Correlation.
+	# Central half?
+	cs = N / 4; 
+	ce = N - N / 4;
+	corr = diagnostics.arrayCorrTime(u_nd[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:]);
+	print corr
+
+	# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta.
 	eta_full = np.zeros((N,N,Nt));
 	u_full = np.zeros((N,N,Nt));
 	for j in range(0,N):
