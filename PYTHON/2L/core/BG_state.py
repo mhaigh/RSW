@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 #=======================================================
 
-def BG_uniform_none(Umag1,Hflat1,Hflat2,f0,beta,g,y,N):
+def BG_uniform_none(Umag1,H1_flat,H2_flat,f0,beta,g,y,N):
 	"(1) Uniform background flow and (2) no background flow"
 
 	U1 = np.zeros(N);
@@ -25,14 +25,14 @@ def BG_uniform_none(Umag1,Hflat1,Hflat2,f0,beta,g,y,N):
 		H2[j] = - rho1_nd * H1[j];
 
 	# Add on the motionless layer thicknesses.
-	H1 = H1 + Hflat1;
-	H2 = H2 + Hflat2;
+	H1 = H1 + H1_flat;
+	H2 = H2 + H2_flat;
 
 	return U1, U2, H1, H2
 	
 #=======================================================
 
-def BG_Gaussian_none(Umag1,sigma,JET_POS,Hflat1,Hflat2,f0,beta,g,y,Ly,N):
+def BG_Gaussian_none(Umag1,sigma,JET_POS,H1_flat,H2_flat,f0,beta,g,y,Ly,N):
 	"Gaussian BG flow"
 
 	from scipy.special import erf
@@ -63,8 +63,8 @@ def BG_Gaussian_none(Umag1,sigma,JET_POS,Hflat1,Hflat2,f0,beta,g,y,Ly,N):
 
 
 	# Add on the motionless layer thicknesses.
-	H1 = H1 + Hflat1;
-	H2 = H2 + Hflat2;
+	H1 = H1 + H1_flat;
+	H2 = H2 + H2_flat;
 
 	return U1, U2, H1, H2
 
@@ -98,13 +98,15 @@ def BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N):
 					# Adjusted Coriolis contribution herein.
 					+ f0 * (y[j] - y[j]**3 / (6.0 * sigma**2)) + beta * (y[j]**2 / 2. - y[j]**4 / (8.0 * sigma**2))) / g + Hflat; #erf(0);
 
+	H1 = H1 + H1_flat;
+	H2 = H2 + H2_flat;
 
 	return U0, H0
 	
 
 #=======================================================
 	
-def BG_none_none(Hflat1,Hflat2):
+def BG_none_none(H1_flat,H2_flat,N):
 	"Zero BG flow"
 
 	U1 = np.zeros(N);
@@ -112,8 +114,8 @@ def BG_none_none(Hflat1,Hflat2):
 	H1 = np.zeros(N);
 	H2 = np.zeros(N);
 
-	H1 = H1 + Hflat1;
-	H2 = H2 + Hflat2;
+	H1 = H1 + H1_flat;
+	H2 = H2 + H2_flat;
 
 	return U1, U2, H1, H2
 

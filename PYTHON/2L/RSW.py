@@ -19,10 +19,13 @@
 
 #====================================================
 
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 from core import diagnostics, forcing, PV, solver
+from output import plotting
 
 from inputFile import *
 
@@ -33,7 +36,6 @@ from inputFile import *
 def RSW_main():
 
 	# Forcing
-	F1_nd, F2_nd, F3_nd, F4_nd, F5_nd, F6_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd, Ftilde4_nd, Ftilde5_nd, Ftilde6_nd = forcing.Forcing(x,y,K,y0,r0,N,FORCE1,FORCE2,AmpF,g,f,f0,U,L,rho1_nd,rho2_nd,dx,dy);
 
 	# Coefficients
 	a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U1_nd,U2_nd,H1_nd,H2_nd,rho1_nd,rho2_nd,omega_nd,gamma_nd,dy_nd,N);
@@ -43,8 +45,10 @@ def RSW_main():
 		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
 	if BC == 'FREE-SLIP':
 		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
-
-#====================================================
+	
+	plotting.plotForcing(x_grid,y_grid,F1_nd,F2_nd,F3_nd,F6_nd);
+	
+	#====================================================
 
 	u1_nd, u2_nd, v1_nd, v2_nd, eta0_nd, eta1_nd = solver.SPEC_TO_PHYS(u1tilde_nd,u2tilde_nd,v1tilde_nd,v2tilde_nd,eta0tilde_nd,eta1tilde_nd,T_nd,Nt,dx_nd,omega_nd,N);
 

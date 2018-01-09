@@ -11,6 +11,8 @@ from diagnostics import diff
 
 #=======================================================
 
+#=======================================================
+
 # SOLVER_COEFFICIENTS
 #=======================================================
 def SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N):
@@ -288,6 +290,8 @@ def NO_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde
 	return solution;
 
 #=======================================================
+
+### This is the solver used for the paper ###
 
 # FREE_SLIP_SOLVER
 #=======================================================

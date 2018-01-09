@@ -274,13 +274,211 @@ def NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f
 #=======================================================
 def FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2):
 # Called by RSW_2L.py if BC = 'FREE-SLIP'.
+# The boundary conditions are: u_y = v = v_yy = 0.
 
 	dim = 6 * N - 4; 	 # u and eta have N gridpoints, v have N-2 gridpoints
 	#print(dim);
 
 	A = np.zeros((dim,dim),dtype=complex);	# For the free-slip, no-normal flow BC.
-	# eta has N gridpoints in y, whereas u and v have N2=N-2, after removing the two 'dead' gridpoints.
-	# We primarily consider forcing away from the boundaries so that it's okay applying no-slip BCs.
+	# u and eta have N gridpoints in y, whereas v has N2=N-2, after removing the two 'dead' gridpoints.
+	# We define a so that the 6 equations are ordered as follows: u1, u2, v1, v2, eta0, eta1.
+
+	solution = np.zeros((dim,N),dtype=complex);		
+
+	for i in range(0,N):
+		#print(i);
+
+		# Boundary conditions
+
+		# u1 equation
+		# South
+		A[0,0] = a1[0,i] - 2. * a2;	# u1[0]
+		A[0,1] = 2. * a2;			# u1
+		A[0,2*N+2*N2] = a4[i];		# eta0[0]
+		# North
+		A[N-1,N-1] = a1[N-1,i] - 2. * a2;	# u1[N-1]
+		A[N-1,N-2] = 2. * a2;				# u1[N-2]
+		A[N-1,3*N+2*N2-1] = a4[i];			# eta0[N-1]
+
+		# u2 equation
+		# South
+		A[N,N] = d1[0,i] - 2. * a2;	# u2[0]
+		A[N,N+1] = 2. * a2;			# u2[1]
+		A[N,2*N+2*N2] = d4[i];		# eta0[0]
+		A[N,3*N+2*N2] = d5[i];		# eta1[0]
+		# North
+		A[2*N-1,2*N-1] = d1[N-1,i] - 2. * a2;	# u2[N-1]
+		A[2*N-1,2*N-2] = 2. * a2;				# u2[N-2]
+		A[2*N-1,3*N+2*N2-1] = d4[i];			# eta0[N-1]
+		A[2*N-1,4*N+2*N2-1] = d5[i];			# eta1[N-1]
+		
+		# edited up to here.....
+		# v1 equation
+		# South
+		A[2*N,1] = f_nd[1];				# u1[1]
+		A[2*N,2*N] = a1[1,i] - 2. * a2;	# v1[1]
+		A[2*N,2*N+1] = a2;				# v1[2]
+		A[2*N,2*N+2*N2] = - b4;			# eta0[0]
+		A[2*N,2*N+2*N2+2] = b4;			# eta0[2]
+		# North
+		A[2*N+N2-1,N-2] = f_nd[N2];					# u1[N-2]
+		A[2*N+N2-1,2*N+N2-1] = a1[N-2,i] - 2. * a2;	# v1[N-2]
+		A[2*N+N2-1,2*N+N2-2] = a2;					# v1[N-3]
+		A[2*N+N2-1,3*N+2*N2-1] = b4;				# eta0[N-1]
+		A[2*N+N2-1,3*N+2*N2-3] = -b4;				# eta0[N-3]
+
+		# v2 equation
+		# South
+		A[2*N+N2,N+1] = f_nd[1];				# u2[1]
+		A[2*N+N2,2*N+N2] = d1[1,i] - 2. * a2;	# v2[1]
+		A[2*N+N2,2*N+N2+1] = a2;				# v2[2]
+		A[2*N+N2,2*N+2*N2+2] = e4;				# eta0[2]
+		A[2*N+N2,2*N+2*N2] = - e4;				# eta0[0]
+		A[2*N+N2,3*N+2*N2+2] = e5;				# eta1[2]
+		A[2*N+N2,3*N+2*N2] = - e5;				# eta1[0]
+		# North
+		A[2*N+2*N2-1,2*N-2] = f_nd[N2];					# u2[N-2]
+		A[2*N+2*N2-1,2*N+2*N2-1] = d1[N2,i] - 2. * a2;	# v2[N-2]
+		A[2*N+2*N2-1,2*N+2*N2-2] = a2;					# v2[N-3]
+		A[2*N+2*N2-1,3*N+2*N2-1] = e4;					# eta0[N-1]
+		A[2*N+2*N2-1,3*N+2*N2-3] = - e4;				# eta0[N-3]
+		A[2*N+2*N2-1,4*N+2*N2-1] = e5;					# eta1[N-1]
+		A[2*N+2*N2-1,4*N+2*N2-3] = - e5;				# eta1[N-3]
+
+		# h1 = eta0 - eta1 equation
+		# South
+		A[2*N+2*N2,0] = c1[0,i];				# u1[0]
+		A[2*N+2*N2,2*N] = 2. * c3[0];			# v1[1] (one-sided FD approx.)
+		A[2*N+2*N2,2*N+2*N2] = c4[0,i];			# eta0[0]
+		A[2*N+2*N2,3*N+2*N2] = c5[0,i];			# eta1[0]
+		A[2*N+2*N2+1,1] = c1[0,i];				# u1[1]
+		A[2*N+2*N2+1,2*N] = c2[1];				# v1[1]
+		A[2*N+2*N2+1,2*N+1] = c3[1];			# v1[2]
+		A[2*N+2*N2+1,2*N+2*N2+1] = c4[1,i];		# eta0[1]
+		A[2*N+2*N2+1,3*N+2*N2+1] = c5[1,i];		# eta1[1]
+		# North
+		A[3*N+2*N2-1,N-1] = c1[N-1,i];				# u1[N-1]
+		A[3*N+2*N2-1,2*N+N2-1] = - 2. * c3[N-1];	# v1[N-2] (one-sided FD approx.)
+		A[3*N+2*N2-1,3*N+2*N2-1] = c4[N-1,i];		# eta0[N-1]
+		A[3*N+2*N2-1,4*N+2*N2-1] = c5[N-1,i];		# eta1[N-1]
+		A[3*N+2*N2-2,N-2] = c1[N2,i];				# u1[N-2]
+		A[3*N+2*N2-2,2*N+N2-1] = c2[N2];			# v1[N-2]
+		A[3*N+2*N2-2,2*N+N2-2] = - c3[N2];			# v1[N-3]	
+		A[3*N+2*N2-2,3*N+2*N2-2] = c4[N2,i];		# eta0[N-2]
+		A[3*N+2*N2-2,4*N+2*N2-2] = c5[N2,i];		# eta1[N-2]
+
+		# h2 = eta1 equation
+		# South
+		A[3*N+2*N2,N] = f1[0,i];				# u2[0]
+		A[3*N+2*N2,2*N+N2] = 2. * f3[0];		# v2[0] (one-sided FD approx.)
+		A[3*N+2*N2,3*N+2*N2] = f4[0,i];			# eta1[0]
+		A[3*N+2*N2+1,N+1] = f1[1,i];			# u2[1]
+		A[3*N+2*N2+1,2*N+N2] = f2[1];			# v2[1]
+		A[3*N+2*N2+1,2*N+N2] = f3[1];			# v2[2]
+		A[3*N+2*N2+1,3*N+2*N2+1] = f4[1,i];		# eta1[1]
+		# North
+		A[4*N+2*N2-1,N-1] = f1[N-1,i];					# u2[N-1]
+		A[4*N+2*N2-1,2*N+2*N2-1] = - 2. * f3[N-1];		# v2[N-1] (one-sided FD approx.)
+		A[4*N+2*N2-1,4*N+2*N2-1] = f4[N-1,i];			# eta1[N-1]
+		A[4*N+2*N2-2,N-2] = f1[N2,i];					# u2[N-2]
+		A[4*N+2*N2-2,2*N+2*N2-1] = f2[N2];				# v2[N-2]
+		A[4*N+2*N2-2,2*N+2*N2-2] = - f3[N2];			# v2[N-3]
+		A[4*N+2*N2-2,4*N+2*N2-2] = f4[N2,i];			# eta1[N-2]
+
+		# Inner domain values	
+	
+		# A loop for remaining values of the u equations.
+		for j in range(1,N-1):
+			# u1 equation
+			A[j,j] = a1[j,i] - 2. * a2;		# u1[j]
+			A[j,j+1] = a2;					# u1[j+1]
+			A[j,j-1] = a2;					# u1[j-1]
+			A[j,2*N+j-1] = a3[j];			# v1[j]
+			A[j,2*N+2*N2+j] = a4[i];		# eta0[j]
+			# u2 equation
+			A[N+j,N+j] = d1[j,i] - 2. * a2;		# u2[j]
+			A[N+j,N+j+1] = a2;					# u2[j+1]
+			A[N+j,N+j-1] = a2;					# u2[j-1]
+			A[N+j,2*N+N2+j-1] = d3[j];			# v2[j]
+			A[N+j,2*N+2*N2+j] = d4[i];			# eta0[j]
+			A[N+j,3*N+2*N2+j] = d5[i];			# eta1[j]	
+
+		# A loop for the remaining values of the v equations.
+		for j in range(1,N-3):
+			# v1 equation
+			A[2*N+j,j+1] = f_nd[j+1];				# u1[j+1]
+			A[2*N+j,2*N+j] = a1[j+1,i] - 2. * a2;	# v1[j+1]
+			A[2*N+j,2*N+j+1] = a2;					# v1[j+2]
+			A[2*N+j,2*N+j-1] = a2;					# v1[j]
+			A[2*N+j,2*N+2*N2+j+2] = b4;				# eta0[j+2]
+			A[2*N+j,2*N+2*N2+j] = - b4;				# eta0[j]
+			# v2 equation
+			A[2*N+N2+j,N+j+1] = f_nd[j+1];				# u2[j+1]
+			A[2*N+N2+j,2*N+N2+j] = d1[j+1,i] - 2. * a2;	# v2[j+1]
+			A[2*N+N2+j,2*N+N2+j+1] = a2;				# v2[j+2]
+			A[2*N+N2+j,2*N+N2+j-1] = a2;				# v2[j]
+			A[2*N+N2+j,2*N+2*N2+j+2] = e4;				# eta0[j+2]
+			A[2*N+N2+j,2*N+2*N2+j] = - e4;				# eta0[j]
+			A[2*N+N2+j,3*N+2*N2+j+2] = e5;				# eta1[j+2]
+			A[2*N+N2+j,3*N+2*N2+j] = - e5;				# eta1[j]
+
+		# A loop for the remaining values of the h/eta equations.
+		for j in range(2,N-2):
+			# h1 equation
+			A[2*N+2*N2+j,j] = c1[j,i];				# u1[j]
+			A[2*N+2*N2+j,2*N+j-1] = c2[j];			# v1[j]
+			A[2*N+2*N2+j,2*N+j] = c3[j];			# v1[j+1]
+			A[2*N+2*N2+j,2*N+j-2] = - c3[j];		# v1[j-1]
+			A[2*N+2*N2+j,2*N+2*N2+j] = c4[j,i];		# eta0[j]
+			A[2*N+2*N2+j,3*N+2*N2+j] = c5[j,i];		# eta1[j]
+			# h2 equation
+			A[3*N+2*N2+j,N+j] = f1[j,i];				# u2[j]
+			A[3*N+2*N2+j,2*N+N2+j-1] = f2[j];			# v2[j]
+			A[3*N+2*N2+j,2*N+N2+j] = f3[j];				# v2[j+1]
+			A[3*N+2*N2+j,2*N+N2+j-2] = - f3[j];			# v2[j-1]
+			A[3*N+2*N2+j,3*N+2*N2+j] = f4[j,i];			# eta1[j]
+		
+		# Now assign the values to F
+		for j in range(0,N):	
+			F[j] = Ftilde1_nd[j,i];				# Forcing the u1 equation
+			F[2*N+2*N2+j] = Ftilde3_nd[j,i];	# Forcing the h1 equation
+			F[3*N+2*N2+j] = Ftilde6_nd[j,i];	# Forcing the h2 equation
+		for j in range(0,N-2):
+			F[2*N+j] = Ftilde2_nd[j+1,i];		# Forcing the v1 equation
+		
+
+		solution[:,i] = np.linalg.solve(A,F);
+
+	u1tilde_nd = np.zeros((N,N),dtype=complex);
+	u2tilde_nd = np.zeros((N,N),dtype=complex);
+	v1tilde_nd = np.zeros((N,N),dtype=complex);
+	v2tilde_nd = np.zeros((N,N),dtype=complex);
+	eta0tilde_nd = np.zeros((N,N),dtype=complex);
+	eta1tilde_nd = np.zeros((N,N),dtype=complex);
+	for j in range(0,N):
+		u1tilde_nd[j,:] = solution[j,:];
+		u2tilde_nd[j,:] = solution[N+j,:];
+		eta0tilde_nd[j,:] = solution[2*N+2*N2+j];
+		eta1tilde_nd[j,:] = solution[3*N+2*N2+j];		
+	for j in range(0,N2):
+		v1tilde_nd[j+1,:] = solution[2*N+j,:];
+		v2tilde_nd[j+1,:] = solution[2*N+N2+j,:];
+
+	return u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd;
+
+#=======================================================
+
+
+# FREE_SLIP_SOLVER2
+#=======================================================
+def FREE_SLIP_SOLVER2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2):
+# Called by RSW_2L.py if BC = 'FREE-SLIP'.
+
+	dim = 6 * N - 4; 	 # u and eta have N gridpoints, v have N-2 gridpoints
+	#print(dim);
+
+	A = np.zeros((dim,dim),dtype=complex);	# For the free-slip, no-normal flow BC.
+	# u and eta have N gridpoints in y, whereas v has N2=N-2, after removing the two 'dead' gridpoints.
 	# We define a so that the 6 equations are ordered as follows: u1, u2, v1, v2, eta0, eta1.
 
 	# Initialise the forcing.
