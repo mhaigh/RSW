@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP.
 
-N = 512+1; 			# Number of gridpoints in each direction.
+N = 256+1; 			# Number of gridpoints in each direction.
 	
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -35,7 +35,7 @@ beta = 2.0e-11;     		# Planetary vorticity gradient (m-1 s-1)
 #=======================================================
 
 g = 9.81;		# Acceleration due to gravity (m s-2)
-gamma = 4e-8;	# Frictional coefficient (s-1)
+gamma = 4.0e-8;	# Frictional coefficient (s-1)
 nu = 100.;		# Kinematic viscosity (m2 s-1)
 
 rho1 = 1020.;    # Density of upper layer (kg m-3)
@@ -48,9 +48,9 @@ rho2 = 1030.;	# Density of lower layer (kg m-3) (should be greater than rho1)
 # so that the BG steady state satisfies the geostrophic equations.
 
 # Upper layer
-BG1 = 'NONE';			# Options: UNIFORM, GAUSSIAN, NONE.
+BG1 = 'UNIFORM';			# Options: UNIFORM, GAUSSIAN, NONE.
 
-Umag = 0.16; # 0.8 for Gaussian BG flow.
+Umag1 = 0.08; # 0.8 for Gaussian BG flow.
 
 #sigma = 0.02 * 3840000.0;	# Jet width
 #JET_POS = 'CENTER';
@@ -80,7 +80,7 @@ AmpF = 1.0e-7;
 
 period_days = 60.;						# Periodicity of plunger (days)
 Nt = 200;								# Number of time samples
-ts = Nt-1; 								# index at which the time-snapshot is taken
+ts = Nt - 1; 							# index at which the time-snapshot is taken
 
 #======================================================================================================================================================================================================
 #======================================================================================================================================================================================================
@@ -130,11 +130,11 @@ rho2_nd = (rho2 - rho1) / rho2;
 
 if BG2 == 'NONE':
 	if BG1 == 'UNIFORM':	
-		U1, U2, H1, H2 = BG_state.BG_uniform_none(Umag1,H1_flat,H2_flat,f0,beta,g,y,N);
+		U1, U2, H1, H2 = BG_state.BG_uniform_none(Umag1,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,N);
 	elif BG1 == 'GAUSSIAN':
-		U1, U2, H1, H2 = BG_state.BG_Gaussian_none(Umag1,sigma,JET_POS,H1_flat,H2_flat,f0,beta,g,y,Ly,N);
+		U1, U2, H1, H2 = BG_state.BG_Gaussian_none(Umag1,sigma,JET_POS,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,Ly,N);
 	elif BG1 == 'NONE':
-		U1, U2, H1, H2 = BG_state.BG_none_none(H1_flat,H2_flat,N);	
+		U1, U2, H1, H2 = BG_state.BG_none_none(H1_flat,H2_flat,rho1_nd,rho2_nd,N);	
 	else:
 		raise ValueError('Invalid BG flow option selected');
 

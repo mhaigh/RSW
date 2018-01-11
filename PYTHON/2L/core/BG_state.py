@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 #=======================================================
 
-def BG_uniform_none(Umag1,H1_flat,H2_flat,f0,beta,g,y,N):
+def BG_uniform_none(Umag1,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,N):
 	"(1) Uniform background flow and (2) no background flow"
 
 	U1 = np.zeros(N);
@@ -32,7 +32,7 @@ def BG_uniform_none(Umag1,H1_flat,H2_flat,f0,beta,g,y,N):
 	
 #=======================================================
 
-def BG_Gaussian_none(Umag1,sigma,JET_POS,H1_flat,H2_flat,f0,beta,g,y,Ly,N):
+def BG_Gaussian_none(Umag1,sigma,JET_POS,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,Ly,N):
 	"Gaussian BG flow"
 
 	from scipy.special import erf
@@ -70,7 +70,7 @@ def BG_Gaussian_none(Umag1,sigma,JET_POS,H1_flat,H2_flat,f0,beta,g,y,Ly,N):
 
 #=======================================================
 
-def BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N):
+def BG_LapGauss(Umag,sigma,JET_POS,Hflat,rho1_nd,rho2_nd,f0,beta,g,y,Ly,N):
 	"Laplacian-Gaussian background flow"
 
 	from scipy.special import erf

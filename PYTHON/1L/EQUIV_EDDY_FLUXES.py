@@ -28,7 +28,7 @@ TEST = 'U0';
 # Initialise tests
 
 if TEST == 'U0':
-	nn = 21;
+	nn = 81;
 	U0_set = np.linspace(-0.1,0.1,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
@@ -66,8 +66,8 @@ EEF_u = np.zeros((nn,2));
 EEF_v = np.zeros((nn,2));
 EEF_eta = np.zeros((nn,2));
 
-corr = np.zeros(nn);
-corr_yy = np.zeros(nn);
+corr_vy_uy = np.zeros(nn);
+corr_v_uyy = np.zeros(nn);
 cs = N / 4; 
 ce = N - N / 4;
 	
@@ -141,16 +141,16 @@ for ii in range(0,nn):
 		# Comment out if not required.
 
 		# Take relevant derivatives
-		#v_y = np.zeros((N,N,Nt));
+		v_y = np.zeros((N,N,Nt));
 		u_y = np.zeros((N,N,Nt));
 		u_yy = np.zeros((N,N,Nt));
 		for ti in range(0,Nt):
-		#	v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
+			v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
 			u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
 			u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
 
-		corr[ii] = diagnostics.arrayCorrTime(u_nd[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:])
-		corr_yy[ii] = diagnostics.arrayCorrTime(u_yy[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:])
+		corr_vy_uy[ii] = diagnostics.arrayCorrTime(u_y[cs:ce,cs:ce,:],v_y[cs:ce,cs:ce,:])
+		corr_v_uyy[ii] = diagnostics.arrayCorrTime(u_yy[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:])
 	
 		# Define initial footprint contributions (include SSH terms later)
 		#P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
@@ -182,10 +182,8 @@ for ii in range(0,nn):
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
 #np.save(filename_eta,EEF_eta);
-import matplotlib.pyplot as plt
-plt.plot(U0_set,corr);
-plt.plot(U0_set,corr_yy);
-plt.show();
+np.save('corr_vy_uy',corr_vy_uy);
+np.save('corr_v_uyy',corr_v_uyy);
 
 	
 elapsed = time.time() - start;

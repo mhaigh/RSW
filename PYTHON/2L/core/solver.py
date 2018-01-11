@@ -278,6 +278,16 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3
 
 	dim = 6 * N - 4; 	 # u and eta have N gridpoints, v have N-2 gridpoints
 	#print(dim);
+	
+	# Define the start and end indices of each variable
+	u1s = 0;  u1e = N-1;
+	u2s = N;  u2e = 2*N-1;
+
+	v1s = 2*N;  v1e = 2*N+N2-1;
+	v2s = 2*N+N2; v2e = 2*N+2*N2-1;
+
+	eta0s = 2*N+2*N2;  eta0e = 3*N+2*N2-1;
+	eta1s = 3*N+2*N2;  eta1e = 4*N+2*N2-1;
 
 	A = np.zeros((dim,dim),dtype=complex);	# For the free-slip, no-normal flow BC.
 	# u and eta have N gridpoints in y, whereas v has N2=N-2, after removing the two 'dead' gridpoints.
@@ -292,162 +302,167 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3
 
 		# u1 equation
 		# South
-		A[0,0] = a1[0,i] - 2. * a2;	# u1[0]
-		A[0,1] = 2. * a2;			# u1
-		A[0,2*N+2*N2] = a4[i];		# eta0[0]
+		A[u1s,u1s] = a1[0,i] - 2. * a2;		# u1[0]
+		A[u1s,u1s+1] = 2. * a2;				# u1
+		A[u1s,eta0s] = a4[i];				# eta0[0]
 		# North
-		A[N-1,N-1] = a1[N-1,i] - 2. * a2;	# u1[N-1]
-		A[N-1,N-2] = 2. * a2;				# u1[N-2]
-		A[N-1,3*N+2*N2-1] = a4[i];			# eta0[N-1]
+		A[u1e,u1e] = a1[N-1,i] - 2. * a2;	# u1[N-1]
+		A[u1e,u1e-1] = 2. * a2;				# u1[N-2]
+		A[u1e,eta0e] = a4[i];				# eta0[N-1]
 
 		# u2 equation
 		# South
-		A[N,N] = d1[0,i] - 2. * a2;	# u2[0]
-		A[N,N+1] = 2. * a2;			# u2[1]
-		A[N,2*N+2*N2] = d4[i];		# eta0[0]
-		A[N,3*N+2*N2] = d5[i];		# eta1[0]
+		A[u2s,u2s] = d1[0,i] - 2. * a2;		# u2[0]
+		A[u2s,u2s+1] = 2. * a2;				# u2[1]
+		A[u2s,eta0s] = d4[i];				# eta0[0]
+		A[u2s,eta1s] = d5[i];				# eta1[0]
 		# North
-		A[2*N-1,2*N-1] = d1[N-1,i] - 2. * a2;	# u2[N-1]
-		A[2*N-1,2*N-2] = 2. * a2;				# u2[N-2]
-		A[2*N-1,3*N+2*N2-1] = d4[i];			# eta0[N-1]
-		A[2*N-1,4*N+2*N2-1] = d5[i];			# eta1[N-1]
+		A[u2e,u2e] = d1[N-1,i] - 2. * a2;	# u2[N-1]
+		A[u2e,u2e-1] = 2. * a2;				# u2[N-2]
+		A[u2e,eta0e] = d4[i];				# eta0[N-1]
+		A[u2e,eta1e] = d5[i];				# eta1[N-1]
 		
-		# edited up to here.....
 		# v1 equation
 		# South
-		A[2*N,1] = f_nd[1];				# u1[1]
-		A[2*N,2*N] = a1[1,i] - 2. * a2;	# v1[1]
-		A[2*N,2*N+1] = a2;				# v1[2]
-		A[2*N,2*N+2*N2] = - b4;			# eta0[0]
-		A[2*N,2*N+2*N2+2] = b4;			# eta0[2]
+		A[v1s,u1s+1] = b1[1];				# u1[1]
+		A[v1s,v1s] = a1[1,i] - 2. * a2;		# v1[1]
+		A[v1s,v1s+1] = a2;					# v1[2]
+		A[v1s,eta0s] = - b4;				# eta0[0]
+		A[v1s,eta0s+2] = b4;				# eta0[2]
 		# North
-		A[2*N+N2-1,N-2] = f_nd[N2];					# u1[N-2]
-		A[2*N+N2-1,2*N+N2-1] = a1[N-2,i] - 2. * a2;	# v1[N-2]
-		A[2*N+N2-1,2*N+N2-2] = a2;					# v1[N-3]
-		A[2*N+N2-1,3*N+2*N2-1] = b4;				# eta0[N-1]
-		A[2*N+N2-1,3*N+2*N2-3] = -b4;				# eta0[N-3]
+		A[v1e,u1e-1] = b1[N2];				# u1[N-2]
+		A[v1e,v1e] = a1[N-2,i] - 2. * a2;	# v1[N-2]
+		A[v1e,v1e-1] = a2;					# v1[N-3]
+		A[v1e,eta0e] = b4;					# eta0[N-1]
+		A[v1e,eta0e-2] = -b4;				# eta0[N-3]
 
 		# v2 equation
 		# South
-		A[2*N+N2,N+1] = f_nd[1];				# u2[1]
-		A[2*N+N2,2*N+N2] = d1[1,i] - 2. * a2;	# v2[1]
-		A[2*N+N2,2*N+N2+1] = a2;				# v2[2]
-		A[2*N+N2,2*N+2*N2+2] = e4;				# eta0[2]
-		A[2*N+N2,2*N+2*N2] = - e4;				# eta0[0]
-		A[2*N+N2,3*N+2*N2+2] = e5;				# eta1[2]
-		A[2*N+N2,3*N+2*N2] = - e5;				# eta1[0]
+		A[v2s,u2s+1] = b1[1];				# u2[1]
+		A[v2s,v2s] = d1[1,i] - 2. * a2;		# v2[1]
+		A[v2s,v2s+1] = a2;					# v2[2]
+		A[v2s,eta0s+2] = e4;				# eta0[2]
+		A[v2s,eta0s] = - e4;				# eta0[0]
+		A[v2s,eta1s+2] = e5;				# eta1[2]
+		A[v2s,eta1s] = - e5;				# eta1[0]
 		# North
-		A[2*N+2*N2-1,2*N-2] = f_nd[N2];					# u2[N-2]
-		A[2*N+2*N2-1,2*N+2*N2-1] = d1[N2,i] - 2. * a2;	# v2[N-2]
-		A[2*N+2*N2-1,2*N+2*N2-2] = a2;					# v2[N-3]
-		A[2*N+2*N2-1,3*N+2*N2-1] = e4;					# eta0[N-1]
-		A[2*N+2*N2-1,3*N+2*N2-3] = - e4;				# eta0[N-3]
-		A[2*N+2*N2-1,4*N+2*N2-1] = e5;					# eta1[N-1]
-		A[2*N+2*N2-1,4*N+2*N2-3] = - e5;				# eta1[N-3]
+		A[v2e,u2e-1] = b1[N2];				# u2[N-2]
+		A[v2e,v2e] = d1[N2,i] - 2. * a2;	# v2[N-2]
+		A[v2e,v2e-1] = a2;					# v2[N-3]
+		A[v2e,eta0e] = e4;					# eta0[N-1]
+		A[v2e,eta0e-2] = - e4;				# eta0[N-3]
+		A[v2e,eta1e] = e5;					# eta1[N-1]
+		A[v2e,eta1e-2] = - e5;				# eta1[N-3]
 
 		# h1 = eta0 - eta1 equation
 		# South
-		A[2*N+2*N2,0] = c1[0,i];				# u1[0]
-		A[2*N+2*N2,2*N] = 2. * c3[0];			# v1[1] (one-sided FD approx.)
-		A[2*N+2*N2,2*N+2*N2] = c4[0,i];			# eta0[0]
-		A[2*N+2*N2,3*N+2*N2] = c5[0,i];			# eta1[0]
-		A[2*N+2*N2+1,1] = c1[0,i];				# u1[1]
-		A[2*N+2*N2+1,2*N] = c2[1];				# v1[1]
-		A[2*N+2*N2+1,2*N+1] = c3[1];			# v1[2]
-		A[2*N+2*N2+1,2*N+2*N2+1] = c4[1,i];		# eta0[1]
-		A[2*N+2*N2+1,3*N+2*N2+1] = c5[1,i];		# eta1[1]
+		A[eta0s,u1s] = c1[0,i];				# u1[0]
+		A[eta0s,v1s] = 2. * c3[0];			# v1[1] (one-sided FD approx.)
+		A[eta0s,eta0s] = c4[0,i];			# eta0[0]
+		A[eta0s,eta1s] = c5[0,i];			# eta1[0]
+		# South + 1
+		A[eta0s+1,u1s+1] = c1[1,i];			# u1[1]
+		A[eta0s+1,v1s] = c2[1];				# v1[1]
+		A[eta0s+1,v1s+1] = c3[1];			# v1[2]
+		A[eta0s+1,eta0s+1] = c4[1,i];		# eta0[1]
+		A[eta0s+1,eta1s+1] = c5[1,i];		# eta1[1]
 		# North
-		A[3*N+2*N2-1,N-1] = c1[N-1,i];				# u1[N-1]
-		A[3*N+2*N2-1,2*N+N2-1] = - 2. * c3[N-1];	# v1[N-2] (one-sided FD approx.)
-		A[3*N+2*N2-1,3*N+2*N2-1] = c4[N-1,i];		# eta0[N-1]
-		A[3*N+2*N2-1,4*N+2*N2-1] = c5[N-1,i];		# eta1[N-1]
-		A[3*N+2*N2-2,N-2] = c1[N2,i];				# u1[N-2]
-		A[3*N+2*N2-2,2*N+N2-1] = c2[N2];			# v1[N-2]
-		A[3*N+2*N2-2,2*N+N2-2] = - c3[N2];			# v1[N-3]	
-		A[3*N+2*N2-2,3*N+2*N2-2] = c4[N2,i];		# eta0[N-2]
-		A[3*N+2*N2-2,4*N+2*N2-2] = c5[N2,i];		# eta1[N-2]
+		A[eta0e,u1e] = c1[N-1,i];			# u1[N-1]
+		A[eta0e,v1e] = - 2. * c3[N-1];		# v1[N-2] (one-sided FD approx.)
+		A[eta0e,eta0e] = c4[N-1,i];			# eta0[N-1]
+		A[eta0e,eta1e] = c5[N-1,i];			# eta1[N-1]
+		# North - 1
+		A[eta0e-1,u1e-1] = c1[N2,i];		# u1[N-2]
+		A[eta0e-1,v1e] = c2[N2];			# v1[N-2]
+		A[eta0e-1,v1e-1] = - c3[N2];		# v1[N-3]	
+		A[eta0e-1,eta0e-1] = c4[N2,i];		# eta0[N-2]
+		A[eta0e-1,eta1e-1] = c5[N2,i];		# eta1[N-2]
 
 		# h2 = eta1 equation
 		# South
-		A[3*N+2*N2,N] = f1[0,i];				# u2[0]
-		A[3*N+2*N2,2*N+N2] = 2. * f3[0];		# v2[0] (one-sided FD approx.)
-		A[3*N+2*N2,3*N+2*N2] = f4[0,i];			# eta1[0]
-		A[3*N+2*N2+1,N+1] = f1[1,i];			# u2[1]
-		A[3*N+2*N2+1,2*N+N2] = f2[1];			# v2[1]
-		A[3*N+2*N2+1,2*N+N2] = f3[1];			# v2[2]
-		A[3*N+2*N2+1,3*N+2*N2+1] = f4[1,i];		# eta1[1]
+		A[eta1s,u2s] = f1[0,i];				# u2[0]
+		A[eta1s,v2s] = 2. * f3[0];			# v2[0] (one-sided FD approx.)
+		A[eta1s,eta1s] = f4[0,i];			# eta1[0]
+		# South + 1
+		A[eta1s+1,u2s+1] = f1[1,i];			# u2[1]
+		A[eta1s+1,v2s] = f2[1];				# v2[1]
+		A[eta1s+1,v2s+1] = f3[1];			# v2[2]
+		A[eta1s+1,eta1s+1] = f4[1,i];		# eta1[1]
 		# North
-		A[4*N+2*N2-1,N-1] = f1[N-1,i];					# u2[N-1]
-		A[4*N+2*N2-1,2*N+2*N2-1] = - 2. * f3[N-1];		# v2[N-1] (one-sided FD approx.)
-		A[4*N+2*N2-1,4*N+2*N2-1] = f4[N-1,i];			# eta1[N-1]
-		A[4*N+2*N2-2,N-2] = f1[N2,i];					# u2[N-2]
-		A[4*N+2*N2-2,2*N+2*N2-1] = f2[N2];				# v2[N-2]
-		A[4*N+2*N2-2,2*N+2*N2-2] = - f3[N2];			# v2[N-3]
-		A[4*N+2*N2-2,4*N+2*N2-2] = f4[N2,i];			# eta1[N-2]
+		A[eta1e,u2e] = f1[N-1,i];			# u2[N-1]
+		A[eta1e,v2e] = - 2. * f3[N-1];		# v2[N-1] (one-sided FD approx.)
+		A[eta1e,eta1e] = f4[N-1,i];			# eta1[N-1]
+		# North - 1
+		A[eta1e-1,u2e-1] = f1[N2,i];		# u2[N-2]
+		A[eta1e-1,v2e] = f2[N2];			# v2[N-2]
+		A[eta1e-1,v2e-1] = - f3[N2];		# v2[N-3]
+		A[eta1e-1,eta1e-1] = f4[N2,i];		# eta1[N-2]
 
 		# Inner domain values	
 	
 		# A loop for remaining values of the u equations.
 		for j in range(1,N-1):
 			# u1 equation
-			A[j,j] = a1[j,i] - 2. * a2;		# u1[j]
-			A[j,j+1] = a2;					# u1[j+1]
-			A[j,j-1] = a2;					# u1[j-1]
-			A[j,2*N+j-1] = a3[j];			# v1[j]
-			A[j,2*N+2*N2+j] = a4[i];		# eta0[j]
+			A[j,j] = a1[j,i] - 2. * a2;				# u1[j]
+			A[j,j+1] = a2;							# u1[j+1]
+			A[j,j-1] = a2;							# u1[j-1]
+			A[j,v1s+j-1] = a3[j];					# v1[j]
+			A[j,eta0s+j] = a4[i];					# eta0[j]
 			# u2 equation
-			A[N+j,N+j] = d1[j,i] - 2. * a2;		# u2[j]
-			A[N+j,N+j+1] = a2;					# u2[j+1]
-			A[N+j,N+j-1] = a2;					# u2[j-1]
-			A[N+j,2*N+N2+j-1] = d3[j];			# v2[j]
-			A[N+j,2*N+2*N2+j] = d4[i];			# eta0[j]
-			A[N+j,3*N+2*N2+j] = d5[i];			# eta1[j]	
+			A[u2s+j,u2s+j] = d1[j,i] - 2. * a2;		# u2[j]
+			A[u2s+j,u2s+j+1] = a2;					# u2[j+1]
+			A[u2s+j,u2s+j-1] = a2;					# u2[j-1]
+			A[u2s+j,v2s+j-1] = d3[j];				# v2[j]
+			A[u2s+j,eta0s+j] = d4[i];				# eta0[j]
+			A[u2s+j,eta1s+j] = d5[i];				# eta1[j]	
 
 		# A loop for the remaining values of the v equations.
 		for j in range(1,N-3):
 			# v1 equation
-			A[2*N+j,j+1] = f_nd[j+1];				# u1[j+1]
-			A[2*N+j,2*N+j] = a1[j+1,i] - 2. * a2;	# v1[j+1]
-			A[2*N+j,2*N+j+1] = a2;					# v1[j+2]
-			A[2*N+j,2*N+j-1] = a2;					# v1[j]
-			A[2*N+j,2*N+2*N2+j+2] = b4;				# eta0[j+2]
-			A[2*N+j,2*N+2*N2+j] = - b4;				# eta0[j]
+			A[v1s+j,j+1] = b1[j+1];					# u1[j+1]
+			A[v1s+j,v1s+j] = a1[j+1,i] - 2. * a2;	# v1[j+1]
+			A[v1s+j,v1s+j+1] = a2;					# v1[j+2]
+			A[v1s+j,v1s+j-1] = a2;					# v1[j]
+			A[v1s+j,eta0s+j+2] = b4;				# eta0[j+2]
+			A[v1s+j,eta0s+j] = - b4;				# eta0[j]
 			# v2 equation
-			A[2*N+N2+j,N+j+1] = f_nd[j+1];				# u2[j+1]
-			A[2*N+N2+j,2*N+N2+j] = d1[j+1,i] - 2. * a2;	# v2[j+1]
-			A[2*N+N2+j,2*N+N2+j+1] = a2;				# v2[j+2]
-			A[2*N+N2+j,2*N+N2+j-1] = a2;				# v2[j]
-			A[2*N+N2+j,2*N+2*N2+j+2] = e4;				# eta0[j+2]
-			A[2*N+N2+j,2*N+2*N2+j] = - e4;				# eta0[j]
-			A[2*N+N2+j,3*N+2*N2+j+2] = e5;				# eta1[j+2]
-			A[2*N+N2+j,3*N+2*N2+j] = - e5;				# eta1[j]
+			A[v2s+j,u2s+j+1] = b1[j+1];				# u2[j+1]
+			A[v2s+j,v2s+j] = d1[j+1,i] - 2. * a2;	# v2[j+1]
+			A[v2s+j,v2s+j+1] = a2;					# v2[j+2]
+			A[v2s+j,v2s+j-1] = a2;					# v2[j]
+			A[v2s+j,eta0s+j+2] = e4;				# eta0[j+2]
+			A[v2s+j,eta0s+j] = - e4;				# eta0[j]
+			A[v2s+j,eta1s+j+2] = e5;				# eta1[j+2]
+			A[v2s+j,eta1s+j] = - e5;				# eta1[j]
 
 		# A loop for the remaining values of the h/eta equations.
 		for j in range(2,N-2):
 			# h1 equation
-			A[2*N+2*N2+j,j] = c1[j,i];				# u1[j]
-			A[2*N+2*N2+j,2*N+j-1] = c2[j];			# v1[j]
-			A[2*N+2*N2+j,2*N+j] = c3[j];			# v1[j+1]
-			A[2*N+2*N2+j,2*N+j-2] = - c3[j];		# v1[j-1]
-			A[2*N+2*N2+j,2*N+2*N2+j] = c4[j,i];		# eta0[j]
-			A[2*N+2*N2+j,3*N+2*N2+j] = c5[j,i];		# eta1[j]
+			A[eta0s+j,j] = c1[j,i];					# u1[j]
+			A[eta0s+j,v1s+j-1] = c2[j];				# v1[j]
+			A[eta0s+j,v1s+j] = c3[j];				# v1[j+1]
+			A[eta0s+j,v1s+j-2] = - c3[j];			# v1[j-1]
+			A[eta0s+j,eta0s+j] = c4[j,i];			# eta0[j]
+			A[eta0s+j,eta1s+j] = c5[j,i];			# eta1[j]
 			# h2 equation
-			A[3*N+2*N2+j,N+j] = f1[j,i];				# u2[j]
-			A[3*N+2*N2+j,2*N+N2+j-1] = f2[j];			# v2[j]
-			A[3*N+2*N2+j,2*N+N2+j] = f3[j];				# v2[j+1]
-			A[3*N+2*N2+j,2*N+N2+j-2] = - f3[j];			# v2[j-1]
-			A[3*N+2*N2+j,3*N+2*N2+j] = f4[j,i];			# eta1[j]
+			A[eta1s+j,N+j] = f1[j,i];				# u2[j]
+			A[eta1s+j,v2s+j-1] = f2[j];				# v2[j]
+			A[eta1s+j,v2s+j] = f3[j];				# v2[j+1]
+			A[eta1s+j,v2s+j-2] = - f3[j];			# v2[j-1]
+			A[eta1s+j,eta1s+j] = f4[j,i];			# eta1[j]
 		
-		# Now assign the values to F
+		# Forcing
+		F = np.zeros(dim,dtype=complex);
 		for j in range(0,N):	
 			F[j] = Ftilde1_nd[j,i];				# Forcing the u1 equation
-			F[2*N+2*N2+j] = Ftilde3_nd[j,i];	# Forcing the h1 equation
-			F[3*N+2*N2+j] = Ftilde6_nd[j,i];	# Forcing the h2 equation
+			F[eta0s+j] = Ftilde3_nd[j,i];	# Forcing the h1 equation
+			F[eta1s+j] = Ftilde6_nd[j,i];	# Forcing the h2 equation
 		for j in range(0,N-2):
-			F[2*N+j] = Ftilde2_nd[j+1,i];		# Forcing the v1 equation
+			F[v1s+j] = Ftilde2_nd[j+1,i];		# Forcing the v1 equation
 		
 
 		solution[:,i] = np.linalg.solve(A,F);
+
 
 	u1tilde_nd = np.zeros((N,N),dtype=complex);
 	u2tilde_nd = np.zeros((N,N),dtype=complex);
@@ -457,12 +472,13 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3
 	eta1tilde_nd = np.zeros((N,N),dtype=complex);
 	for j in range(0,N):
 		u1tilde_nd[j,:] = solution[j,:];
-		u2tilde_nd[j,:] = solution[N+j,:];
-		eta0tilde_nd[j,:] = solution[2*N+2*N2+j];
-		eta1tilde_nd[j,:] = solution[3*N+2*N2+j];		
+		u2tilde_nd[j,:] = solution[u2s+j,:];
+		eta0tilde_nd[j,:] = solution[eta0s+j];
+		eta1tilde_nd[j,:] = solution[eta1s+j];		
 	for j in range(0,N2):
-		v1tilde_nd[j+1,:] = solution[2*N+j,:];
-		v2tilde_nd[j+1,:] = solution[2*N+N2+j,:];
+		v1tilde_nd[j+1,:] = solution[v1s+j,:];
+		v2tilde_nd[j+1,:] = solution[v2s+j,:];
+	
 
 	return u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd;
 

@@ -50,21 +50,87 @@ def plotForcing(x_grid,y_grid,F1_nd,F2_nd,F3_nd,F6_nd):
 	plt.tight_layout();
 	plt.show();
 
-	
-#====================================================
-
-
 #====================================================
 
 # solutionPlots
-def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
+def solutionPlots(x,y,x_grid,y_grid,u1,u2,v1,v2,h1,h2,ts,N,contour):
 
-	ulim = np.max(abs(u_nd[:,:,ts]));
-	vlim = np.max(abs(v_nd[:,:,ts]));
-	etalim = np.max(abs(eta_nd[:,:,ts]));
-	
-	if div:
-			
+	# Take absolute maximum.
+	u1lim = np.max(abs(u1[:,:,ts]));
+	u2lim = np.max(abs(u2[:,:,ts]));
+	v1lim = np.max(abs(v1[:,:,ts]));
+	v2lim = np.max(abs(v2[:,:,ts]));
+	h1lim = np.max(abs(h1[:,:,ts]));
+	h2lim = np.max(abs(h2[:,:,ts]));
+
+	# Normalise each solution, extract snapshot.	
+	u1 = u1[:,:,ts] / u1lim;
+	u2 = u2[:,:,ts] / u2lim;
+	v1 = v1[:,:,ts] / v1lim;
+	v2 = v2[:,:,ts] / v2lim;
+	h1 = h1[:,:,ts] / h1lim;
+	h2 = h2[:,:,ts] / h2lim;	
+
+	if contour:
+		
+		# Another good option is 'seismic' (slightly darker shades).
+		plt.figure(1,figsize=(22.,13.));
+
+		plt.subplot(231);
+		plt.contourf(x[0:N],y,u1);
+		plt.text(0.3,0.45,'u1',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+		plt.subplot(232);
+		plt.contourf(x[0:N],y,v1);
+		plt.text(0.3,0.45,'v1',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+		plt.subplot(233);
+		plt.contourf(x[0:N],y,h1);
+		plt.text(0.3,0.45,'h1',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+
+		plt.subplot(234);
+		plt.contourf(x[0:N],y,u2);
+		plt.text(0.3,0.45,'u2',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+		plt.subplot(235);
+		plt.contourf(x[0:N],y,v2);
+		plt.text(0.3,0.45,'v1',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+		plt.subplot(236);
+		plt.contourf(x[0:N],y,h2);
+		plt.text(0.3,0.45,'h1',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+
+		plt.tight_layout();
+		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
+		plt.show();
+
+
+	else:
+
 		plt.figure(1,figsize=(22,6.4));
 
 		plt.subplot(131);
@@ -101,44 +167,6 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.show();
 
-		# Another good option is 'seismic' (slightly darker shades).
-
-	else:
-
-		plt.figure(1,figsize=(22,6.4));
-
-		plt.subplot(131);
-		plt.contourf(x_nd[0:N],y_nd,u_nd[:,:,ts]);
-		plt.text(0.3,0.45,'u',fontsize=22);
-		plt.xticks((-1./2,-1./4,0,1./4,1./2));
-		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
-		plt.xlabel('x',fontsize=16);
-		plt.ylabel('y',fontsize=16);
-		plt.grid(b=True, which='both', color='0.65',linestyle='--');
-		plt.clim(-ulim,ulim);
-		plt.colorbar();
-
-		plt.subplot(132);
-		plt.contourf(x_nd[0:N],y_nd,v_nd[:,:,ts]);
-		plt.text(0.3,0.45,'v',fontsize=22);
-		plt.xticks((-1./2,-1./4,0,1./4,1./2));
-		plt.yticks((-1./2,-1./4,0,1./4,1./2));
-		plt.grid(b=True, which='both', color='0.65',linestyle='--');
-		plt.clim(-vlim,vlim);
-		plt.colorbar();
-
-		plt.subplot(133);
-		plt.contourf(x_nd[0:N],y_nd,eta_nd[:,:,ts]);
-		plt.text(0.3,0.45,'eta',fontsize=22);
-		plt.xticks((-1./2,-1./4,0,1./4,1./2));
-		plt.yticks((-1./2,-1./4,0,1./4,1./2));
-		plt.grid(b=True, which='both', color='0.65',linestyle='--');
-		plt.clim(-etalim,etalim);
-		plt.colorbar();
-
-		plt.tight_layout();
-		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/' + str(Fpos) + '_'  + str(N) + '.png');
-		plt.show();
 
 		#cmap='coolwarm'
 

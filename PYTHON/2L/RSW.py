@@ -35,8 +35,6 @@ from inputFile import *
 
 def RSW_main():
 
-	# Forcing
-
 	# Coefficients
 	a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U1_nd,U2_nd,H1_nd,H2_nd,rho1_nd,rho2_nd,omega_nd,gamma_nd,dy_nd,N);
 
@@ -44,12 +42,9 @@ def RSW_main():
 	if BC == 'NO-SLIP':
 		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
 	if BC == 'FREE-SLIP':
-		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
+		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
 	
-	plotting.plotForcing(x_grid,y_grid,F1_nd,F2_nd,F3_nd,F6_nd);
-	
-	#====================================================
-
+	#===================================================
 	u1_nd, u2_nd, v1_nd, v2_nd, eta0_nd, eta1_nd = solver.SPEC_TO_PHYS(u1tilde_nd,u2tilde_nd,v1tilde_nd,v2tilde_nd,eta0tilde_nd,eta1tilde_nd,T_nd,Nt,dx_nd,omega_nd,N);
 
 	# Before taking real part, can define an error calculator to call here.
@@ -77,20 +72,17 @@ def RSW_main():
 		h2_full[:,j,:] = h2_nd[:,j,:] + H2_nd[j];
 
 	# Call function calculate PV in each layer.
-	PV1_prime, PV1_full, PV1_BG = PV.vort(u1_nd,v1_nd,h1_nd,u1_full,h1_full,H1_nd,U1_nd,N,Nt,dx_nd,dy_nd,f_nd);
-	PV2_prime, PV2_full, PV2_BG = PV.vort(u2_nd,v2_nd,h2_nd,u2_full,h2_full,H2_nd,U2_nd,N,Nt,dx_nd,dy_nd,f_nd);
+	#PV1_prime, PV1_full, PV1_BG = PV.vort(u1_nd,v1_nd,h1_nd,u1_full,h1_full,H1_nd,U1_nd,N,Nt,dx_nd,dy_nd,f_nd);
+	#PV2_prime, PV2_full, PV2_BG = PV.vort(u2_nd,v2_nd,h2_nd,u2_full,h2_full,H2_nd,U2_nd,N,Nt,dx_nd,dy_nd,f_nd);
 
 	# Calculate footprints using previously calculated PV. Most interseted in the upper layer.
-	P, P_xav = PV.footprint(u1_full,v1_nd,PV1_full,U1_nd,U1,x_nd,y_nd,dx_nd,dy_nd,AmpF_nd,FORCE1,r0,nu,BG1,Fpos,ts,period_days,N,Nt,GAUSS);
-
-	u1_perm = diagnostics.permute(u1_nd,N,Nt,float(N)/4); 
+	#P, P_xav = PV.footprint(u1_full,v1_nd,PV1_full,U1_nd,U1,x_nd,y_nd,dx_nd,dy_nd,AmpF_nd,FORCE1,r0,nu,BG1,Fpos,ts,period_days,N,Nt,GAUSS);
 
 	# PLOTS
 	#====================================================
 
-	diagnostics.solutionPlots(x_nd,y_nd,u1_nd,v1_nd,eta0_nd,u2_nd,v2_nd,eta1_nd,ts,FORCE1,BG1,Fpos,N);
+	plotting.solutionPlots(x_nd,y_nd,x_grid,y_grid,u1_nd,u2_nd,v1_nd,v2_nd,h1_nd,h2_nd,ts,N,True);
 
-	diagnostics.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 		
 
 #====================================================
