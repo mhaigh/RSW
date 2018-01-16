@@ -7,9 +7,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-from diagnostics import diff
-from diagnostics import extend
-
 import plotly.graph_objs as go
 import plotly.plotly as py
 
@@ -482,6 +479,122 @@ def vec2vecs(vec,N,dim,BC):
 	return u_vec, v_vec, eta_vec;
 
 #===================================================
+
+#====================================================
+
+# diff
+def diff(f,d,p,delta):
+# Function for differentiating a vector
+# f[y,x] is the function to be differentiated.
+# d is the direction in which the differentiation is to be taken:
+# d=0 for differentiation over the first index, d=1 for the second.
+# d=2 for a 1D vector
+# p is a periodic switch:
+# p=1 calculates periodic derivative.
+# Need to be careful with periodic derivatives, output depends on whether f[0]=f[dim-1] or =f[dim].
+	
+	if d != 2:
+		dimx = np.shape(f)[1];		# Finds the number of gridpoints in the x and y directions
+		dimy = np.shape(f)[0];
+		df = np.zeros((dimy,dimx),dtype=f.dtype);
+	else:
+		dimy = np.shape(f)[0];
+		df = np.zeros(dimy,dtype=f.dtype);
+	
+	if p == 0:
+		# Solid boundary derivative.
+		# Note multiplication by 2 of boundary terms are to
+		# invert the division by 2 at the end of the module.
+		if d == 0:
+		
+			df[1:dimy-1,:] = f[2:dimy,:] - f[0:dimy-2,:];
+		
+			df[0,:] = 2 * (f[1,:] - f[0,:]);
+			df[dimy-1,:] = 2 * (f[dimy-1,:] - f[dimy-2,:]);
+	
+		elif d == 1:
+
+			df[:,1:dimx-1] = f[:,2:dimx] - f[:,0:dimx-2];
+
+			df[:,0] = 2 * (f[:,1] - f[:,0]);
+			df[:,dimx-1] = 2 * (f[:,0] - f[:,dimx-2]);
+		
+		elif d == 2:
+
+			df[1:dimy-1] = f[2:dimy] - f[0:dimy-2];
+
+			df[0] = 2 * (f[1] - f[0]);
+			df[dimy-1] = 2 * (f[dimy-1] - f[dimy-2]);
+
+		else:
+			print('error')
+
+	elif p == 1:
+		# Periodic option
+
+		if d == 0:
+
+			df[1:dimy-1,:] = f[2:dimy,:] - f[0:dimy-2,:];	
+
+			df[0,:] = f[1,:] - f[dimy-1,:];
+			df[dimy-1,:] = f[0,:] - f[dimy-2,:];
+	
+		elif d == 1:
+
+			df[:,1:dimx-1] = f[:,2:dimx]-f[:,0:dimx-2];
+
+			df[:,0] = f[:,1] - f[:,dimx-1];
+			df[:,dimx-1] = f[:,0] - f[:,dimx-2];
+
+		elif d == 2:
+
+			df[1:dimy-1] = f[2:dimy] - f[0:dimy-2];
+
+			df[0] = f[1] - f[dimy-2];
+			df[dimy-1] = f[1] - f[dimy-2];
+			
+			#print(str(df[0])+'='+str(f[1])+'+'+str(f[dimy-1]));
+			#print(str(df[dimy-1])+'='+str(f[0])+'+'+str(f[dimy-2]));
+		
+		else:
+			print('error')
+
+	else:
+		print('error')
+
+	df = 0.5 * df / delta;
+
+	return df
+
+#====================================================
+
+#====================================================
+
+# extend
+def extend(f):
+# A function used to replace the extra x-gridpoint on a solution.
+
+	dimx = np.shape(f)[1];
+	dimy = np.shape(f)[0];
+	if f.size != dimx * dimy:
+		dimt = np.shape(f)[2];
+
+		f_new = np.zeros((dimy,dimx+1,dimt),dtype=f.dtype);
+		for i in range(0,dimx):
+			f_new[:,i,:] = f[:,i,:];
+	
+		f_new[:,dimx,:] = f[:,0,:];
+	
+	else:
+		f_new = np.zeros((dimy,dimx+1),dtype=f.dtype);
+		for i in range(0,dimx):
+			f_new[:,i] = f[:,i];
+	
+		f_new[:,dimx] = f[:,0];
+
+	return f_new
+
+
 
 	
 	

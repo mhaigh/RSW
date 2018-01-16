@@ -43,7 +43,7 @@ nu = 100.;		# Kinematic viscosity (m2 s-1)
 BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-Umag = 0.0688; #0.0688, -0.0233, 0.0213
+Umag = 0.0; #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
 #Umag = 0.8;		# Jet max speed

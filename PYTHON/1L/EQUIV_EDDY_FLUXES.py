@@ -28,7 +28,7 @@ TEST = 'U0';
 # Initialise tests
 
 if TEST == 'U0':
-	nn = 81;
+	nn = 3;
 	U0_set = np.linspace(-0.1,0.1,nn);
 	if FORCE_TYPE == 'CTS':
 		F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
@@ -62,15 +62,26 @@ else:
 	P1 = np.zeros((nn,N));
 	P2 = np.zeros((nn,N));
 
-EEF_u = np.zeros((nn,2));
-EEF_v = np.zeros((nn,2));
-EEF_eta = np.zeros((nn,2));
+#EEF_u = np.zeros((nn,2));
+#EEF_v = np.zeros((nn,2));
+#EEF_eta = np.zeros((nn,2));
 
-corr_vy_uy = np.zeros(nn);
-corr_v_uyy = np.zeros(nn);
+# Correlation
+corr_vy_uy = np.zeros((nn,Nt));
+corr_v_uyy = np.zeros((nn,Nt));
 cs = N / 4; 
 ce = N - N / 4;
 	
+# Amplitude
+uAmp = np.zeros((nn,Nt));
+vAmp = np.zeros((nn,Nt));
+
+# EEF
+EEF_vy_uy = np.zeros((nn,2));
+EEF_v_uyy = np.zeros((nn,2));
+l_vy_uy = np.zeros((nn,2));
+l_v_uyy = np.zeros((nn,2));
+
 #=======================================================
 
 # Now start the loop over each forcing index.
@@ -130,10 +141,10 @@ for ii in range(0,nn):
 			u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
 	
 		# Calculate PV fields and PV fluxes.
-		#PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
-		#uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
-		#P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
-		#EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
+		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+		P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+		EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
 
 		#===
 
@@ -148,20 +159,30 @@ for ii in range(0,nn):
 			v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
 			u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
 			u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
-
-		corr_vy_uy[ii] = diagnostics.arrayCorrTime(u_y[cs:ce,cs:ce,:],v_y[cs:ce,cs:ce,:])
-		corr_v_uyy[ii] = diagnostics.arrayCorrTime(u_yy[cs:ce,cs:ce,:],v_nd[cs:ce,cs:ce,:])
+			# Correlation at each time step
+			corr_vy_uy[ii,ti] = diagnostics.arrayCorr(u_y[cs:ce,cs:ce,ti],v_y[cs:ce,cs:ce,ti]);
+			corr_v_uyy[ii,ti] = diagnostics.arrayCorr(u_yy[cs:ce,cs:ce,ti],v_nd[cs:ce,cs:ce,ti]);
+			# Amplitude
+			uAmp[ii,ti] = max(u_nd[cs:ce,cs:ce,ti].max(),u_nd[cs:ce,cs:ce,ti].min(),key=abs);
+			vAmp[ii,ti] = max(v_nd[cs:ce,cs:ce,ti].max(),v_nd[cs:ce,cs:ce,ti].min(),key=abs);
 	
 		# Define initial footprint contributions (include SSH terms later)
-		#P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
-		#P2_tmp = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
+		P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
+		P2_tmp = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
 
-		#P1_tmp = diagnostics.extend(P1_tmp);
-		#P2_tmp = diagnostics.extend(P2_tmp);
+		P1_tmp = diagnostics.extend(P1_tmp);
+		P2_tmp = diagnostics.extend(P2_tmp);
 
-		#P1[ii,:] = np.trapz(P1_tmp,x_nd,dx_nd,axis=1) / H0_nd;
-		#P2[ii,:] = np.trapz(P2_tmp,x_nd,dx_nd,axis=1) / H0_nd;
+		P1[ii,:] = np.trapz(P1_tmp,x_nd,dx_nd,axis=1) / H0_nd;
+		P2[ii,:] = np.trapz(P2_tmp,x_nd,dx_nd,axis=1) / H0_nd;
 
+		plt.plot(P_xav[ii,:]);
+		plt.plot(P1[ii,:]+P2[ii,:]);
+		plt.show();
+
+		EEF_vy_uy[ii,:], l_vy_uy[ii,:] = PV.EEF(P1[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
+		EEF_v_uyy[ii,:], l_v_uyy[ii,:] = PV.EEF(P2[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
+	
 		#===
 
 		# Buoyancy EEF
@@ -174,6 +195,10 @@ for ii in range(0,nn):
 		#Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 		#EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
+
+print(EEF_PV);
+print(EEF_vy_uy+EEF_v_uyy);
+
 #np.save(filename,EEF_PV);
 #np.save('EEF_l',l_PV);
 #np.save('P_xav',P_xav);
@@ -182,9 +207,16 @@ for ii in range(0,nn):
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
 #np.save(filename_eta,EEF_eta);
-np.save('corr_vy_uy',corr_vy_uy);
-np.save('corr_v_uyy',corr_v_uyy);
 
+#np.save('output/corr_vy_uy',corr_vy_uy);
+#np.save('output/corr_v_uyy',corr_v_uyy);
+#np.save('output/uAmp',uAmp);
+#np.save('output/vAmp',vAmp);
+
+#np.save('output/EEF_vy_uy',EEF_vy_uy);
+#np.save('output/EEF_v_uyy',EEF_v_uyy);
+#np.save('output/l_vy_uy',l_vy_uy);
+#np.save('output/l_v_uyy',l_v_uyy);
 	
 elapsed = time.time() - start;
 elapsed = np.ones(1) * elapsed;

@@ -13,7 +13,7 @@ import itertools as it
 
 from eig import eigDiagnostics, eigSolver
 from core import diagnostics, PV, energy
-from output import ncSaveEigenmodes
+from output.output import ncSaveEigenmodes
 
 from inputFile import *
 
@@ -30,14 +30,14 @@ from inputFile import *
 I = np.complex(0.0,1.0);
 
 # Define the coefficients required by the solver
-a1,a2,a3,a4,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
+a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS2(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 	
-k_start = N-24;
-k_end = N;
+k_start = 3;
+k_end = 4;
 Nk = 8;
 #loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
-#loop = range(k_start,k_end);
-loop = range(0,N);
+loop = range(k_start,k_end);
+#loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
@@ -45,13 +45,14 @@ for ii in loop:
 	if BC == 'NO-SLIP':
 		val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 	if BC == 'FREE-SLIP':
-		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,N,N2,ii,False);
+		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
 		#val, vec = eigSolver.FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
-	val = val / (2*np.pi*I*Ro);
+											
+	#val = val / (2*np.pi*I*Ro);
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24.0 * 3600.0);
-	iii=np.argsort(period_days);
-
+	
+	
 	dim = np.size(val);
 	# count = number of zero-crossings by the eigenvector 
 	# i_count = set of indices ordering modes by their count
@@ -65,8 +66,12 @@ for ii in loop:
 	val = val[i_count];
 	period_days = period_days[i_count];
 
+	p_sort = np.argsort(-np.abs(period_days));
+	print(period_days[p_sort]);
+	
+	
 	# Before saving the modes, they need to be normalised by their energy.
-	ENERGY = 1;
+	ENERGY = 0;
 	if ENERGY ==1:
 		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 		E = np.zeros(dim);	
@@ -75,17 +80,20 @@ for ii in loop:
 			EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
 			u_vec[:,wi], v_vec[:,wi], eta_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), eta_vec[:,wi] / np.sqrt(EE);
 
-	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
+	#ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 
+#====================================================
 
 if str(raw_input('continue? y or n: ')) == 'n':
 	sys.exit();
+
+#====================================================
  
+u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
+
 for ii in loop:
 
 	k = K_nd[ii];
-
-	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 
 	#====================================================
 
@@ -98,18 +106,22 @@ for ii in loop:
 	u = np.zeros((N,N),dtype=float);
 	count_new = np.array(list(count));
 	update_i = [];		# Used to store the set of wi indices that need updating.
-	wii = 0;
-	while wii < dim:
+	wiii = 0;
+	while wiii < dim:
+		wii = p_sort[wiii]
 		print('i_count = ' + str(wii));
 		for i in range(0,N):
 			for j in range(0,N):
-				u[j,i] = np.real(u_vec[j,wii] * np.exp(2 * np.pi * I * (k * x_nd[i])));
+				u[j,i] = np.real(u_vec[j,wii] * np.exp(2.0 * np.pi * I * (k * x_nd[i] - val[wii] * T_nd[ts])));
 		print('count = ' + str(count[wii]));
 		print('period = ' + str(period_days[wii]));
-		plt.subplot(121);
+		plt.subplot(131);
 		plt.contourf(u);
-		plt.subplot(122);
-		plt.plot(np.abs(u_vec[:,wii]),y_nd);
+		plt.subplot(132);
+		plt.plot(np.real(u_vec[:,wii]),y_nd);
+		plt.ylim(-0.5,0.5);
+		plt.subplot(133);
+		plt.plot(np.imag(u_vec[:,wii]),y_nd)
 		plt.ylim(-0.5,0.5);
 		plt.show();
 
@@ -118,7 +130,7 @@ for ii in loop:
 
 		count_new[wii], wii = eigDiagnostics.updateCount(count[wii],wii);	# Update the count, wii is set to high number if user wants to quit the algorithm.
 
-		wii = wii + 1;
+		wiii += 1;
 
 	#====================================================
 
@@ -140,7 +152,7 @@ for ii in loop:
 	# 3. The new vectors can be checked, again using u_vec as an example.
 
 	u = np.zeros((N,N),dtype=float);
-	for wi in range(0,dim):
+	for wi in range(0,0):
 		for i in range(0,N):
 			for j in range(0,N):
 				u[j,i] = np.real(u_vec[j,wi] * np.exp(2 * np.pi * I * (k * x_nd[i])));
@@ -206,13 +218,7 @@ for ii in loop:
 		for i in range(0,N):
 			u_full[:,i] = u[:,i,wi] + U0_nd[:];
 			eta_full[:,i] = eta[:,i,wi] + H0_nd[:];
-
-		PV_full, PV_prime = eigDiagnostics.PV(u[:,:,wi],v[:,:,wi],eta[:,:,wi],u_full,eta_full,H0_nd,U0_nd,f_nd,dx_nd,dy_nd,N);
-		print(period_days[freq_index[wi]]);
-		P, P_xav = eigDiagnostics.footprint(u[:,:,wi],v[:,:,wi],PV_full,x_nd,dx_nd,dy_nd,N);
-		
-		eigDiagnostics.eigPlots(u[:,:,wi],v[:,:,wi],eta[:,:,wi],x_nd,y_nd);
-		#diagnostics.pvPlots(PV_full,PV_prime,P,x_nd,y_nd);
+	
 
 		plt.plot(y_nd,u_set[wi,:]);
 		plt.show();
