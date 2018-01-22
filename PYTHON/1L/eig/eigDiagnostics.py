@@ -472,13 +472,31 @@ def vec2vecs(vec,N,dim,BC):
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[N:2*N-2,:];
 		eta_vec = vec[2*N-4:3*N-4,:];	
-		return val, u_vec, v_vec, eta_vec;		
 	else:
 		sys.exit('ERROR: choose valid BC');
 
 	return u_vec, v_vec, eta_vec;
 
-#===================================================
+#====================================================
+
+# vecs2vec
+def vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC):
+# The inverse operation of the above function.
+
+	vec = np.zeros((dim,dim),dtype=complex);
+
+	if BC == 'FREE-SLIP':
+		vec[0:N,:] = u_vec;		
+		vec[N:2*N-2,:] = v_vec[1:N-1,:];
+		vec[2*N-2:3*N-2,:] = eta_vec;
+	elif BC == 'NO-SLIP':
+		vec[0:N-2,:] = u_vec[1:N-1,:];
+		vec[N:2*N-2,:] = v_vec[1:N-1,:];
+		vec[2*N-4:3*N-4,:] = eta_vec;	
+	else:
+		sys.exit('ERROR: choose valid BC');
+
+	return vec;
 
 #====================================================
 

@@ -21,7 +21,11 @@ from inputFile import *
 
 #====================================================
 
-def EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm):
+def EIG_DECOMP_main(U0_nd,H0_nd,dim):
+
+	# Dimensions
+	Nm = dim;		# How many modes to use in the decomposition at each wavenumber (dim is maximum).
+	Nk = N;
 
 	# The 1L SW solution
 	#====================================================
@@ -62,7 +66,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm):
 	# Initisialastion steps
 	#====================================================
 
-	VEC = 'NEW';		# From FILE, requires pre-saved vectors which take up lots of memory.
+	VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
 	LOOP = 'FULL';		# FULL, PART
 
 	
@@ -112,6 +116,11 @@ def EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm):
 		# Eigenmodes, eigenvalues and count.
 		#====================================================
 
+		# This section returns three arrays: 1. val, 2. vec, 3. count
+		# 1.) val = val[0:dim] stores the eigenvalues/frequencies.
+		# 2.) vec = vec[]
+		# 3.) count = count[]
+
 		# Run the solver for the current k-value.
 		if VEC == 'NEW':	# Solve the eigenmode problem anew.
 			a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS2(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
@@ -119,7 +128,29 @@ def EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm):
 				val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 			if BC == 'FREE-SLIP':
 				val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
-			count = np.zeros(dim);
+
+			# Order modes by meridional pseudo wavenumber (count).
+			count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False);
+			count = count[i_count];
+			vec = vec[:,i_count];
+			val = val[i_count];
+
+			# Each eigenmode is currently a unit vector, but we normalise so that each mode contains unit energy.
+			#==
+	
+			# Extract the three components.
+			u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);	
+		
+			# Calculate the contained in each component.
+			E = np.zeros(dim);	
+			for wi in range(0,dim):
+				EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
+				# Normalise each vector by the square root of the energy.
+				u_vec[:,wi], v_vec[:,wi], eta_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), eta_vec[:,wi] / np.sqrt(EE);
+
+			# Rebuild the vector. This should have unit energy perturbation. 
+			# (There are more direct ways of executing this normalisation, but this method is the safest.)
+			vec = eigDiagnostics.vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC);
 		
 			# Comment out this line, depending on which EIG_COEFFICIENTS function is being called.
 			#val = val / (2. * np.pi * I * Ro);
@@ -144,12 +175,10 @@ def EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm):
 		freq = np.real(val);
 		period_days = T_adv / (freq * 24. * 3600.);
 
+		dim = np.size(val);
+
+
 		#====================================================
-	
-		# This section returns three arrays: 1. val, 2. vec, 3. count
-		# 1.) val = val[0:dim] stores the eigenvalues/frequencies.
-		# 2.) vec = vec[]
-		# 3.) count = count[]
 	
 		# Now we have the solution and the eigenmodes.
 		# The decomposition follows the following steps:
@@ -207,7 +236,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm):
 #====================================================
 
 # Define BG flow set. 
-nn = 81;
+nn = 2;
 U0_set = np.linspace(-0.1,0.1,nn);
 
 # Define forcing. This is constant throughout if only BG flow varies.
@@ -218,9 +247,7 @@ elif FORCE_TYPE == 'DCTS':
 else:
 	sys.exit('ERROR: Invalid forcing option selected.');
 
-
-# Dimensions
-Nm = dim;		# How many modes to use in the decomposition at each wavenumber (dim is maximum).
+Nm = dim;
 Nk = N;
 
 # Initialise output arrays
@@ -247,17 +274,17 @@ p = np.zeros((Nk,nn));					# For storing weighted phase speed at each wavenumber
 
 if __name__ == '__main__':
 
-	for ii in range(0,nn):
+	for ui in range(0,nn):
 
 		# Before executing the main function, (re)define BG state.
 		for j in range(0,N):
-			U0[j] = U0_set[ii];
+			U0[j] = U0_set[ui];
 			H0[j] = - (U0[j] / g) * (f0 * y[j] + beta * y[j]**2 / 2) + Hflat;
 			U0_nd = U0 / U;
 			H0_nd = H0 / chi;
 
 		# Decompose solution into eigenmodes.
-		theta[:,:,ii], mean[:,ii], var[:,ii], p[:,ii], proj[:,:,ii], solution[:,:,ii], scatter_k[:,ii], scatter_l[:,ii], scatter_p[:,ii] = EIG_DECOMP_main(U0_nd,H0_nd,Nk,Nm);
+		theta[:,:,ui], mean[:,ui], var[:,ui], p[:,ui], proj[:,:,ui], solution[:,:,ui], scatter_k[:,ui], scatter_l[:,ui], scatter_p[:,ui] = EIG_DECOMP_main(U0_nd,H0_nd,dim);
 
 # Save data
 
@@ -266,7 +293,7 @@ np.save('mean',mean);
 np.save('var',var);
 np.save('p',p);
 
-sys.exit();
+#sys.exit();
 
 # Plotting
 #====================================================
@@ -278,12 +305,12 @@ plt.grid();
 plt.show();
 
 
-plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(mean));
+plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(mean[:,0]));
 plt.ylabel('MEAN ABS WEIGHT');
 plt.xlabel('WAVENUMBER');
 plt.show();
 
-plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(var));
+plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(var[:,0]));
 plt.ylabel('VARIANCE');
 plt.xlabel('WAVENUMBER');
 plt.show();

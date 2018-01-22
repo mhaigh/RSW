@@ -41,7 +41,7 @@ loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
-	print(k);
+	print('k = ' + str(k));
 	if BC == 'NO-SLIP':
 		val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 	if BC == 'FREE-SLIP':
@@ -69,16 +69,18 @@ for ii in loop:
 	p_sort = np.argsort(-np.abs(period_days));
 	#print(period_days[p_sort]);
 	
-	
 	# Before saving the modes, they need to be normalised by their energy.
 	ENERGY = 1;
 	if ENERGY == 1:
 		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
+		
 		E = np.zeros(dim);	
 		for wi in range(0,dim):
 			#print(str(wi+1) + ' / ' + str(dim));	
 			EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
 			u_vec[:,wi], v_vec[:,wi], eta_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), eta_vec[:,wi] / np.sqrt(EE);
+		# Rebuild
+		vec = eigDiagnostics.vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC);
 
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 

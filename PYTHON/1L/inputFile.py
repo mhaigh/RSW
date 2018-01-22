@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-N = 32+1; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
