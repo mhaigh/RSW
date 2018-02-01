@@ -370,31 +370,43 @@ def scatterPeriod(k,l,p,dom_index,Nm,Nk_neg,Nk_pos,Fpos):
 
 #====================================================
 
-# orderEigenmodes
-def orderEigenmodes(vec,val,N,VECS):
-# A function that takes the set of eigenmodes, given by vec, and orders them according to the number of zero crossings.
-# When two or more eigenmodes cross zeros the same amount of times, they are ordered by their frequency, smallest first.
+# vec2field
+def vec2field(u_vec,freq,x_nd,k,N,Ts):
+
+	I = np.complex(0.0,1.0)
 	
-	dim = np.size(val);
+	u = np.zeros((N,N))
+	for i in range(0,N):
+		for j in range(0,N):
+			u[j,i] = np.real(u_vec[j] * np.exp(2.0 * np.pi * I * (k * x_nd[i] - freq * Ts)))
 
-	if VECS:
-		vec = np.array(vec);
-		u_vec = vec[0,:,:];
-		v_vec = vec[1,:,:];
-		eta_vec = vec[2,:,:];
+	return u
 
-	else:
-		u_vec = vec[0:N,:];		# Extract the eigenmodes.
-		v_vec = vec[N:2*N,:];
-		eta_vec = vec[2*N:3*N,:];		
+#====================================================
 
-	# Initialise a counter for the number of zero crossings. 
+# orderEigenmodes
+def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
+# A function that takes the set of eigenmodes, given by vec, and orders them according to the number of zero crossings.
+# When two or more eigenmodes cross zeros the same amount of times, they are ordered by their frequency, smallest firs
+
+
+	from statistics import mode
+
+	u_vec, v_vec, eta_vec = vec2vecs(vec,N,dim,BC);
 	count = np.zeros((dim),dtype=int);
+	dom_i = np.zeros(N,dtype=int);
 	for wi in range(0,dim):
-		for j in range(1,N):
-			if (u_vec[j-1,wi] >= 0 and u_vec[j,wi] <= 0) or (u_vec[j-1,wi] <= 0 and u_vec[j,wi] >= 0):
-				count[wi] = count[wi] + 1;
-
+		u = vec2field(u_vec[:,wi],val[wi],x_nd,k,N,Ts)	# u = u[y,x]
+		u_tilde = np.fft.fft(u,axis=0);
+		for i in range(0,N):		
+			dom_i[i] = np.argsort(u_tilde[:,i])[0];
+		#print dom_i
+		count[wi] = dom_i[0];
+		if count[wi] < 4:
+			print(count[wi])
+			plt.contourf(u);
+			plt.show();
+		
 	i_count = np.argsort(count);
 
 	return count, i_count;

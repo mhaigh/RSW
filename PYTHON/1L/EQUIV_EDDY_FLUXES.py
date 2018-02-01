@@ -77,10 +77,8 @@ uAmp = np.zeros((nn,Nt));
 vAmp = np.zeros((nn,Nt));
 
 # EEF
-EEF_vy_uy = np.zeros((nn,2));
-EEF_v_uyy = np.zeros((nn,2));
-l_vy_uy = np.zeros((nn,2));
-l_v_uyy = np.zeros((nn,2));
+EEF = np.zeros((nn,2));
+l = np.zeros((nn,2));
 
 #=======================================================
 
@@ -175,13 +173,6 @@ for ii in range(0,nn):
 
 		P1[ii,:] = np.trapz(P1_tmp,x_nd,dx_nd,axis=1) / H0_nd;
 		P2[ii,:] = np.trapz(P2_tmp,x_nd,dx_nd,axis=1) / H0_nd;
-
-		plt.plot(P_xav[ii,:]);
-		plt.plot(P1[ii,:]+P2[ii,:]);
-		plt.show();
-
-		EEF_vy_uy[ii,:], l_vy_uy[ii,:] = PV.EEF(P1[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
-		EEF_v_uyy[ii,:], l_v_uyy[ii,:] = PV.EEF(P2[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
 	
 		#===
 
@@ -196,22 +187,19 @@ for ii in range(0,nn):
 		#EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
 
-print(EEF_PV);
-print(EEF_vy_uy+EEF_v_uyy);
-
-#np.save(filename,EEF_PV);
-#np.save('EEF_l',l_PV);
-#np.save('P_xav',P_xav);
-#np.save('P1',P1);
-#np.save('P2',P2);
+np.save(filename,EEF_PV);
+np.save('EEF_l',l_PV);
+np.save('P_xav',P_xav);
+np.save('P1',P1);
+np.save('P2',P2);
 #np.save(filename_u,EEF_u);
 #np.save(filename_v,EEF_v);
 #np.save(filename_eta,EEF_eta);
 
-#np.save('output/corr_vy_uy',corr_vy_uy);
-#np.save('output/corr_v_uyy',corr_v_uyy);
-#np.save('output/uAmp',uAmp);
-#np.save('output/vAmp',vAmp);
+np.save('output/corr_vy_uy',corr_vy_uy);
+np.save('output/corr_v_uyy',corr_v_uyy);
+np.save('output/uAmp',uAmp);
+np.save('output/vAmp',vAmp);
 
 #np.save('output/EEF_vy_uy',EEF_vy_uy);
 #np.save('output/EEF_v_uyy',EEF_v_uyy);

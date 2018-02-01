@@ -94,8 +94,9 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 	scatter_p = np.zeros(Nm * Nk);		# An empty array for storing periods of the dominant wavenumbers.
 	theta_abs = np.zeros((Nm,Nk));		# For storing the absolute value of each weight.
 	theta_abs_tot = np.zeros(Nk);		# For storing sum of absolute values of each set of decomposition weights.
-	c = np.zeros((Nm,Nk));				# For storing the zonal phase speed of each mode.
-	p = np.zeros(Nk);					# For storing weighted phase speed at each wavenumber.
+	cx = np.zeros((Nm,Nk));				# For storing the zonal phase speed of each mode,
+	cy = np.zeros((Nm,Nk));				# and the meridional phase speed.
+	p = np.zeros((Nk,2));					# For storing weighted phase speeds at each wavenumber. (i=0 => y)
 
 	# Analysis
 	#====================================================
@@ -204,9 +205,13 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 			theta[mi,i] = theta_tmp[dom_index_tmp[mi]];
 			# All weights are now ordered in terms of their absolute value.
 
-			# For statistics.
-			theta_abs[mi,i] = np.abs(theta[mi,i]);		# Absolute value of each mode
-			c[mi,i] = freq[dom_index[mi,i]] / k;		# Phase speed of each mode	
+			# Absolute value of each mode
+			theta_abs[mi,i] = np.abs(theta[mi,i]);		
+
+			# Zonal & meridional phase speed of each mode
+			cx[mi,i] = freq[dom_index[mi,i]] / k;	
+			if count[dom_index[mi,i]] != 0:
+				cy[mi,i] = freq[dom_index[mi,i]] / count[dom_index[mi,i]];
 	
 			# The projection.
 			proj[:,ii] = proj[:,ii] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
@@ -225,7 +230,9 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 		# Should normalise so that all have the same mean (i.e. mean = 1/Nm);
 		mean[i] = theta_abs_tot[i] / Nm;
 		var[i] = sum((theta_abs[:,i] - mean[i])**2) / (Nm * mean[i]**2);
-		p[i] = sum((theta_abs[:,i] * c[:,i])) / theta_abs_tot[i];
+		p[i,1] = sum((theta_abs[:,i] * cx[:,i])) / theta_abs_tot[i];
+		p[i,0] = sum((theta_abs[:,i] * cy[:,i])) / theta_abs_tot[i];
+		print(cy[10,i]);
 
 	return theta, mean, var, p, proj, solution, scatter_k, scatter_l, scatter_p
 
@@ -236,8 +243,8 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 #====================================================
 
 # Define BG flow set. 
-nn = 2;
-U0_set = np.linspace(-0.1,0.1,nn);
+nn = 1;
+U0_set = np.linspace(0.04,0.04,nn);
 
 # Define forcing. This is constant throughout if only BG flow varies.
 if FORCE_TYPE == 'CTS':
@@ -267,7 +274,7 @@ scatter_p = np.zeros((Nm*Nk,nn));		# An empty array for storing periods of the d
 theta_abs = np.zeros((Nm,Nk,nn));		# For storing the absolute value of each weight.
 theta_abs_tot = np.zeros((Nk,nn));		# For storing sum of absolute values of each set of decomposition weights.
 c = np.zeros((Nm,Nk,nn));				# For storing the zonal phase speed of each mode.
-p = np.zeros((Nk,nn));					# For storing weighted phase speed at each wavenumber.
+p = np.zeros((Nk,2,nn));					# For storing weighted phase speed at each wavenumber.
 
 # Main function
 #====================================================
@@ -284,7 +291,7 @@ if __name__ == '__main__':
 			H0_nd = H0 / chi;
 
 		# Decompose solution into eigenmodes.
-		theta[:,:,ui], mean[:,ui], var[:,ui], p[:,ui], proj[:,:,ui], solution[:,:,ui], scatter_k[:,ui], scatter_l[:,ui], scatter_p[:,ui] = EIG_DECOMP_main(U0_nd,H0_nd,dim);
+		theta[:,:,ui], mean[:,ui], var[:,ui], p[:,:,ui], proj[:,:,ui], solution[:,:,ui], scatter_k[:,ui], scatter_l[:,ui], scatter_p[:,ui] = EIG_DECOMP_main(U0_nd,H0_nd,dim);
 
 # Save data
 
@@ -298,9 +305,11 @@ np.save('p',p);
 # Plotting
 #====================================================
 
-plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p*U));
+#plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p[:,1,:]*U),label='zonal');
+plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p[:,0,:]*U),label='merid');
 plt.xlabel('k');
 plt.ylabel('Weighted phase speed');
+plt.legend();
 plt.grid();
 plt.show();
 

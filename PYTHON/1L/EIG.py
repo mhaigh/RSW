@@ -36,8 +36,8 @@ k_start = 3;
 k_end = 4;
 Nk = 8;
 #loop = it.chain(range(0,Nk+1),range(N-Nk-1,N));	##
-#loop = range(k_start,k_end);
-loop = range(0,N);
+loop = range(k_start,k_end);
+#loop = range(0,N);
 for ii in loop:
 	# Run the solver for the current k-value.
 	k = K_nd[ii];	
@@ -47,17 +47,19 @@ for ii in loop:
 	if BC == 'FREE-SLIP':
 		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
 		#val, vec = eigSolver.FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
-											
+				
+									
 	#val = val / (2*np.pi*I*Ro);
 	freq = np.real(val);
 	period_days = T_adv / (freq * 24.0 * 3600.0);
 	
 	
 	dim = np.size(val);
+	
 	# count = number of zero-crossings by the eigenvector 
 	# i_count = set of indices ordering modes by their count
-	#count, i_count = eigDiagnostics.orderEigenmodes(vec,val,N,False);	
-	count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False);
+	count, i_count = eigDiagnostics.orderEigenmodes(vec,val,x_nd,k,T_nd[ts],N,dim,BC);	
+	#count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False);
 	# orderEigenmodes2 works best.
 	
 	# Order all relevant arrays
@@ -71,10 +73,9 @@ for ii in loop:
 	
 	# Before saving the modes, they need to be normalised by their energy.
 	ENERGY = 1;
-	if ENERGY == 1:
-		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
-		
+	if ENERGY == 1:		
 		E = np.zeros(dim);	
+		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 		for wi in range(0,dim):
 			#print(str(wi+1) + ' / ' + str(dim));	
 			EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
@@ -82,7 +83,7 @@ for ii in loop:
 		# Rebuild
 		vec = eigDiagnostics.vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC);
 
-	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
+	#ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 
 #====================================================
 
@@ -108,13 +109,12 @@ for ii in loop:
 	u = np.zeros((N,N),dtype=float);
 	count_new = np.array(list(count));
 	update_i = [];		# Used to store the set of wi indices that need updating.
-	wiii = 0;
+	wiii = 0
 	while wiii < dim:
-		wii = p_sort[wiii]
+		wii = wiii;
+		#wii = p_sort[wiii];
 		print('i_count = ' + str(wii));
-		for i in range(0,N):
-			for j in range(0,N):
-				u[j,i] = np.real(u_vec[j,wii] * np.exp(2.0 * np.pi * I * (k * x_nd[i] - val[wii] * T_nd[ts])));
+		u = eigDiagnostics.vec2field(u_vec[:,wii],val[wii],x_nd,k,N,T_nd[ts])
 		print('count = ' + str(count[wii]));
 		print('period = ' + str(period_days[wii]));
 		plt.subplot(131);
