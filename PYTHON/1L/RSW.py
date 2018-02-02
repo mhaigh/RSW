@@ -227,7 +227,15 @@ def RSW_main():
 
 	#output.ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_full,PV_prime,PV_BG,Pq,EEFq,N,Nt);
 
-
+	nrows = 4	
+	#plt.figure(1,)
+	fig, axes = plt.subplots(nrows=nrows, ncols=3,figsize=(22,7*nrows))
+	for row in range(0,nrows):
+		plotting.fp_PV_plot(PV_prime,P,P_xav,x_nd,y_nd,ts,N,x_grid,y_grid,row,nrows)
+	plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.);
+	plt.savefig('fig1.png');
+	plt.show();
+	sys.exit();
 
 	#====================================================
 

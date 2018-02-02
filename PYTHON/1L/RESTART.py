@@ -11,14 +11,8 @@ import sys
 
 import numpy as np
 
-import diagnostics
-import PV
-import buoy
-import forcing_1L
-import solver
-import output
-import energy
-import plotting
+from core import diagnostics, PV, forcing, solver, energy
+from output import plotting
 
 from inputFile import *
 

@@ -488,6 +488,57 @@ def pvPlots_save(PV_full,PV_prime,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_g
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_prime_' + str(Fpos) + '_'  + U0_name + '.png');
 	plt.close();
 
+
+#====================================================
+
+# fp_PV_plot
+def fp_PV_plot(PV_prime,P,P_xav,x_nd,y_nd,ts,N,x_grid,y_grid,row,nrows):
+
+	PV_prime_lim = np.max(abs(PV_prime[:,:,ts]));
+	PV_prime = PV_prime[:,:,ts] / PV_prime_lim;
+
+	Plim = np.max(np.absolute(P));
+	P = P / Plim;
+	
+	P_xav = P_xav * 1.0e5;
+
+	fs = 12
+
+	plt.subplot(nrows,3,1+3*row)
+	plt.pcolor(x_grid, y_grid, PV_prime, cmap='bwr',vmin=-.5,vmax=.5);
+	plt.yticks((-1./4,0,1./4),fontsize=fs);
+	plt.axis([-1./4,1./4,-1./4,1./4]);
+	if row == nrows-1:
+		plt.xlabel('x',fontsize=fs);
+		plt.xticks((-1./4,0,1./4),fontsize=fs);
+	else:
+		plt.xticks((-1./4,0,1./4),fontsize=0);
+	plt.ylabel('y',fontsize=fs);
+	plt.grid()
+	#plt.gca().set_aspect('equal', adjustable='box')
+
+	plt.subplot(nrows,3,2+3*row)
+	plt.pcolor(x_grid, y_grid, P, cmap='bwr',vmin=-.5,vmax=.5);
+	plt.xticks((-1./4,0,1./4));
+	plt.yticks((-1./4,0,1./4),fontsize=0);
+	plt.axis([-1./4,1./4,-1./4,1./4]);
+	if row == nrows-1:
+		plt.xlabel('x',fontsize=fs);
+		plt.xticks((-1./4,0,1./4),fontsize=fs);
+	else:
+		plt.xticks((-1./4,0,1./4),fontsize=0);
+	plt.grid()
+	
+	plt.subplot(nrows,3,3+3*row)	
+	plt.plot(P_xav,y_nd,'k-',linewidth=2)
+	plt.text(0.8*max(abs(P_xav)),0.40,r'$\langle P\rangle$',fontsize=fs+8)
+	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=fs);
+	plt.xticks(fontsize=fs)
+	plt.ylim(-1./2,1./2)
+	#plt.ylabel('y',fontsize=fs);
+	plt.grid();
+
+	
 #====================================================
 
 # footprintPlots_save
@@ -510,7 +561,7 @@ def footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_gri
 	#plt.text(0.25,0.4,str(int(period_days))+' days',fontsize=18)
 	#plt.text(0.25,0.4,'U0 = ' + str(U*U0_nd[0]),fontsize=18);
 	#plt.text(0.25,0.4,r'$\nu$ = ' + str(int(nu)),fontsize=18);
-	plt.xticks((-1./2,-1./4,0,1./4,1./2));
+	plt.xticks((-1./2,-1./4,0,1./4,1./2),);
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');

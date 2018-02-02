@@ -14,7 +14,7 @@ import numpy as np
 import itertools as it
 
 from eig import eigSolver, eigDiagnostics
-from core import diagnostics, solver, forcing
+from core import diagnostics, solver, forcing, energy
 from output import output, output_read
 
 from inputFile import *
@@ -66,7 +66,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 	# Initisialastion steps
 	#====================================================
 
-	VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
+	VEC = 'NEW';		# From FILE, requires pre-saved vectors which take up lots of memory.
 	LOOP = 'FULL';		# FULL, PART
 
 	
@@ -131,10 +131,11 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 				val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
 
 			# Order modes by meridional pseudo wavenumber (count).
-			count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False);
-			count = count[i_count];
-			vec = vec[:,i_count];
-			val = val[i_count];
+			count, i_count = eigDiagnostics.orderEigenmodes(vec,val,x_nd,k,T_nd[ts],N,dim,BC)
+			#count, i_count = eigDiagnostics.orderEigenmodes2(vec,val,N,False)
+			count = count[i_count]
+			vec = vec[:,i_count]
+			val = val[i_count]
 
 			# Each eigenmode is currently a unit vector, but we normalise so that each mode contains unit energy.
 			#==

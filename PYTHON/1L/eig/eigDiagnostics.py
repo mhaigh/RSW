@@ -391,21 +391,27 @@ def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 
 
 	from statistics import mode
-
-	u_vec, v_vec, eta_vec = vec2vecs(vec,N,dim,BC);
-	count = np.zeros((dim),dtype=int);
-	dom_i = np.zeros(N,dtype=int);
+	
+	Ns = 1 # Number of samples
+	
+	u_vec, v_vec, eta_vec = vec2vecs(vec,N,dim,BC)
+	count = np.zeros((dim),dtype=int)
+	dom_i = np.zeros(Ns,dtype=int)
 	for wi in range(0,dim):
+		# Extract a velocity
 		u = vec2field(u_vec[:,wi],val[wi],x_nd,k,N,Ts)	# u = u[y,x]
-		u_tilde = np.fft.fft(u,axis=0);
-		for i in range(0,N):		
-			dom_i[i] = np.argsort(u_tilde[:,i])[0];
-		#print dom_i
-		count[wi] = dom_i[0];
-		if count[wi] < 4:
-			print(count[wi])
-			plt.contourf(u);
-			plt.show();
+		for i in range(0,Ns):	
+			# Fourier transform meridionally	
+			u_tilde = np.fft.fft(u[:,i])
+			# At each x-value, organise in terms of power,
+			# and extract the dominant mode (index).
+			dom_i[i] = np.argsort(-np.abs(u_tilde))[0]
+		count[wi] = mode(dom_i)
+
+	#	if count[wi] < 4:
+	#		print(count[wi])
+	#		plt.contourf(u);
+	#		plt.show();
 		
 	i_count = np.argsort(count);
 
