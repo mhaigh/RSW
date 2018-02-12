@@ -10,14 +10,14 @@ from diagnostics import diff, extend, timeAverage
 #=====================================================================
 
 # fluxes
-def fluxes(u_nd,v_nd):
+def fluxes(u,v):
 # Calculates momentum flux terms.
 # For the purpose of EEFs of momentum, we only need three flux terms:
 # uu, uv, and vv.
 	
-	uu = u_nd * u_nd;
-	uv = u_nd * v_nd;
-	vv = v_nd * v_nd;
+	uu = u * u;
+	uv = u * v;
+	vv = v * v;
 
 	return uu, uv, vv
 

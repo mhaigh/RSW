@@ -311,7 +311,7 @@ def ddt(f,delta):
 #====================================================
 
 # error
-def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N):
+def error(u,v,h,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N):
 # This function calculates the error of the 1L SW solutions, and is to be used in the main code RSW_visc_1L.py.
 
 	SCHEME = diff;
@@ -325,26 +325,26 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 	I = np.complex(0,1);
 	ts = 10;
 	# Now we calculate all the relevant x and y derivatives
-	u_y = SCHEME(u_nd[:,:,ts],0,0,dy_nd);
+	u_y = SCHEME(u[:,:,ts],0,0,dy_nd);
 	u_yy = SCHEME(u_y[:,:],0,0,dy_nd);
-	u_x = SCHEME(u_nd[:,:,ts],1,1,dx_nd);
+	u_x = SCHEME(u[:,:,ts],1,1,dx_nd);
 	u_xx = SCHEME(u_x[:,:],1,1,dx_nd);
 	
-	v_y = SCHEME(v_nd[:,:,ts],0,0,dy_nd);
+	v_y = SCHEME(v[:,:,ts],0,0,dy_nd);
 	v_yy = SCHEME(v_y[:,:],0,0,dy_nd);
-	v_x = SCHEME(v_nd[:,:,ts],1,1,dx_nd);
+	v_x = SCHEME(v[:,:,ts],1,1,dx_nd);
 	v_xx = SCHEME(v_x[:,:],1,1,dx_nd);
 
-	eta_x = SCHEME(eta_nd[:,:,ts],1,1,dx_nd);
-	eta_y = SCHEME(eta_nd[:,:,ts],0,0,dy_nd);
+	eta_x = SCHEME(h[:,:,ts],1,1,dx_nd);
+	eta_y = SCHEME(h[:,:,ts],0,0,dy_nd);
 
 	U0_y = SCHEME(U0_nd,2,0,dy_nd);
 	H0_y = SCHEME(H0_nd,2,0,dy_nd);
 	
 	# t derivatives
-	u_t = ddt(u_nd,dt_nd);
-	v_t = ddt(v_nd,dt_nd);
-	eta_t = ddt(eta_nd,dt_nd);
+	u_t = ddt(u,dt_nd);
+	v_t = ddt(v,dt_nd);
+	eta_t = ddt(h,dt_nd);
 	
 	e11 = np.zeros((N,N),dtype=complex);
 	e12 = np.zeros((N,N),dtype=complex);
@@ -356,9 +356,9 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 	for i in range(0,N):
 		for j in range(0,N):
 			e11[j,i] = Ro * (u_t[j,i,ts] + U0_nd[j] * u_x[j,i]);
-			e12[j,i] = gamma_nd * u_nd[j,i,ts];
+			e12[j,i] = gamma_nd * u[j,i,ts];
 			e13[j,i] = - Ro_Re * (u_xx[j,i] + u_yy[j,i]);
-			e14[j,i] = (Ro * U0_y[j] - f_nd[j]) * v_nd[j,i,ts];
+			e14[j,i] = (Ro * U0_y[j] - f_nd[j]) * v[j,i,ts];
 			e15[j,i] = eta_x[j,i];
 			e16[j,i] = - Ro * F1_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
 	error1 = e11 + e12 + e13 + e14 + e15 + e16;
@@ -366,9 +366,9 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 	for i in range(0,N):
 		for j in range(0,N):
 			e11[j,i] = Ro * (v_t[j,i,ts] + U0_nd[j] * v_x[j,i]);
-			e12[j,i] = gamma_nd * v_nd[j,i,ts];
+			e12[j,i] = gamma_nd * v[j,i,ts];
 			e13[j,i] = - Ro_Re * (v_xx[j,i] + v_yy[j,i]);
-			e14[j,i] = f_nd[j] * u_nd[j,i,ts];
+			e14[j,i] = f_nd[j] * u[j,i,ts];
 			e15[j,i] = eta_y[j,i];
 			e16[j,i] = - Ro * F2_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
 	error2 = e11 + e12 + e13 + e14 + e15 + e16;
@@ -415,7 +415,7 @@ def error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_
 		for j in range(0,N):
 			e11[j,i] = eta_t[j,i,ts] + U0_nd[j] * eta_x[j,i];
 			e12[j,i] = H0_nd[j] * (u_x[j,i] + v_y[j,i]);
-			e13[j,i] = H0_y[j] * v_nd[j,i,ts];
+			e13[j,i] = H0_y[j] * v[j,i,ts];
 			e14[j,i] = - F3_nd[j,i] * np.exp(2. * np.pi * I * omega_nd * T_nd[ts]);
 	error3 = e11 + e12 + e13 + e14;
 

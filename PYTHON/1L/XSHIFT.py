@@ -70,33 +70,33 @@ for ii in range(0,nn):
 		solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2)
 
 	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-	u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+	u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
-	u_nd = np.real(u_nd);
-	v_nd = np.real(v_nd);
-	eta_nd = np.real(eta_nd);
+	u = np.real(u);
+	v = np.real(v);
+	h = np.real(h);
 	
 	# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-	u_nd = u_nd / AmpF_nd;
-	v_nd = v_nd / AmpF_nd;
-	eta_nd = eta_nd / AmpF_nd;
+	u = u / AmpF_nd;
+	v = v / AmpF_nd;
+	h = h / AmpF_nd;
 
 	# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
-	eta_full = np.zeros((N,N,Nt));
+	h_full = np.zeros((N,N,Nt));
 	u_full = np.zeros((N,N,Nt));
 	for j in range(0,N):
-		eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-		u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+		h_full[j,:,:] = h[j,:,:] + H0_nd[j];
+		u_full[j,:,:] = u[j,:,:] + U0_nd[j];
 
-	#np.save('u_nd.npy',u_nd);
-	#np.save('v_nd.npy',v_nd);
-	#np.save('eta_nd.npy',eta_nd);
+	#np.save('u.npy',u);
+	#np.save('v.npy',v);
+	#np.save('h.npy',h);
 
 	#plt.subplot(121);
 	#plt.pcolor(x_grid,y_grid,u_full[:,:,ts],cmap='bwr');
 	#plt.colorbar();
 	#plt.subplot(122);
-	#plt.pcolor(x_grid,y_grid,eta_full[:,:,ts],cmap='bwr');
+	#plt.pcolor(x_grid,y_grid,h_full[:,:,ts],cmap='bwr');
 	#plt.colorbar();
 	#plt.show();
 
@@ -108,8 +108,8 @@ for ii in range(0,nn):
 
 	# Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
 	if doPV:
-		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
-		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u,v,h,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt);
 		# Keep these next two lines commented out unless testing effects of normalisation.
 		# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
 		# PV_prime, PV_full = PV_prime/AmpF_nd, PV_full/AmpF_nd;

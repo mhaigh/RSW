@@ -114,31 +114,31 @@ def EEF_y0(y0_set,pi):
 				solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
 	
 			utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-			u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+			u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 			
 			# Take real part.
-			u_nd = np.real(u_nd);
-			v_nd = np.real(v_nd);
-			eta_nd = np.real(eta_nd);
+			u = np.real(u);
+			v = np.real(v);
+			h = np.real(h);
 	
 			# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-			u_nd = u_nd / AmpF_nd;
-			v_nd = v_nd / AmpF_nd;
-			eta_nd = eta_nd / AmpF_nd;
+			u = u / AmpF_nd;
+			v = v / AmpF_nd;
+			h = h / AmpF_nd;
 	
 			# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
-			eta_full = np.zeros((N,N,Nt));
+			h_full = np.zeros((N,N,Nt));
 			u_full = np.zeros((N,N,Nt));
 			for j in range(0,N):
-				eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-				u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+				h_full[j,:,:] = h[j,:,:] + H0_nd[j];
+				u_full[j,:,:] = u[j,:,:] + U0_nd[j];
 	
 			# Calculate PV fields and PV fluxes.
-			PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
-			uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+			PV_prime, PV_full, PV_BG = PV.potentialVorticity(u,v,h,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+			uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt);
 		
 			# Do footprints
-			P, P_xav[yi,:] = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
+			P, P_xav[yi,:] = PV.footprint_1L(u_full,v,h_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
 			EEF_array[yi,:], l_array[yi,:] = PV.EEF(P_xav[yi,:],y_nd,y0_nd,dy_nd,omega_nd,N);
 
 	filename = 'EEF_array_' + str(pi);
@@ -173,31 +173,31 @@ def EEF_U0(U0_set,pi):
 			solution = solver.FREE_SLIP_SOLVER2(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N,N2);
 	
 		utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-		u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+		u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 			
 		# Take real part.
-		u_nd = np.real(u_nd);
-		v_nd = np.real(v_nd);
-		eta_nd = np.real(eta_nd);
+		u = np.real(u);
+		v = np.real(v);
+		h = np.real(h);
 
 		# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-		u_nd = u_nd / AmpF_nd;
-		v_nd = v_nd / AmpF_nd;
-		eta_nd = eta_nd / AmpF_nd;
+		u = u / AmpF_nd;
+		v = v / AmpF_nd;
+		h = h / AmpF_nd;
 	
 		# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
-		eta_full = np.zeros((N,N,Nt));
+		h_full = np.zeros((N,N,Nt));
 		u_full = np.zeros((N,N,Nt));
 		for j in range(0,N):
-			eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-			u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+			h_full[j,:,:] = h[j,:,:] + H0_nd[j];
+			u_full[j,:,:] = u[j,:,:] + U0_nd[j];
 	
 		# Calculate PV fields and PV fluxes.
-		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
-		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u,v,h,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
+		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt);
 		
 		# Do footprints
-		P, P_xav[yi,:] = PV.footprint_1L(u_full,v_nd,eta_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
+		P, P_xav[yi,:] = PV.footprint_1L(u_full,v,h_full,PV_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);			
 		EEF_array[yi,:], l_array[yi,:] = PV.EEF(P_xav[yi,:],y_nd,y0_nd,dy_nd,omega_nd,N);
 
 	filename = 'EEF_array_' + str(pi);

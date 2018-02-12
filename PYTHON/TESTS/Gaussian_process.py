@@ -25,7 +25,7 @@ dt = T[1] - T[0];
 
 S = np.zeros(N);
 
-S[0] = np.random.normal(0,1.0)
+S[0] = 0#np.random.normal(0,1.0)
 
 for ti in range(1,N):
 	g = np.random.normal(0,1.0);

@@ -12,160 +12,133 @@ import sys
 import numpy as np
 
 from core import diagnostics, PV, forcing, solver, energy
-from output import plotting
+from output import plotting_bulk
 
 from inputFile import *
 
 #=======================================================
 
-path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/';
+test = 'sigma' # U0 or sigma
 
-u_nd = np.load(path + 'u_U0=32.npy');
-v_nd = np.load(path + 'v_U0=32.npy');
-eta_nd = np.load(path + 'eta_U0=32.npy');
-P = np.load(path + 'P_U0=-16.npy');
+#samples = ['16']
+#samples = ['-08','00','08','16']
+samples = ['0'] 				# sigma samples
 
-#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/u_y0=15sigma.npy');
-#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/v_y0=15sigma.npy');
-#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=15sigma/eta_y0=15sigma.npy');
+samples2 = [0]
 
-#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/u_y0=0.npy');
-#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/v_y0=0.npy');
-#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/y0=0/eta_y0=0.npy');
+ns = len(samples)
+ns2 = len(samples2)
 
-#u_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/u_nd.npy');
-#v_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/v_nd.npy');
-#eta_nd = np.load('/home/mike/Documents/GulfStream/RSW/PYTHON/1L/eta_nd.npy');
+# Initialise u,v,eta,PV,P
+u = np.zeros((N,N,ns),dtype=complex);
+v = np.zeros((N,N,ns),dtype=complex);
+h = np.zeros((N,N,ns),dtype=complex);
+q = np.zeros((N,N,ns));
+P = np.zeros((N,N+1,ns));
+P_xav = np.zeros((N,ns))
 
-#====================================================
+#=======================================================
 
-#plt.contourf(u_nd[:,:,ts]);
-#plt.colorbar();
-#plt.show();
+# First define all necessary terms to be plotted.
+for si in range(0,ns):
+	
+	sample = samples[si]
 
-#plt.contourf(eta_nd[:,:,ts]);
-#plt.colorbar();
-#plt.show()
+	# For each U0 or sigma value, we need to first load the saved solutions
+	if test == 'U0':
+		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/UNIFORM/'
+		U0_load = str(sample)
+		u_tmp = np.load(path + 'u_U0='+U0_load+'.npy')[:,:,ts]
+		v_tmp = np.load(path + 'v_U0='+U0_load+'.npy')[:,:,ts]
+		h_tmp = np.load(path + 'eta_U0='+U0_load+'.npy')[:,:,ts]
+		P[:,:,si] = np.load(path + 'P_U0='+U0_load+'.npy')
+		P_xav[:,si] = np.trapz(P[:,:,si],x_nd,dx_nd,axis=1);
 
-#====================================================
+		# Last step: redefine U0 and H0 for each sample
+		U0, H0 = BG_state.BG_uniform(float(sample)/100.,Hflat,f0,beta,g,y,N);
+		U0_nd = U0 / U
+		H0_nd = H0 / chi	
+	else:
+		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/'
 
-# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
-eta_full = np.zeros((N,N,Nt));
-u_full = np.zeros((N,N,Nt));
-for j in range(0,N):
-	eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-	u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
-
-U0_str = r'$U_{0}=-0.16$';
-#U0_str = r'$y_{0}=-\sigma$';
-#U0_str = r'$y_{0}=0$';
-
-#====================================================
-
-# Soltuion Plots
-if plotSol:
-	#plotting.solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,True);
-	plotting.solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,True);
-	#plotting.solutionPlotsDim(x,y,u,v,eta,ts,L,FORCE,BG,Fpos,N);
+		u_tmp = np.load(path + 'u_y0='+sample+'.npy')[:,:,ts]
+		v_tmp = np.load(path + 'v_y0='+sample+'.npy')[:,:,ts]
+		h_tmp = np.load(path + 'eta_y0='+sample+'.npy')[:,:,ts]
+		P[:,:,si] = np.load(path + 'P_y0='+sample+'.npy')
+		P_xav[:,si] = np.trapz(P[:,:,si],x_nd,dx_nd,axis=1);
 
 
-# Energy
+	# Calculate full flows.
+	h_full = np.zeros((N,N))
+	u_full = np.zeros((N,N))
+	for j in range(0,N):
+		h_full[j,:] = h_tmp[j,:] + H0_nd[j]
+		u_full[j,:] = u_tmp[j,:] + U0_nd[j]
 
-if doEnergy:
-	KE_BG, KE_BG_tot, PE_BG, PE_BG_tot = energy.energy_BG(U0_nd,H0_nd,Ro,y_nd,dy_nd,N);
-	E_BG_tot = KE_BG_tot + PE_BG_tot;
-	#print (KE_BG_tot, PE_BG_tot);
-	tii = 10
-	KE, KE_tot = energy.KE(u_full[:,:,tii],v_nd[:,:,tii],eta_full[:,:,tii],x_nd,y_nd,dx_nd,dy_nd,N);
-	PE, PE_tot = energy.PE(eta_full[:,:,tii],Ro,x_nd,y_nd,dx_nd,dy_nd,N);
-	E = KE + PE;
-	E_tot = KE_tot + PE_tot;
+	# Snapshot of PV
+	#q[:,:,si] = PV.PV_instant(u_tmp,v_tmp,h_tmp,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
 
-	plt.contourf(KE);
-	plt.show();
-	#print(E_tot-E_BG_tot);
+	# Now we have snapshot of solution, snapshot of PV, and the footprint.
+	u[:,:,si] = u_tmp;	v[:,:,si] = v_tmp;	h[:,:,si] = h_tmp;
+	
+print('Plotting...')
 
-#====================================================
+#=======================================================
 
-# Error - if calculated, should be done before real part of solution is taken
-if errorPhys:
-	e1, e2, e3 = diagnostics.error(u_nd,v_nd,eta_nd,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
-	e = np.sqrt((e1**2 + e2**2 + e3**2) / 3.0);
-	print 'Error = ' + str(e) + '. Error split = ' + str(e1) + ', ' + str(e2) + ', ' + str(e3);
-if errorSpec:
-	error_spec = np.zeros((3,N));	# An array to save the spectral error at each wavenumber for each equation.
-	for i in range(0,N):
-		error_spec[:,i] = diagnostics.specError(utilde_nd[:,i],vtilde_nd[:,i],etatilde_nd[:,i],Ftilde1_nd[:,i],Ftilde2_nd[:,i],Ftilde3_nd[:,i],a1[:,i],a2,a3,a4[i],\
-b4,c1[:,i],c2,c3,c4[:,i],f_nd,Ro,K_nd[i],H0_nd,y_nd,dy_nd,N);
-	for eq in range(0,3):
-		error = sum(error_spec[eq,:]) / N;
-		print('Error' + str(int(eq+1)) + '=' + str(error));
+# Second, create all plots.
 
-#====================================================
+# Solutions
+if True:
+	fig, axes = plt.subplots(nrows=ns,ncols=3,figsize=(22,7*ns))
 
-# Dimensional solutions
-u = u_nd * U;
-v = v_nd * U;
-eta = eta_nd * chi;
+	for si in range(0,ns):
+		sample = samples[si]
+		if test == 'U0':
+			string = r'$U_{0} = ' + str(float(sample)/100) + '$'	
+		else:
+			if sample == '0':
+				string = r'$y_{0}=0$'
+			elif sample == '-1':
+				string = r'$y_{0}=-\sigma$'
+			else:
+				string = r'$y_{0}=' + sample + '\sigma$'
+		U0_str = 'U0 = ' + str(U0)
+		plotting_bulk.plotSolutions(u[:,:,si],v[:,:,si],h[:,:,si],N,x_grid,y_grid,si,ns,string)
+		plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
+		plt.savefig('fig0.png');
 
-#====================================================
+# Phase & Amp
+if False:
+	fig, axes = plt.subplots(nrows=ns,ncols=3,figsize=(22,2*7*ns2))
 
-# PV and PV footprints
-#====================================================
+	for si in range(0,ns2):
+		sample = samples[samples2[si]]
+		if test == 'U0':
+			string = r'$U_{0} = ' + str(float(sample)/100) + '$'
+		U0_str = 'U0 = ' + str(U0)
+		plotting_bulk.plotSolutionsAmpPhase(u[:,:,si],v[:,:,si],h[:,:,si],N,x_grid,y_grid,si,ns2,string,fig)
+		plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=0.8);
+		plt.savefig('fig1.png');
 
-# Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
-if doPV:
-	PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd);
-	uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
-	# Keep these next two lines commented out unless testing effects of normalisation.
-	# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
-	# PV_prime, PV_full = PV_prime/AmpF_nd, PV_full/AmpF_nd;
-	if doFootprints:
-		if footprintComponents: 
-			P, P_uq, P_uQ, P_Uq, P_vq, P_vQ, P_xav, P_uq_xav, P_uQ_xav, P_Uq_xav, P_vq_xav, P_vQ_xav = PV.footprintComponents(uq,Uq,uQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
-			#plotting.footprintComponentsPlot(uq,Uq,uQ,vq,vQ,P,P_uq,P_Uq,P_uQ,P_vq,P_vQ,P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,x_nd,y_nd,N,Nt);
-			#plotting.plotPrimaryComponents(P_uq,P_vq,P_uq_xav,P_vq_xav,x_nd,y_nd,FORCE,BG,Fpos,N);
-		else: 
-			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);	
-		np.save('P.npy',P);		
+
+# Footprints
+if False:
+	fig, axes = plt.subplots(nrows=ns,ncols=3,figsize=(22,7*ns))
+
+	for si in range(0,ns):
+		sample = samples[si]
+		if test == 'U0':
+			string = r'$U_{0} = ' + str(float(sample)/100) + '$'
+		U0_str = 'U0 = ' + str(U0)
+		plotting_bulk.fp_PV_plot(q[:,:,si],P[:,:,si],P_xav[:,si],N,x_grid,y_grid,y_nd,si,ns,string)
+		plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
+		plt.savefig('fig2.png');
+
+
+
+
+
 			
-# Buoyancy footprints
-#====================================================
 
-# Should these be zero, according to conservation of mass?
-#Pb, Pb_xav = buoy.footprint(u_full,v_nd,eta_full,U0_nd,U,Umag,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,AmpF_nd,FORCE,r0,nu,BG,Fpos,ts,period_days,N,Nt,GAUSS);
-
-#====================================================
-
-#output.ncSave(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_full,PV_prime,PV_BG,Pq,EEFq,N,Nt);
-
-# Plots
-#====================================================
-#====================================================
-
-# Call the function that plots the forcing in physical and physical-spectral space.
-if plotForcing:
-	plotting.forcingPlots(x_nd,y_nd,F1_nd,F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
-	#forcing_1L.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N); # For diagnostic purposes
-
-# Background state plots (inc. BG SSH, BG flow, BG PV)
-if plotBG:
-	plotting.bgPlots(y_nd,H0_nd,U0_nd,PV_BG);
-
-
-# Plots of PV and zonally averaged PV
-#plotting.pvPlots(PV_full,PV_prime,x_nd,y_nd);
-plotting.pvPlots_save(PV_full,PV_prime,P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,True);
-if plotPV_av:
-	plotting.PV_avPlots(x_nd,y_nd,PV_prime,PV_BG,PV_full,ts,FORCE,BG,Fpos,N);
-
-# Plots of footprints - may need to edit the source code at times.
-if plotFootprint:
-	plotting.footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,GAUSS,FORCE,nu,r0,period_days,U0_nd,U,N);
-
-# Phase and amplitude
-if plotPhaseAmp:
-	plotting.solutionPlotsAmp(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
-	plotting.solutionPlotsPhase(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N);
 
 

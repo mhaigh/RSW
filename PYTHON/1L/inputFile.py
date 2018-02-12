@@ -2,6 +2,8 @@
 #=======================================================
 #=======================================================
 # File of input parameters for the 1L RSW plunger code
+# Most parameters are given in dimensional values.
+# The initalisation stage redefines them nondimensionally.
 
 import numpy as np
 from scipy.special import erf
@@ -19,7 +21,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-N = 64+1; 			# Number of gridpoints
+N = 512+1; 			# Number of gridpoints
 
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -43,7 +45,7 @@ nu = 100.;		# Kinematic viscosity (m2 s-1)
 BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-Umag = .04; #0.0688, -0.0233, 0.0213
+Umag = 0.08 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
 #Umag = 0.8;		# Jet max speed
@@ -64,7 +66,7 @@ FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 
-Fpos = 'CENTER';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
+Fpos = 'NORTH';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
 							
 r0 = 90.0 * 1000.0;  		# Forcing radius
 AmpF = 1.0e-7; 				# Forcing amplitude
@@ -211,8 +213,8 @@ T_adv = L / U;			# The advective timescale
 # Defining dimensionless parameters
 #=======================================================
 
-Lx_nd = Lx / L;		# In case Lx and Ly are chosen to be different, we still scale by the same length, Ly
-Ly_nd = Ly / L;				
+Lx = Lx / L;		# In case Lx and Ly are chosen to be different, we still scale by the same length, Ly
+Ly = Ly / L;				
 
 y_nd = y / L;    
 x_nd = x / L;
@@ -232,8 +234,8 @@ H0_nd = H0 / chi;	# The steady-state SSH scales the same way as eta.
 U0_nd = U0 / U;
 
 f0_nd = 1.0;					# =f0/f0      		 
-beta_nd = beta * L / f0;
-f_nd = f / f0;					# The same as: f_nd = f0_nd + beta_nd * y_nd      
+bh = beta * L / f0;
+f_nd = f / f0;					# The same as: f_nd = f0_nd + bh * y_nd      
 
 gamma_nd = gamma / f0;			# Simply scaled by the base Coriolis frequency
 
@@ -254,7 +256,7 @@ if nu != 0:
 	Re = L * U / nu;		# Reynolds number: measures inertial forces relative to viscous ones.
 else:
 	Re = None;				# Instead of defining it as infinity, define it as None.
-Ld = np.sqrt(g * Hflat) / f0;	# Rossby def radius.
+Ld = np.sqrt(g * H0_nd) / f_nd;	# Rossby def radius.
 
 # Forcing
 #=======================================================
@@ -276,16 +278,7 @@ print('FORCING PERIOD = ' + str(period_days) + ' DAYS');
 print(str(FORCE) + ' FORCING WITH ' + str(BG) + ' BG FLOW')
 print('Ro = ' + str(Ro));
 print('Re = ' + str(Re));
-print('Ld = ' + str(Ld));
+print('Ld = ' + str(Ld[0]));
 print('N = ' + str(N));
-	
 
-#dH0 = - g * diff(H0,2,0,dy) / f;
-
-#plt.subplot(121);
-#plt.plot(dH0);
-#plt.plot(U0);
-#plt.subplot(122);
-#plt.plot(H0);
-#plt.show();
 

@@ -6,7 +6,7 @@ import diagnostics
 
 OPT = 3;
 
-N = 64;
+N = 256;
 y = np.linspace(1,N,N);
 x = np.linspace(1,N,N);
 dy = y[1] - y[0];
@@ -111,7 +111,9 @@ if OPT == 1:
 	#plt.colorbar();
 	#plt.show();
 
-	xgrid,ygrid = np.meshgrid(x,y);
+	cmax = np.max(np.absolute(curl))
+	xgrid,ygrid = np.meshgrid(x,y)
+
 	plt.subplot(121);	
 	plt.pcolor(xgrid,ygrid,curl);
 	plt.colorbar();
@@ -209,9 +211,11 @@ if OPT == 2:
 	#plt.colorbar();
 	#plt.show();
 
+	cmax = np.max(np.absolute(curl))
 	xgrid,ygrid = np.meshgrid(x,y);
+
 	plt.subplot(121);	
-	plt.pcolor(xgrid,ygrid,curl);
+	plt.pcolor(xgrid,ygrid,curl,vmin=-cmax,vmax=cmax);
 	plt.colorbar();
 	plt.title('wind stress curl');
 	plt.subplot(122);
@@ -249,11 +253,11 @@ if OPT == 3:
 	i1 = np.argsort(-taux1[:,0]);
 	i2 = np.argsort(-taux2[:,0]);
 
-	plt.subplot(121)
-	plt.contourf(taux1);
-	plt.subplot(122)
-	plt.contourf(tauy1);
-	plt.show();
+	#plt.subplot(121)
+	#plt.contourf(taux1);
+	#plt.subplot(122)
+	#plt.contourf(tauy1);
+	#plt.show();
 
 	taux1_y = diagnostics.diff(taux1,0,0,dy);
 	taux2_y = diagnostics.diff(taux2,0,0,dy);
@@ -265,7 +269,14 @@ if OPT == 3:
 	plt.show();
 	
 	curl = tauy1_x - taux1_y;
-	plt.contourf(curl);
+	cmax = 0.7*np.max(np.absolute(curl))
+	xgrid,ygrid=np.meshgrid(x,y)
+	
+	
+	plt.pcolor(xgrid,ygrid,curl,vmin=-cmax,vmax=cmax);
+	plt.colorbar()	
+	plt.title('Wind stress curl')
+	plt.axis([xgrid.min(), xgrid.max(), ygrid.min(), ygrid.max()])
 	plt.show();
 
 

@@ -242,10 +242,10 @@ def E_anomaly_EIG(u_vec,v_vec,eta_vec,H0_nd,U0_nd,Ro,y_nd,dy_nd):
 
 #=========================================================
 # KE
-def KE(u_full,v_nd,eta_full,x_nd,y_nd,dx_nd,dy_nd,N):
+def KE(u_full,v,h_full,x_nd,y_nd,dx_nd,dy_nd,N):
 # Outputs the KE at a moment in time, by taking as input as time-snapshot of the solution u,v,eta.
 
-	KE = 0.5 * (u_full**2 + v_nd**2) * eta_full;
+	KE = 0.5 * (u_full**2 + v**2) * h_full;
 
 	KE_tot = np.trapz(np.trapz(KE,x_nd[0:N],dx_nd,axis=1),y_nd,dy_nd);
 
@@ -254,10 +254,10 @@ def KE(u_full,v_nd,eta_full,x_nd,y_nd,dx_nd,dy_nd,N):
 #=========================================================
 
 # PE
-def PE(eta_full,Ro,x_nd,y_nd,dx_nd,dy_nd,N):
+def PE(h_full,Ro,x_nd,y_nd,dx_nd,dy_nd,N):
 # Outputs the KE at a moment in time, by taking as input as time-snapshot of the solution u,v,eta.
 
-	PE = 0.5 * eta_full**2 / Ro;
+	PE = 0.5 * h_full**2 / Ro;
 
 	PE_tot = np.trapz(np.trapz(PE,x_nd[0:N],dx_nd,axis=1),y_nd,dy_nd);
 
@@ -272,22 +272,22 @@ def PE(eta_full,Ro,x_nd,y_nd,dx_nd,dy_nd,N):
 
 
 def ENER(b):
-	u_nd = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/u_nd_' + str(Fpos) + str(N) + '.npy');
-	v_nd = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/v_nd_' + str(Fpos) + str(N) + '.npy');
-	eta_nd = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/eta_nd_' + str(Fpos) + str(N) + '.npy');
+	u = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/u_' + str(Fpos) + str(N) + '.npy');
+	v = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/v_' + str(Fpos) + str(N) + '.npy');
+	h = np.load('/home/mike/Documents/GulfStream/Code/DATA/1L/' + str(FORCE) + '/' + str(BG) + '/h_' + str(Fpos) + str(N) + '.npy');
 	
 	I = np.complex(0,1);		# Define I = sqrt(-1)
 	
-	u_nd = extend(u_nd);
-	v_nd = extend(v_nd);
-	eta_nd = extend(eta_nd);
+	u = extend(u);
+	v = extend(v);
+	h = extend(h);
 	
 	# In order to calculate the energy forced into the system, we require the energy of the full system
 	etaFull = np.zeros((N,N+1,Nt));
 	uFull = np.zeros((N,N+1,Nt));
 	for j in range(0,N):
-		etaFull[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-		uFull[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+		etaFull[j,:,:] = h[j,:,:] + H0_nd[j];
+		uFull[j,:,:] = u[j,:,:] + U0_nd[j];
 
 	# Initialise the energy arrays (Full = perturbation + BG state)
 	KEphysFull = np.zeros((N,N+1,Nt));
@@ -296,7 +296,7 @@ def ENER(b):
 	PEtotFull = np.zeros(Nt);
 	# Now calculate the KE and PE of the full system (i.e. including BG state) at each time.
 	for ti in range(0,Nt):
-		KEphysFull[:,:,ti] = 0.5 * (etaFull[:,:,ti]) * (uFull[:,:,ti]**2 + v_nd[:,:,ti]**2);	# v_nd = vFull
+		KEphysFull[:,:,ti] = 0.5 * (etaFull[:,:,ti]) * (uFull[:,:,ti]**2 + v[:,:,ti]**2);	# v = vFull
 		KEtotFull[ti] = np.trapz(np.trapz(KEphysFull[:,:,ti],x,dx,1),y,dy,0);
 		PEphysFull[:,:,ti] = 0.5 * g * etaFull[:,:,ti]**2;										# To keep it nd, there is no multiplicatio  by g
 		PEtotFull[ti] = np.trapz(np.trapz(PEphysFull[:,:,ti],x,dx,1),y,dy,0);
@@ -320,8 +320,8 @@ def ENER(b):
 	# A more direct alternative for calculating the energies - a useful check.
 	# These use the faster algebraic definition given in the report and do not calculate energies using TOT-BG.
 	#for j in range(0,N):
-	#	PEphys[j,:,:] = 0.5 * g * eta_nd[j,:,:] * (eta_nd[j,:,:] + 2 * H0_nd[j]);
-	#	KEphys[j,:,:] = 0.5 * etaFull[j,:,:] * (u_nd[j,:,:]**2 + 2 * u_nd[j,:,:] * U0_nd[j] + v_nd[j,:,:]**2) + 0.5 * eta_nd[j,:,:] * U0_nd[j]**2;
+	#	PEphys[j,:,:] = 0.5 * g * h[j,:,:] * (h[j,:,:] + 2 * H0_nd[j]);
+	#	KEphys[j,:,:] = 0.5 * etaFull[j,:,:] * (u[j,:,:]**2 + 2 * u[j,:,:] * U0_nd[j] + v[j,:,:]**2) + 0.5 * h[j,:,:] * U0_nd[j]**2;
 
 	# Normalise the energy by the forcing amplitude
 	KEphys = KEphys / AmpF_nd**3;		

@@ -216,8 +216,8 @@ H0_y_nd = H0_y * Ly / chi;
 U0_nd = U0 / U;
 
 f0_nd = 1.0;					# =f0/f0      		 
-beta_nd = beta * Ly / f0;
-f_nd = f / f0;					# The same as: f_nd = f0_nd + beta_nd * y_nd      
+bh = beta * Ly / f0;
+f_nd = f / f0;					# The same as: f_nd = f0_nd + bh * y_nd      
 
 gamma_nd = gamma / f0;			# Simply scaled by the base Coriolis frequency
 

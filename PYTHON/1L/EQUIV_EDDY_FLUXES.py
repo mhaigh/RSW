@@ -119,28 +119,28 @@ for ii in range(0,nn):
 			solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	
 		utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-		u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+		u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 			
 		# Take real part.
-		u_nd = np.real(u_nd);
-		v_nd = np.real(v_nd);
-		eta_nd = np.real(eta_nd);
+		u = np.real(u);
+		v = np.real(v);
+		h = np.real(h);
 	
 		# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-		u_nd = u_nd / AmpF_nd;
-		v_nd = v_nd / AmpF_nd;
-		eta_nd = eta_nd / AmpF_nd;
+		u = u / AmpF_nd;
+		v = v / AmpF_nd;
+		h = h / AmpF_nd;
 
 		# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
-		eta_full = np.zeros((N,N,Nt));
+		h_full = np.zeros((N,N,Nt));
 		u_full = np.zeros((N,N,Nt));
 		for j in range(0,N):
-			eta_full[j,:,:] = eta_nd[j,:,:] + H0_nd[j];
-			u_full[j,:,:] = u_nd[j,:,:] + U0_nd[j];
+			h_full[j,:,:] = h[j,:,:] + H0_nd[j];
+			u_full[j,:,:] = u[j,:,:] + U0_nd[j];
 	
 		# Calculate PV fields and PV fluxes.
-		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_nd,v_nd,eta_nd,u_full,eta_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
-		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u_nd,v_nd,U0_nd,PV_prime,PV_BG,N,Nt);
+		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u,v,h,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt);
 		P, P_xav[ii,:] = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 		EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav[ii,:],y_nd,y0_nd,y0_index,dy_nd,N);
 
@@ -154,19 +154,19 @@ for ii in range(0,nn):
 		u_y = np.zeros((N,N,Nt));
 		u_yy = np.zeros((N,N,Nt));
 		for ti in range(0,Nt):
-			v_y[:,:,ti] = diagnostics.diff(v_nd[:,:,ti],0,0,dy_nd);
-			u_y[:,:,ti] = diagnostics.diff(u_nd[:,:,ti],0,0,dy_nd);
+			v_y[:,:,ti] = diagnostics.diff(v[:,:,ti],0,0,dy_nd);
+			u_y[:,:,ti] = diagnostics.diff(u[:,:,ti],0,0,dy_nd);
 			u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
 			# Correlation at each time step
 			corr_vy_uy[ii,ti] = diagnostics.arrayCorr(u_y[cs:ce,cs:ce,ti],v_y[cs:ce,cs:ce,ti]);
-			corr_v_uyy[ii,ti] = diagnostics.arrayCorr(u_yy[cs:ce,cs:ce,ti],v_nd[cs:ce,cs:ce,ti]);
+			corr_v_uyy[ii,ti] = diagnostics.arrayCorr(u_yy[cs:ce,cs:ce,ti],v[cs:ce,cs:ce,ti]);
 			# Amplitude
-			uAmp[ii,ti] = max(u_nd[cs:ce,cs:ce,ti].max(),u_nd[cs:ce,cs:ce,ti].min(),key=abs);
-			vAmp[ii,ti] = max(v_nd[cs:ce,cs:ce,ti].max(),v_nd[cs:ce,cs:ce,ti].min(),key=abs);
+			uAmp[ii,ti] = max(u[cs:ce,cs:ce,ti].max(),u[cs:ce,cs:ce,ti].min(),key=abs);
+			vAmp[ii,ti] = max(v[cs:ce,cs:ce,ti].max(),v[cs:ce,cs:ce,ti].min(),key=abs);
 	
 		# Define initial footprint contributions (include SSH terms later)
 		P1_tmp = diagnostics.timeAverage(v_y*u_y,T_nd,Nt);
-		P2_tmp = diagnostics.timeAverage(v_nd*u_yy,T_nd,Nt);
+		P2_tmp = diagnostics.timeAverage(v*u_yy,T_nd,Nt);
 
 		P1_tmp = diagnostics.extend(P1_tmp);
 		P2_tmp = diagnostics.extend(P2_tmp);
@@ -177,12 +177,12 @@ for ii in range(0,nn):
 		#===
 
 		# Buoyancy EEF
-		#uh, uH, Uh, UH, vh, vH = thickness.fluxes(u_nd,v_nd,eta_nd,U0_nd,H0_nd,N,Nt);
+		#uh, uH, Uh, UH, vh, vH = thickness.fluxes(u,v,h,U0_nd,H0_nd,N,Nt);
 		#B, B_xav = thickness.footprint(uh,uH,Uh,vh,vH,x_nd,y_nd,T_nd,dx_nd,dy_nd,dt_nd,N,Nt);			
 		#EEF_eta[ii,:] = thickness.EEF(B_xav,y_nd,y0_nd,y0_index,dy_nd,N);
 
 		# Calculate momentum fluxes and footprints
-		#uu, uv, vv = momentum.fluxes(u_nd,v_nd);
+		#uu, uv, vv = momentum.fluxes(u,v);
 		#Mu, Mv, Mu_xav, Mv_xav = momentum.footprint(uu,uv,vv,x_nd,T_nd,dx_nd,dy_nd,N,Nt);
 		#EEF_u[ii,:], EEF_v[ii,:] = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		

@@ -12,7 +12,7 @@ import netCDF4 as nc
 #=======================================================
 
 # ncSave
-def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T_nd,PV_FULL,PV_PRIME,PV_bg,P,EEF,N,Nt):
+def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u,v,h,x_nd,y_nd,K_nd,T_nd,PV_FULL,PV_PRIME,PV_bg,P,EEF,N,Nt):
 # A function that saves the output of RSW_1L.py in netcdf format.
 # Saves the solutions (physical and spectral by default) and depending on whether or not
 # they were calculated, also saves the PV, footprints, and EEF.
@@ -48,9 +48,9 @@ def ncSaveSols(utilde_nd,vtilde_nd,etatilde_nd,u_nd,v_nd,eta_nd,x_nd,y_nd,K_nd,T
 	etatilde = RSW1L.createVariable('etatilde_real','f4',('k_dim','y_dim','real_imag',));	
 	
 	# ...and assign the data to the variables
-	u[:,:,:] = u_nd;
-	v[:,:,:] = v_nd;
-	eta[:,:,:] = eta_nd;
+	u[:,:,:] = u;
+	v[:,:,:] = v;
+	eta[:,:,:] = h;
 	utilde[:,:,0] = np.real(utilde_nd); utilde[:,:,1] = np.imag(utilde_nd);
 	vtilde[:,:,0] = np.real(vtilde_nd); vtilde[:,:,1] = np.imag(vtilde_nd);
 	etatilde[:,:,0] = np.real(etatilde_nd); etatilde[:,:,1] = np.imag(etatilde_nd);	

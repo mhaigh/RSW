@@ -126,7 +126,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 		if VEC == 'NEW':	# Solve the eigenmode problem anew.
 			a1,a2,a3,a4,b1,b4,c1,c2,c3,c4 = eigSolver.EIG_COEFFICIENTS2(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,gamma_nd,dy_nd,N);
 			if BC == 'NO-SLIP':
-				val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
+				val, u_vec, v_vec, h_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 			if BC == 'FREE-SLIP':
 				val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
 
@@ -141,18 +141,18 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 			#==
 	
 			# Extract the three components.
-			u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);	
+			u_vec, v_vec, h_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);	
 		
 			# Calculate the contained in each component.
 			E = np.zeros(dim);	
 			for wi in range(0,dim):
-				EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
+				EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],h_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
 				# Normalise each vector by the square root of the energy.
-				u_vec[:,wi], v_vec[:,wi], eta_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), eta_vec[:,wi] / np.sqrt(EE);
+				u_vec[:,wi], v_vec[:,wi], h_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), h_vec[:,wi] / np.sqrt(EE);
 
 			# Rebuild the vector. This should have unit energy perturbation. 
 			# (There are more direct ways of executing this normalisation, but this method is the safest.)
-			vec = eigDiagnostics.vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC);
+			vec = eigDiagnostics.vecs2vec(u_vec,v_vec,h_vec,N,dim,BC);
 		
 			# Comment out this line, depending on which EIG_COEFFICIENTS function is being called.
 			#val = val / (2. * np.pi * I * Ro);
@@ -356,26 +356,26 @@ v_proj = np.real(v_proj[:,:,ts]);
 eta_proj = np.real(eta_proj[:,:,ts]);
 
 u_full = np.zeros((N,N));
-eta_full = np.zeros((N,N));
+h_full = np.zeros((N,N));
 for i in range(0,N):
 	u_full[:,i] = u_proj[:,i] + U0_nd[:];
-	eta_full[:,i] = eta_proj[:,i] + H0_nd[:];
+	h_full[:,i] = eta_proj[:,i] + H0_nd[:];
 
 utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
-u_nd, v_nd, eta_nd = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
+u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
-u_nd = np.real(u_nd);
-v_nd = np.real(v_nd);
-eta_nd = np.real(eta_nd);
-
-#====================================================
-
-
-
+u = np.real(u);
+v = np.real(v);
+h = np.real(h);
 
 #====================================================
 
-eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u_nd[:,:,ts],v_nd[:,:,ts],eta_nd[:,:,ts],x_nd,y_nd,x_grid,y_grid,True);
+
+
+
+#====================================================
+
+eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u[:,:,ts],v[:,:,ts],h[:,:,ts],x_nd,y_nd,x_grid,y_grid,True);
 
 #====================================================
 
@@ -385,7 +385,7 @@ sys.exit();
 eigDiagnostics.scatterWeight(scatter_k,scatter_l,theta,theta_abs_tot,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
 eigDiagnostics.scatterPeriod(scatter_k,scatter_l,scatter_p,dom_index,Nm,Nk_neg,Nk_pos,Fpos);	
 
-#PV_full, PV_prime = eigDiagnostics.PV(u_proj,v_proj,eta_proj,u_full,eta_full,H0_nd,U0_nd,f_nd,dx_nd,dy_nd,N);
+#PV_full, PV_prime = eigDiagnostics.PV(u_proj,v_proj,eta_proj,u_full,h_full,H0_nd,U0_nd,f_nd,dx_nd,dy_nd,N);
 #P, P_xav = eigDiagnostics.footprint(u_proj,v_proj,PV_full,x_nd,dx_nd,dy_nd,N);
 
 #diagnostics.pvPlots(PV_full,PV_prime,P,x_nd,y_nd);

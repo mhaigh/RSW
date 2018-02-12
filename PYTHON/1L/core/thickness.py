@@ -10,20 +10,20 @@ from diagnostics import diff, extend, timeAverage
 #=====================================================================
 
 # fluxes
-def fluxes(u_nd,v_nd,eta_nd,U0_nd,H0_nd,N,Nt):
+def fluxes(u,v,h,U0_nd,H0_nd,N,Nt):
 # Calculates 6 PV flux terms
 	
-	uh = u_nd * eta_nd;
-	vh = v_nd * eta_nd;
+	uh = u * h;
+	vh = v * h;
 		
 	Uh = np.zeros((N,N,Nt));	
 	uH = np.zeros((N,N,Nt));
 	vH = np.zeros((N,N,Nt));
 	for i in range(0,N):
 		for ti in range(0,Nt):
-			Uh[:,i,ti] = U0_nd[:] * eta_nd[:,i,ti];
-			uH[:,i,ti] = u_nd[:,i,ti] * H0_nd[:];
-			vH[:,i,ti] = v_nd[:,i,ti] * H0_nd[:];
+			Uh[:,i,ti] = U0_nd[:] * h[:,i,ti];
+			uH[:,i,ti] = u[:,i,ti] * H0_nd[:];
+			vH[:,i,ti] = v[:,i,ti] * H0_nd[:];
 
 	UH = U0_nd * H0_nd;
 

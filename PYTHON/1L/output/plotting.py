@@ -4,20 +4,21 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gs
 
 #====================================================
 
 # vqPlot
-def vqPlot(x_grid,y_grid,y_nd,v_nd,PV_prime,vq,P,P_xav,EEF,U0,ts):
+def vqPlot(x_grid,y_grid,y_nd,v,PV_prime,vq,P,P_xav,EEF,U0,ts):
 	
 	U0 = max(U0);		
 	EEF = round(10e6*EEF,5);
 	
-	vlim = np.max(abs(v_nd[:,:,ts]));
+	vlim = np.max(abs(v[:,:,ts]));
 	PVlim = np.max(abs(PV_prime[:,:,ts]));	
 	vqlim = np.max(abs(vq));
 
-	vmax = round(np.max(abs(v_nd)),3);
+	vmax = round(np.max(abs(v)),3);
 	PVmax = round(np.max(abs(PV_prime)),5);
 	vqmax = round(np.max(abs(vq)),5);
 	Pmax = round(np.max(abs(P)),5);
@@ -30,7 +31,7 @@ def vqPlot(x_grid,y_grid,y_nd,v_nd,PV_prime,vq,P,P_xav,EEF,U0,ts):
 
 	plt.figure(1,figsize=[16,16]);
 	plt.subplot(221);
-	plt.pcolor(x_grid,y_grid,v_nd[:,:,ts],cmap='bwr',vmin=-vlim,vmax=vlim);
+	plt.pcolor(x_grid,y_grid,v[:,:,ts],cmap='bwr',vmin=-vlim,vmax=vlim);
 	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
 	plt.text(-0.4,-0.4,'U0='+str(U0),fontsize=18);
 	plt.text(-0.4,0.4,'vmax='+str(vmax),fontsize=18);
@@ -114,18 +115,18 @@ def forcingPlot_save(x_grid,y_grid,F3_nd,FORCE,BG,Fpos,N):
 #====================================================
 
 # solutionPlots
-def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
+def solutionPlots(x_nd,y_nd,u,v,h,ts,FORCE,BG,Fpos,N,x_grid,y_grid,div):
 
-	ulim = np.max(abs(u_nd[:,:,ts]));
-	vlim = np.max(abs(v_nd[:,:,ts]));
-	etalim = np.max(abs(eta_nd[:,:,ts]));
+	ulim = np.max(abs(u[:,:,ts]));
+	vlim = np.max(abs(v[:,:,ts]));
+	etalim = np.max(abs(h[:,:,ts]));
 	
 	if div:
 			
 		plt.figure(1,figsize=(22,6.4));
 
 		plt.subplot(131);
-		plt.pcolor(x_grid, y_grid, u_nd[:,:,ts], cmap='bwr', vmin=-ulim, vmax=ulim);
+		plt.pcolor(x_grid, y_grid, u[:,:,ts], cmap='bwr', vmin=-ulim, vmax=ulim);
 		plt.text(0.3,0.45,'u',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -135,7 +136,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.colorbar();
 
 		plt.subplot(132);
-		plt.pcolor(x_grid, y_grid, v_nd[:,:,ts], cmap='bwr', vmin=-vlim, vmax=vlim);
+		plt.pcolor(x_grid, y_grid, v[:,:,ts], cmap='bwr', vmin=-vlim, vmax=vlim);
 		plt.text(0.3,0.45,'v',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -145,7 +146,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.colorbar();
 
 		plt.subplot(133);
-		plt.pcolor(x_grid, y_grid, eta_nd[:,:,ts], cmap='bwr', vmin=-etalim, vmax=etalim);
+		plt.pcolor(x_grid, y_grid, h[:,:,ts], cmap='bwr', vmin=-etalim, vmax=etalim);
 		plt.text(0.3,0.45,'eta',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -165,7 +166,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.figure(1,figsize=(22,6.4));
 
 		plt.subplot(131);
-		plt.contourf(x_nd[0:N],y_nd,u_nd[:,:,ts]);
+		plt.contourf(x_nd[0:N],y_nd,u[:,:,ts]);
 		plt.text(0.3,0.45,'u',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -176,7 +177,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.colorbar();
 
 		plt.subplot(132);
-		plt.contourf(x_nd[0:N],y_nd,v_nd[:,:,ts]);
+		plt.contourf(x_nd[0:N],y_nd,v[:,:,ts]);
 		plt.text(0.3,0.45,'v',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -185,7 +186,7 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 		plt.colorbar();
 
 		plt.subplot(133);
-		plt.contourf(x_nd[0:N],y_nd,eta_nd[:,:,ts]);
+		plt.contourf(x_nd[0:N],y_nd,h[:,:,ts]);
 		plt.text(0.3,0.45,'eta',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -202,20 +203,20 @@ def solutionPlots(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,x_grid,y_grid,di
 #====================================================
 
 # solutionPlots_save
-def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,div):
+def solutionPlots_save(x_nd,y_nd,u,v,h,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_grid,div):
 # Function that saves plots of the solutions (including PV) separately.
 
-	ulim = np.max(abs(u_nd[:,:,ts]));
-	vlim = np.max(abs(v_nd[:,:,ts]));
-	etalim = np.max(abs(eta_nd[:,:,ts]));
+	ulim = np.max(abs(u[:,:,ts]));
+	vlim = np.max(abs(v[:,:,ts]));
+	etalim = np.max(abs(h[:,:,ts]));
 
-	u_nd = u_nd / ulim;
-	v_nd = v_nd / vlim;
-	eta_nd = eta_nd / etalim
+	u = u / ulim;
+	v = v / vlim;
+	h = h / etalim
 
-	u_nd = extend(u_nd);
-	v_nd = extend(v_nd);
-	eta_nd = extend(eta_nd);
+	u = extend(u);
+	v = extend(v);
+	h = extend(h);
 
 	u_str = 'max=' + str(round(ulim,4));
 	v_str = 'max=' + str(round(vlim,4));
@@ -223,7 +224,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 
 	if div:
 			
-		plt.pcolor(x_grid, y_grid, u_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.pcolor(x_grid, y_grid, u[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26);
 		plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
 		plt.text(-0.45,-0.4,u_str,color='k',fontsize=18);
@@ -237,7 +238,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.close();
 
-		plt.pcolor(x_grid, y_grid, v_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.pcolor(x_grid, y_grid, v[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
 		#plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
 		plt.text(-0.45,-0.4,v_str,color='k',fontsize=18);
@@ -250,7 +251,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 		plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_' + str(Fpos) + '_'  + str(N) + '.png');
 		plt.close();
 
-		plt.pcolor(x_grid, y_grid, eta_nd[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
+		plt.pcolor(x_grid, y_grid, h[:,:,ts], cmap='bwr', vmin=-1., vmax=1.);
 		plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26);
 		#plt.text(-0.45,0.4,U0_str,color='k',fontsize=22);
 		plt.text(-0.45,-0.4,eta_str,color='k',fontsize=18);
@@ -269,7 +270,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 	else:
 
 		plt.figure(1)
-		plt.contourf(x_nd,y_nd,u_nd[:,:,ts]);
+		plt.contourf(x_nd,y_nd,u[:,:,ts]);
 		plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -283,7 +284,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 		plt.close();
 
 		plt.figure(2)
-		plt.contourf(x_nd,y_nd,v_nd[:,:,ts]);
+		plt.contourf(x_nd,y_nd,v[:,:,ts]);
 		plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -297,7 +298,7 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 		plt.close();
 
 		plt.figure(3)
-		plt.contourf(x_nd,y_nd,eta_nd[:,:,ts]);
+		plt.contourf(x_nd,y_nd,h[:,:,ts]);
 		plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -314,21 +315,21 @@ def solutionPlots_save(x_nd,y_nd,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,N,U0_str,x_gr
 
 # solutionPlotsAmp
 # Plots of amplitude 
-def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
+def solutionPlotsAmp(x_grid,y_grid,u,v,h,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 
-	ulim = np.max(abs(u_nd));
-	vlim = np.max(abs(v_nd));
-	etalim = np.max(abs(eta_nd));
+	ulim = np.max(abs(u));
+	vlim = np.max(abs(v));
+	etalim = np.max(abs(h));
 
-	u_nd = u_nd / ulim;
-	v_nd = v_nd / vlim;
-	eta_nd = eta_nd / etalim
+	u = u / ulim;
+	v = v / vlim;
+	h = h / etalim
 
-	u_nd = extend(u_nd);
-	v_nd = extend(v_nd);
-	eta_nd = extend(eta_nd);
+	u = extend(u);
+	v = extend(v);
+	h = extend(h);
 
-	plt.pcolor(x_grid, y_grid, np.absolute(u_nd), vmin=0., vmax=0.5);
+	plt.pcolor(x_grid, y_grid, np.absolute(u), vmin=0., vmax=0.5);
 	plt.text(0.4,0.4,r'$u^{\prime}$',fontsize=26,color='w');
 	plt.text(-0.45,0.4,U0_str,fontsize=22,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
@@ -342,7 +343,7 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_Amp_' + U0_name + '.png');
 	plt.close();
 	
-	plt.pcolor(x_grid, y_grid, np.absolute(v_nd), vmin=0., vmax=0.5);
+	plt.pcolor(x_grid, y_grid, np.absolute(v), vmin=0., vmax=0.5);
 	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);	
@@ -353,7 +354,7 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/v_Amp_' + U0_name + '.png');
 	plt.close();
 
-	plt.pcolor(x_grid, y_grid, np.absolute(eta_nd), vmin=0., vmax=0.5);
+	plt.pcolor(x_grid, y_grid, np.absolute(h), vmin=0., vmax=0.5);
 	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=26,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
@@ -370,13 +371,13 @@ def solutionPlotsAmp(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_
 
 # solutionPlotsPhase
 # Plots of phase 
-def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
+def solutionPlotsPhase(x_grid,y_grid,u,v,h,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 
-	u_nd = extend(u_nd);
-	v_nd = extend(v_nd);
-	eta_nd = extend(eta_nd);
+	u = extend(u);
+	v = extend(v);
+	h = extend(h);
 
-	plt.pcolor(x_grid, y_grid, np.angle(u_nd), cmap='hsv',vmin=-np.pi, vmax=np.pi);
+	plt.pcolor(x_grid, y_grid, np.angle(u), cmap='hsv',vmin=-np.pi, vmax=np.pi);
 	plt.text(0.4,-0.4,r'$u^{\prime}$',fontsize=26,color='k');
 	plt.text(-0.45,-0.4,U0_str,fontsize=22,color='k');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
@@ -389,7 +390,7 @@ def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/u_Phase_' + U0_name + '.png');
 	plt.close();
 
-	plt.pcolor(x_grid, y_grid, np.angle(v_nd),cmap='rainbow',vmin=-np.pi, vmax=np.pi);
+	plt.pcolor(x_grid, y_grid, np.angle(v),cmap='rainbow',vmin=-np.pi, vmax=np.pi);
 	plt.text(0.4,-0.4,r'$v^{\prime}$',fontsize=26,color='k');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=0);
@@ -401,7 +402,7 @@ def solutionPlotsPhase(x_grid,y_grid,u_nd,v_nd,eta_nd,ts,FORCE,BG,Fpos,U0_name,U
 	plt.close();
 
 	fig, ax = plt.subplots()
-	cax = ax.pcolor(x_grid, y_grid, np.angle(eta_nd),vmin=-np.pi,vmax=np.pi);
+	cax = ax.pcolor(x_grid, y_grid, np.angle(h),vmin=-np.pi,vmax=np.pi);
 	cbar = fig.colorbar(cax, ticks=[-np.pi, 0, np.pi])
 	cbar.ax.set_yticklabels([r'$-\pi$', r'$0$', r'$\pi$'],fontsize=18)  # vertically oriented colorbar
 	plt.text(0.4,-0.4,r'$\eta^{\prime}$',fontsize=26,color='k');
@@ -488,57 +489,6 @@ def pvPlots_save(PV_full,PV_prime,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_g
 	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/PV_prime_' + str(Fpos) + '_'  + U0_name + '.png');
 	plt.close();
 
-
-#====================================================
-
-# fp_PV_plot
-def fp_PV_plot(PV_prime,P,P_xav,x_nd,y_nd,ts,N,x_grid,y_grid,row,nrows):
-
-	PV_prime_lim = np.max(abs(PV_prime[:,:,ts]));
-	PV_prime = PV_prime[:,:,ts] / PV_prime_lim;
-
-	Plim = np.max(np.absolute(P));
-	P = P / Plim;
-	
-	P_xav = P_xav * 1.0e5;
-
-	fs = 12
-
-	plt.subplot(nrows,3,1+3*row)
-	plt.pcolor(x_grid, y_grid, PV_prime, cmap='bwr',vmin=-.5,vmax=.5);
-	plt.yticks((-1./4,0,1./4),fontsize=fs);
-	plt.axis([-1./4,1./4,-1./4,1./4]);
-	if row == nrows-1:
-		plt.xlabel('x',fontsize=fs);
-		plt.xticks((-1./4,0,1./4),fontsize=fs);
-	else:
-		plt.xticks((-1./4,0,1./4),fontsize=0);
-	plt.ylabel('y',fontsize=fs);
-	plt.grid()
-	#plt.gca().set_aspect('equal', adjustable='box')
-
-	plt.subplot(nrows,3,2+3*row)
-	plt.pcolor(x_grid, y_grid, P, cmap='bwr',vmin=-.5,vmax=.5);
-	plt.xticks((-1./4,0,1./4));
-	plt.yticks((-1./4,0,1./4),fontsize=0);
-	plt.axis([-1./4,1./4,-1./4,1./4]);
-	if row == nrows-1:
-		plt.xlabel('x',fontsize=fs);
-		plt.xticks((-1./4,0,1./4),fontsize=fs);
-	else:
-		plt.xticks((-1./4,0,1./4),fontsize=0);
-	plt.grid()
-	
-	plt.subplot(nrows,3,3+3*row)	
-	plt.plot(P_xav,y_nd,'k-',linewidth=2)
-	plt.text(0.8*max(abs(P_xav)),0.40,r'$\langle P\rangle$',fontsize=fs+8)
-	plt.yticks((-1./2,-1./4,0,1./4,1./2),fontsize=fs);
-	plt.xticks(fontsize=fs)
-	plt.ylim(-1./2,1./2)
-	#plt.ylabel('y',fontsize=fs);
-	plt.grid();
-
-	
 #====================================================
 
 # footprintPlots_save

@@ -155,22 +155,24 @@ else:
 	EEF_2 = 10.**4 * EEF_2 / w60;
 
 if vs == 'y0':
-	plt.figure(1);
-	if opt == 'r':
-		plt.plot(y_forced_0,EEF_0,label=l0,linewidth=1.3);
-		plt.plot(y_forced_1,EEF_1,label=l1,linewidth=1.3);
-		plt.plot(y_forced_2,EEF_2,label=l2,linewidth=1.3);
-		if BG == 'U0=Gaussian':
-			plt.yticks((-6,-4,-2,0.0,2,4,6,8,10,12));
-		elif BG == 'U0=0':
-			plt.yticks((0,2,4,6,8,10,12));
-		elif BG == 'U0=16':
-			plt.yticks((0,2,4,6,8,10,12));
-		plt.ylabel('EEF',fontsize=18);
-	else:
-		plt.plot(y_forced,EEF_0,label=l0,linewidth=1.3);
-		plt.plot(y_forced,EEF_1,label=l1,linewidth=1.3);
-		plt.plot(y_forced,EEF_2,label=l2,linewidth=1.3);
+	plt.figure(figsize=[21,7])
+
+	plt.subplot(131)	
+	plt.plot(y_forced_0,EEF_0,label=l0,linewidth=1.3);
+	plt.plot(y_forced_1,EEF_1,label=l1,linewidth=1.3);
+	plt.plot(y_forced_2,EEF_2,label=l2,linewidth=1.3);
+	if BG == 'U0=Gaussian':
+		plt.yticks((-6,-4,-2,0.0,2,4,6,8,10,12));
+	elif BG == 'U0=0':
+		plt.yticks((0,2,4,6,8,10,12));
+	elif BG == 'U0=16':
+		plt.yticks((0,2,4,6,8,10,12));
+	plt.ylabel('EEF',fontsize=18);
+	
+	plt.subplot(132)	
+	plt.plot(y_forced,EEF_0,label=l0,linewidth=1.3);
+	plt.plot(y_forced,EEF_1,label=l1,linewidth=1.3);
+	plt.plot(y_forced,EEF_2,label=l2,linewidth=1.3);
 		if BG == 'U0=Gaussian':
 			plt.yticks((-6,-4,-2,0,2,4,6,8,10,12),fontsize=0);
 		elif BG == 'U0=0':

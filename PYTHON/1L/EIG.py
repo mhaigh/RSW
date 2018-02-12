@@ -43,7 +43,7 @@ for ii in loop:
 	k = K_nd[ii];	
 	print('k = ' + str(k));
 	if BC == 'NO-SLIP':
-		val, u_vec, v_vec, eta_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
+		val, u_vec, v_vec, h_vec = eigSolver.NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,True);
 	if BC == 'FREE-SLIP':
 		val, vec = eigSolver.FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
 		#val, vec = eigSolver.FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,ii,False);
@@ -75,13 +75,13 @@ for ii in loop:
 	ENERGY = 1;
 	if ENERGY == 1:		
 		E = np.zeros(dim);	
-		u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
+		u_vec, v_vec, h_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 		for wi in range(0,dim):
 			#print(str(wi+1) + ' / ' + str(dim));	
-			EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],eta_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
-			u_vec[:,wi], v_vec[:,wi], eta_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), eta_vec[:,wi] / np.sqrt(EE);
+			EE = energy.E_anomaly_EIG(u_vec[:,wi],v_vec[:,wi],h_vec[:,wi],H0_nd,U0_nd,Ro,y_nd,dy_nd);
+			u_vec[:,wi], v_vec[:,wi], h_vec[:,wi] = u_vec[:,wi] / np.sqrt(EE), v_vec[:,wi] / np.sqrt(EE), h_vec[:,wi] / np.sqrt(EE);
 		# Rebuild
-		vec = eigDiagnostics.vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC);
+		vec = eigDiagnostics.vecs2vec(u_vec,v_vec,h_vec,N,dim,BC);
 
 	#ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 
@@ -92,7 +92,7 @@ if str(raw_input('continue? y or n: ')) == 'n':
 
 #====================================================
  
-u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
+u_vec, v_vec, h_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);
 
 for ii in loop:
 
@@ -145,7 +145,7 @@ for ii in loop:
 	vec = vec[:,i_count_new];
 	val = val[i_count_new];
 
-	u_vec, v_vec, eta_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);		
+	u_vec, v_vec, h_vec = eigDiagnostics.vec2vecs(vec,N,dim,BC);		
 
 	ncSaveEigenmodes(vec,val,count,y_nd,k,N,dim,BC);
 	
@@ -187,7 +187,7 @@ for ii in loop:
 	freq_index = [];
 	u_set = [];
 	v_set = [];
-	eta_set = [];
+	h_set = [];
 	for wi in range(0,dim):
 		#plt.plot(u_vec[:,wi]);
 		#plt.show();
@@ -197,29 +197,29 @@ for ii in loop:
 			freq_set.append(freq[wi]);
 			u_set.append(u_vec[:,wi]);
 			v_set.append(v_vec[:,wi]);
-			eta_set.append(eta_vec[:,wi]);
+			h_set.append(h_vec[:,wi]);
 	u_set = np.array(u_set);
 	v_set = np.array(v_set);
-	eta_set = np.array(eta_set);
+	h_set = np.array(h_set);
 	# Note that using np.array reverses the indexing convention.
 
-	# Now define u, v and eta in (x,y)-space.
+	# Now define u, v and h in (x,y)-space.
 	Nf = len(freq_set);
 	u = np.zeros((N,N,Nf));
 	v = np.zeros((N,N,Nf));
-	eta = np.zeros((N,N,Nf));
+	h = np.zeros((N,N,Nf));
 	for wi in range(0,Nf):
 		for i in range(0,N):
 			for j in range(0,N):
 				u[j,i,wi] = np.real(u_set[wi,j] * np.exp(2 * np.pi * I * (k * x_nd[i])));
 				v[j,i,wi] = np.real(v_set[wi,j] * np.exp(2 * np.pi * I * (k * x_nd[i])));
-				eta[j,i,wi] = np.real(eta_set[wi,j] * np.exp(2 * np.pi * I * (k * x_nd[i])));
+				h[j,i,wi] = np.real(h_set[wi,j] * np.exp(2 * np.pi * I * (k * x_nd[i])));
 
 		u_full = np.zeros((N,N));
-		eta_full = np.zeros((N,N));
+		h_full = np.zeros((N,N));
 		for i in range(0,N):
 			u_full[:,i] = u[:,i,wi] + U0_nd[:];
-			eta_full[:,i] = eta[:,i,wi] + H0_nd[:];
+			h_full[:,i] = h[:,i,wi] + H0_nd[:];
 	
 
 		plt.plot(y_nd,u_set[wi,:]);

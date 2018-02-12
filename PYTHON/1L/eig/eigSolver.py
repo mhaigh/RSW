@@ -211,8 +211,8 @@ def NO_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,VECS):
 		u_vec[1:N-1,:] = vec[0:N2,:];
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[N:N+N2,:];
-		eta_vec = vec[2*N2:2*N2+N,:];	
-		return val, u_vec, v_vec, eta_vec;
+		h_vec = vec[2*N2:2*N2+N,:];	
+		return val, u_vec, v_vec, h_vec;
 
 	else:
 		return val, vec;
@@ -316,8 +316,8 @@ def FREE_SLIP_EIG(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,VECS):
 		u_vec = vec[us:ue+1,:];
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[vs:ve+1,:];
-		eta_vec = vec[hs:he+1,:];	
-		return val, u_vec, v_vec, eta_vec;
+		h_vec = vec[hs:he+1,:];	
+		return val, u_vec, v_vec, h_vec;
 
  	else:
 		return val, vec;
@@ -417,8 +417,8 @@ def FREE_SLIP_EIG2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,N,N2,i,VECS):
 		u_vec = vec[0:N,:];
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[N:N+N2,:];
-		eta_vec = vec[N+N2:2*N+N2,:];	
-		return val, u_vec, v_vec, eta_vec;
+		h_vec = vec[N+N2:2*N+N2,:];	
+		return val, u_vec, v_vec, h_vec;
 
  	else:
 		return val, vec;
@@ -514,8 +514,8 @@ def FREE_SLIP_EIG3(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,uBC,etaBC,N,N2,i,VECS):
 		u_vec = vec[0:N,:];
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[N:N+N2,:];
-		eta_vec = vec[N+N2:2*N+N2,:];	
-		return val, u_vec, v_vec, eta_vec;
+		h_vec = vec[N+N2:2*N+N2,:];	
+		return val, u_vec, v_vec, h_vec;
 
  	else:
 		return val, vec;

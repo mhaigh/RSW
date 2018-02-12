@@ -13,11 +13,11 @@ import plotly.plotly as py
 #====================================================
 
 # eigPlot
-def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol):
+def eigPlots(u_proj,v_proj,eta_proj,u,v,h,x_nd,y_nd,x_grid,y_grid,sol):
 	
-	ulim = np.max(abs(u_nd));
-	vlim = np.max(abs(v_nd));
-	etalim = np.max(abs(eta_nd));
+	ulim = np.max(abs(u));
+	vlim = np.max(abs(v));
+	etalim = np.max(abs(h));
 
 	if sol:
 
@@ -54,7 +54,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 		plt.colorbar();
 	
 		plt.subplot(234);
-		plt.pcolor(x_grid,y_grid,u_nd, cmap='bwr', vmin=-ulim, vmax=ulim);
+		plt.pcolor(x_grid,y_grid,u, cmap='bwr', vmin=-ulim, vmax=ulim);
 		plt.text(0.3,0.45,'u',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -64,7 +64,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 		plt.colorbar();
 
 		plt.subplot(235);
-		plt.pcolor(x_grid,y_grid,v_nd, cmap='bwr', vmin=-vlim, vmax=vlim);
+		plt.pcolor(x_grid,y_grid,v, cmap='bwr', vmin=-vlim, vmax=vlim);
 		plt.text(0.3,0.45,'v',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -74,7 +74,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 		plt.colorbar();
 
 		plt.subplot(236);
-		plt.pcolor(x_grid,y_grid,eta_nd, cmap='bwr', vmin=-etalim, vmax=etalim);
+		plt.pcolor(x_grid,y_grid,h, cmap='bwr', vmin=-etalim, vmax=etalim);
 		plt.text(0.3,0.45,'eta',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -89,9 +89,9 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 	# Code never executed, unless we want contourf plots.
 	elif 1==0:
 
-		u_nd = extend(u_nd);
-		v_nd = extend(v_nd);
-		eta_nd = extend(eta_nd);
+		u = extend(u);
+		v = extend(v);
+		h = extend(h);
 
 		plt.figure(1,figsize=[21,6]);
 		plt.subplot(231)
@@ -122,7 +122,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 		plt.colorbar();
 	
 		plt.subplot(234);
-		plt.contourf(x_nd,y_nd,u_nd,vmin=-ulim,vmax=ulim);
+		plt.contourf(x_nd,y_nd,u,vmin=-ulim,vmax=ulim);
 		plt.text(0.3,0.45,'u',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -133,7 +133,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 		plt.colorbar();
 
 		plt.subplot(235);
-		plt.contourf(x_nd,y_nd,v_nd,vmin=-vlim,vmax=vlim);
+		plt.contourf(x_nd,y_nd,v,vmin=-vlim,vmax=vlim);
 		plt.text(0.3,0.45,'v',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -142,7 +142,7 @@ def eigPlots(u_proj,v_proj,eta_proj,u_nd,v_nd,eta_nd,x_nd,y_nd,x_grid,y_grid,sol
 		plt.colorbar();
 
 		plt.subplot(236);
-		plt.contourf(x_nd,y_nd,eta_nd,vmin=-etalim,vmax=etalim);
+		plt.contourf(x_nd,y_nd,h,vmin=-etalim,vmax=etalim);
 		plt.text(0.3,0.45,'eta',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));
@@ -394,7 +394,7 @@ def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 	
 	Ns = 1 # Number of samples
 	
-	u_vec, v_vec, eta_vec = vec2vecs(vec,N,dim,BC)
+	u_vec, v_vec, h_vec = vec2vecs(vec,N,dim,BC)
 	count = np.zeros((dim),dtype=int)
 	dom_i = np.zeros(Ns,dtype=int)
 	for wi in range(0,dim):
@@ -430,12 +430,12 @@ def orderEigenmodes2(vec,val,N,VECS):
 		vec = np.array(vec);
 		u_vec = vec[0,:,:];
 		v_vec = vec[1,:,:];
-		eta_vec = vec[2,:,:];
+		h_vec = vec[2,:,:];
 
 	else:
 		u_vec = vec[0:N,:];		# Extract the eigenmodes.
 		v_vec = vec[N:2*N,:];
-		eta_vec = vec[2*N:3*N,:];		
+		h_vec = vec[2*N:3*N,:];		
 
 	# Initialise a counter for the number of zero crossings. 
 	count = np.zeros((dim),dtype=int);
@@ -483,22 +483,22 @@ def vec2vecs(vec,N,dim,BC):
 		u_vec = vec[0:N,:];
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[N:2*N-2,:];
-		eta_vec = vec[2*N-2:3*N-2,:];
+		h_vec = vec[2*N-2:3*N-2,:];
 	elif BC == 'NO-SLIP':
 		u_vec = np.zeros((N,dim),dtype=complex);
 		u_vec[1:N-1,:] = vec[0:N-2,:];
 		v_vec = np.zeros((N,dim),dtype=complex);
 		v_vec[1:N-1,:] = vec[N:2*N-2,:];
-		eta_vec = vec[2*N-4:3*N-4,:];	
+		h_vec = vec[2*N-4:3*N-4,:];	
 	else:
 		sys.exit('ERROR: choose valid BC');
 
-	return u_vec, v_vec, eta_vec;
+	return u_vec, v_vec, h_vec;
 
 #====================================================
 
 # vecs2vec
-def vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC):
+def vecs2vec(u_vec,v_vec,h_vec,N,dim,BC):
 # The inverse operation of the above function.
 
 	vec = np.zeros((dim,dim),dtype=complex);
@@ -506,11 +506,11 @@ def vecs2vec(u_vec,v_vec,eta_vec,N,dim,BC):
 	if BC == 'FREE-SLIP':
 		vec[0:N,:] = u_vec;		
 		vec[N:2*N-2,:] = v_vec[1:N-1,:];
-		vec[2*N-2:3*N-2,:] = eta_vec;
+		vec[2*N-2:3*N-2,:] = h_vec;
 	elif BC == 'NO-SLIP':
 		vec[0:N-2,:] = u_vec[1:N-1,:];
 		vec[N:2*N-2,:] = v_vec[1:N-1,:];
-		vec[2*N-4:3*N-4,:] = eta_vec;	
+		vec[2*N-4:3*N-4,:] = h_vec;	
 	else:
 		sys.exit('ERROR: choose valid BC');
 
