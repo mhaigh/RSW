@@ -24,7 +24,7 @@ test = 'y0' # U0 or y0
 #samples = ['-08','00','08','16']
 
 samples = ['-1','0','1.5']
-#samples = ['-1'] 				# sigma samples
+#samples = ['-1','1.5'] 				# sigma samples
 
 ns = len(samples)
 
@@ -145,7 +145,7 @@ if True:
 				string = r'$y_{0}=' + sample + '\sigma$'
 		U0_str = 'U0 = ' + str(U0)
 		plotting_bulk.fp_PV_plot(q[:,:,si],P[:,:,si],P_xav[:,si],N,x_grid,y_grid,y_nd,si,ns,string)
-		plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
+		plt.tight_layout(pad=0.3, w_pad=0.1, h_pad=0.6);
 		plt.savefig('fig2.png');
 
 

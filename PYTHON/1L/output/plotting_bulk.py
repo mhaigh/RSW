@@ -29,7 +29,7 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 	v = v / vlim;
 	eta = eta / etalim
 
-	fs = 14
+	fs = 18
 	x_ticks = (-1./2,-1./4,0,1./4,1./2)
 	y_ticks = (-1./2,-1./4,0,1./4,1./2)
 
@@ -54,17 +54,17 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 	else:
 		plt.xticks(x_ticks,fontsize=0);
 	plt.ylabel('y',fontsize=fs+2);
-	plt.text(0.4,0.4,r'$u^{\prime}$',color='k',fontsize=fs+14);
-	plt.text(-0.4,0.4,string,color='k',fontsize=fs+14);
-	plt.text(-0.4,-0.4,u_str,color='k',fontsize=fs+8);
+	plt.text(0.4,0.4,r'$u^{\prime}$',color='k',fontsize=fs+12);
+	plt.text(-0.4,0.4,string,color='k',fontsize=fs+12);
+	plt.text(-0.4,-0.4,u_str,color='k',fontsize=fs+4);
 	plt.grid()
 
 	plt.subplot(grsp[row,1])	
 	plt.pcolor(x_grid, y_grid, v, cmap='bwr',vmin=-1.,vmax=1.);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
-	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=fs+14);
-	plt.text(-0.4,-0.4,v_str,color='k',fontsize=fs+8);
+	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=fs+12);
+	plt.text(-0.4,-0.4,v_str,color='k',fontsize=fs+4);
 	if row == nrows-1:
 		plt.xlabel('x',fontsize=fs+2);
 		plt.xticks(x_ticks,fontsize=fs);
@@ -81,8 +81,8 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 		plt.xticks(x_ticks,fontsize=fs);
 	else:
 		plt.xticks(x_ticks,fontsize=0);
-	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=fs+14);
-	plt.text(-0.4,-0.4,eta_str,color='k',fontsize=fs+8);
+	plt.text(0.4,0.4,r'$\eta^{\prime}$',fontsize=fs+12);
+	plt.text(-0.4,-0.4,eta_str,color='k',fontsize=fs+4);
 	plt.grid();
 	plt.colorbar()
 
@@ -100,7 +100,7 @@ def plotSolutionsAmpPhase(u,v,eta,N,x_grid,y_grid,row,nrows,string,fig):
 	v = v / vlim;
 	eta = eta / etalim
 
-	fs = 14
+	fs = 18
 	x_ticks = (-1./2,-1./4,0,1./4,1./2)
 	y_ticks = (-1./2,-1./4,0,1./4,1./2)
 
@@ -118,15 +118,15 @@ def plotSolutionsAmpPhase(u,v,eta,N,x_grid,y_grid,row,nrows,string,fig):
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.xticks(x_ticks,fontsize=0);
 	plt.ylabel('y',fontsize=fs+2);
-	plt.text(0.4,-0.4,r'$u^{\prime}$',color='k',fontsize=fs+14);
-	plt.text(-0.4,-0.4,string,color='k',fontsize=fs+14);
+	plt.text(0.4,-0.4,r'$u^{\prime}$',color='k',fontsize=fs+12);
+	plt.text(-0.4,-0.4,string,color='k',fontsize=fs+12);
 	plt.grid()
 
 	plt.subplot(grsp[2*row,1])	
 	plt.pcolor(x_grid, y_grid, np.angle(v),vmin=-np.pi,vmax=np.pi);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
-	plt.text(0.4,-0.4,r'$v^{\prime}$',fontsize=fs+14);
+	plt.text(0.4,-0.4,r'$v^{\prime}$',fontsize=fs+12);
 	plt.xticks(x_ticks,fontsize=0);
 	plt.grid()
 
@@ -135,10 +135,10 @@ def plotSolutionsAmpPhase(u,v,eta,N,x_grid,y_grid,row,nrows,string,fig):
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.xticks(x_ticks,fontsize=0);
-	plt.text(0.4,-0.4,r'$\eta^{\prime}$',fontsize=fs+14);
+	plt.text(0.4,-0.4,r'$\eta^{\prime}$',fontsize=fs+12);
 	plt.grid();
 	cbar = fig.colorbar(cax, ticks=[-np.pi, 0, np.pi])
-	cbar.ax.set_yticklabels([r'$-\pi$', r'$0$', r'$\pi$'],fontsize=18) 
+	cbar.ax.set_yticklabels([r'$-\pi$', r'$0$', r'$\pi$'],fontsize=fs) 
 
 	# Amplitude
 	plt.subplot(grsp[2*row+1,0])	
@@ -151,15 +151,15 @@ def plotSolutionsAmpPhase(u,v,eta,N,x_grid,y_grid,row,nrows,string,fig):
 	else:
 		plt.xticks(x_ticks,fontsize=0);
 	plt.ylabel('y',fontsize=fs);
-	plt.text(0.4,0.4,r'$u^{\prime}$',color='w',fontsize=fs+14);
-	plt.text(-0.4,0.4,string,color='w',fontsize=fs+14);
+	plt.text(0.4,0.4,r'$u^{\prime}$',color='w',fontsize=fs+12);
+	plt.text(-0.4,0.4,string,color='w',fontsize=fs+12);
 	plt.grid()
 
 	plt.subplot(grsp[2*row+1,1])	
 	plt.pcolor(x_grid, y_grid, np.absolute(v),vmin=0.,vmax=0.5);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
-	plt.text(0.4,0.4,r'$v^{\prime}$',color='w',fontsize=fs+14);
+	plt.text(0.4,0.4,r'$v^{\prime}$',color='w',fontsize=fs+12);
 	if row == nrows-1:
 		plt.xlabel('x',fontsize=fs+2);
 		plt.xticks(x_ticks,fontsize=fs);
@@ -176,7 +176,7 @@ def plotSolutionsAmpPhase(u,v,eta,N,x_grid,y_grid,row,nrows,string,fig):
 		plt.xticks(x_ticks,fontsize=fs);
 	else:
 		plt.xticks(x_ticks,fontsize=0);
-	plt.text(0.4,0.4,r'$\eta^{\prime}$',color='w',fontsize=fs+14);
+	plt.text(0.4,0.4,r'$\eta^{\prime}$',color='w',fontsize=fs+12);
 	plt.grid();
 	plt.colorbar()
 
@@ -191,18 +191,18 @@ def fp_PV_plot(PV_prime,P,P_xav,N,x_grid,y_grid,y_nd,row,nrows,string):
 	Plim = np.max(np.absolute(P));
 	P = P / Plim;
 	
-	P_xav = P_xav / 1.0e3;
+	P_xav = P_xav * 10e4;
 
-	fs = 14
+	fs = 18
 	x_ticks = (-1./4,0,1./4)
-	y_ticks = (-1./4,0,1./4)
-	#y_ticks = (0.,1./4,1./2)
+	#y_ticks = (-1./4,0,1./4)
+	y_ticks = (0.,1./4,1./2)
 	
-	#y_loc = 0.4
+	#y_loc = 0.45
 	y_loc = 0.2
 
-	axs = [-1./4,1./4,-1./4,1./4]
-	#axs = [-1./4,1./4,0.,1./2]
+	#axs = [-1./4,1./4,-1./4,1./4]
+	axs = [-1./4,1./4,0.,1./2]
 
 	grsp = gs.GridSpec(nrows,3,width_ratios=[1,1.25,1])
 
@@ -217,8 +217,8 @@ def fp_PV_plot(PV_prime,P,P_xav,N,x_grid,y_grid,y_nd,row,nrows,string):
 	else:
 		plt.xticks(x_ticks,fontsize=0);
 	plt.ylabel('y',fontsize=fs+2);
-	plt.text(0.2,y_loc,r'$q^{\prime}$',color='k',fontsize=fs+14);
-	plt.text(-0.2,y_loc,string,color='k',fontsize=fs+14);
+	plt.text(0.2,y_loc,r'$q^{\prime}$',color='k',fontsize=fs+12);
+	plt.text(-0.2,y_loc,string,color='k',fontsize=fs+12);
 	plt.grid(axs)
 	#plt.gca().set_aspect('equal', adjustable='box')
 
@@ -227,7 +227,7 @@ def fp_PV_plot(PV_prime,P,P_xav,N,x_grid,y_grid,y_nd,row,nrows,string):
 	plt.pcolor(x_grid, y_grid, P, cmap='bwr',vmin=-.5,vmax=.5);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.axis(axs);
-	plt.text(0.2,y_loc,r'$P$',fontsize=fs+14);
+	plt.text(0.2,y_loc,r'$P$',fontsize=fs+12);
 	plt.colorbar()
 	if row == nrows-1:
 		plt.xlabel('x',fontsize=fs+2);
@@ -239,11 +239,12 @@ def fp_PV_plot(PV_prime,P,P_xav,N,x_grid,y_grid,y_nd,row,nrows,string):
 	#plt.subplot(nrows,3,3+3*row)
 	plt.subplot(grsp[row,2])	
 	plt.plot(P_xav,y_nd,'k-',linewidth=2)
-	plt.text(0.8*max(abs(P_xav)),y_loc,r'$\langle P\rangle$',fontsize=fs+14)
+	plt.text(0.8*max(abs(P_xav)),y_loc,r'$\langle P\rangle$',fontsize=fs+12)
 	plt.yticks(y_ticks,fontsize=fs);
 	plt.xticks(fontsize=fs)
 	plt.xlim(-1.4*max(P_xav),1.4*max(P_xav))
-	plt.ylim(-1./4,1./4)
+	#plt.ylim(-1./4,1./4)
+	plt.ylim(0,1./2)	
 	plt.ylabel('y',fontsize=fs+2);
 	plt.grid();
 
