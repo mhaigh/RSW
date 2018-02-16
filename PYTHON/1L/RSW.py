@@ -62,20 +62,20 @@ def RSW_main():
 
 	#sys.exit();
 
-	#u = np.real(u);
-	#v = np.real(v);
-	#h = np.real(h);
+	u = np.real(u);
+	v = np.real(v);
+	h = np.real(h);
 	
 	# Normalise all solutions by the (non-dimensional) forcing amplitude. 
 	u = u / AmpF_nd;
 	v = v / AmpF_nd;
 	h = h / AmpF_nd;
 
-	np.save('u.npy',u);
-	np.save('v.npy',v);
-	np.save('h.npy',h);
+	#np.save('u.npy',u);
+	#np.save('v.npy',v);
+	#np.save('h.npy',h);
 
-	sys.exit();
+	#sys.exit();
 
 	# Correlation.
 	# Central half?
@@ -220,7 +220,7 @@ def RSW_main():
 	#output.ncSave(utilde_nd,vtilde_nd,etatilde_nd,u,v,h,x_nd,y_nd,K_nd,T_nd,PV_full,PV_prime,PV_BG,Pq,EEFq,N,Nt);
 
 
-	sys.exit()
+	#sys.exit()
 	
 	#====================================================
 

@@ -10,9 +10,9 @@ from output import output_read
 
 vs = 'y0';
 
-#BG = 'U0=Gaussian'
-BG = 'U0=16';
+BG = 'U0=Gaussian'
 #BG = 'U0=16';
+#BG = 'U0=0';
 #BG = 'U0=-08';
 #BG = 'vsU0';
 
@@ -37,7 +37,7 @@ if vs == 'y0':
 	
 		NN = len(EEF_r0)
 		N_skip = (N - NN) / 2
-		y_forced_0 = y_nd[N_skip:N-N_skip]
+		y_forced_0 = y_nd[N_skip:N-N_skip]	
 
 		NN = len(EEF_r2)
 		N_skip = (N - NN) / 2
@@ -58,33 +58,39 @@ if vs == 'y0':
 		lw2 = 'T = 70 days';
 
 	else:# BG == 'U0=0':
-		if opt == 'r':
-			EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_r60.npy');
-			EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
-			EEF_2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_r120.npy');
-			l0 = 'r0 = 60 km';
-			l1 = 'r0 = 90 km';
-			l2 = 'r0 = 120 km';
-			# Note that varying r0 means that the lengths of the EEF array will differ
-			for ri in range(0,3):
-				exec('NN = len(EEF_' + str(ri) + ')');
-				N_skip = (N - NN) / 2; 
-				exec('y_forced_' + str(ri) + '= y_nd[N_skip:N-N_skip]');
-		
-		elif opt == 'k':
-			EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k50.npy');
-			EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
-			EEF_2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k200.npy');
-			l0 = r'Re = 2Re$_{0}$';
-			l1 = r'Re = Re$_{0}$';
-			l2 = r'Re = Re$_{0}$/2';
-		elif opt == 'w':
-			EEF_0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_om50.npy');
-			EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
-			EEF_2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_om70.npy');
-			l0 = 'T = 50 days';
-			l1 = 'T = 60 days';
-			l2 = 'T = 70 days';
+
+		# Benchmark
+		EEF_1 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0.npy');
+
+		# r
+		EEF_r0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_r60.npy');
+		EEF_r2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_r120.npy');
+		lr0 = 'r0 = 60 km';
+		lr1 = 'r0 = 90 km';
+		lr2 = 'r0 = 120 km';
+
+		# Note that varying r0 means that the lengths of the EEF array will differ
+		NN = len(EEF_r0)
+		N_skip = (N - NN) / 2
+		y_forced_0 = y_nd[N_skip:N-N_skip]	
+
+		NN = len(EEF_r2)
+		N_skip = (N - NN) / 2
+		y_forced_2 = y_nd[N_skip:N-N_skip]
+
+		# k
+		EEF_k0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k50.npy');
+		EEF_k2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_k200.npy');
+		lk0 = r'Re = 2Re$_{0}$';
+		lk1 = r'Re = Re$_{0}$';
+		lk2 = r'Re = Re$_{0}$/2';
+
+		# w
+		EEF_w0 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_om50.npy');
+		EEF_w2 = output_read.npyReadEEF('/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/high_res/'+BG+'/PV/EEF_PV_y0_om70.npy');
+		lw0 = 'T = 50 days';
+		lw1 = 'T = 60 days';
+		lw2 = 'T = 70 days';
 		
 	NN = len(EEF_1);
 
@@ -176,6 +182,20 @@ if vs == 'U0':
 	EEF_y2 = 10.**4 * EEF_y2 / w60;
 #===================================
 
+#==================================
+if vs == 'y0':
+	EEF_1 = 10.**4 * EEF_1 / w60;
+	# w
+	EEF_w0 = 10.**4 * EEF_w0 / w50;
+	EEF_w2 = 10.**4 * EEF_w2 / w70;
+	# r
+	EEF_r0 = 10.**4 * EEF_r0 / w60;
+	EEF_r2 = 10.**4 * EEF_r2 / w60;
+	# k
+	EEF_k0 = 10.**4 * EEF_k0 / w60;
+	EEF_k2 = 10.**4 * EEF_k2 / w60;
+#===================================
+
 lw = 1.3
 
 # y0
@@ -186,30 +206,36 @@ if vs == 'y0':
 	plt.figure(figsize=[22,7])
 
 	plt.subplot(131)	
-	plt.plot(y_forced_0,10.**4*EEF_r0/w60,label=lr0,linewidth=1.3);
-	plt.plot(y_forced,EEF_1/w60,label=lr1,linewidth=1.3);
-	plt.plot(y_forced_2,EEF_r2/w60,label=lr2,linewidth=1.3);
-	#if BG == 'U0=Gaussian':
-	#	plt.yticks((-6,-4,-2,0.0,2,4,6,8,10,12));
-	#elif BG == 'U0=0':
-	#	plt.yticks((0,2,4,6,8,10,12));
-	#elif BG == 'U0=16':
-	#	plt.yticks((0,2,4,6,8,10,12));
+	plt.plot(y_forced_0,EEF_r0,label=lr0,linewidth=1.3);
+	plt.plot(y_forced,EEF_1,label=lr1,linewidth=1.3);
+	plt.plot(y_forced_2,EEF_r2,label=lr2,linewidth=1.3);
+	if BG == 'U0=Gaussian':
+		plt.yticks((-6,-4,-2,0.0,2,4,6,8,10,12));
+	elif BG == 'U0=0':
+		plt.yticks((0,2,4,6,8,10,12));
+	elif BG == 'U0=16':
+		plt.yticks((0,2,4,6,8,10,12));
+	plt.legend(prop={'size': 18})
+	plt.xlim(-0.5,0.5);
 	plt.ylabel('EEF',fontsize=18);
+	plt.xlabel('y0',fontsize=18);
+	plt.grid()
 	
 	plt.subplot(132)	
 	plt.plot(y_forced,EEF_k0,label=lk0,linewidth=1.3);
 	plt.plot(y_forced,EEF_1,label=lk1,linewidth=1.3);
 	plt.plot(y_forced,EEF_k2,label=lk2,linewidth=1.3);
-	#if BG == 'U0=Gaussian':
-	#	plt.yticks((-6,-4,-2,0,2,4,6,8,10,12),fontsize=0);
-	#elif BG == 'U0=0':
-#		plt.yticks((0,2,4,6,8,10,12),fontsize=0);
-#	elif BG == 'U0=16':
-#		plt.yticks((0,2,4,6,8,10,12),fontsize=0);
+	if BG == 'U0=Gaussian':
+		plt.yticks((-6,-4,-2,0,2,4,6,8,10,12),fontsize=0);
+	elif BG == 'U0=0':
+		plt.yticks((0,2,4,6,8,10,12),fontsize=0);
+	elif BG == 'U0=16':
+		plt.yticks((0,2,4,6,8,10,12),fontsize=0);
+	plt.legend(prop={'size': 18})
 	plt.xlim(-0.5,0.5);
 	plt.xticks((-0.5,-0.25,0.0,0.25,0.5));
 	plt.xlabel('y0',fontsize=18);
+	plt.grid()
 
 	plt.subplot(133)	
 	plt.plot(y_forced,EEF_w0,label=lw0,linewidth=1.3);
@@ -221,9 +247,11 @@ if vs == 'y0':
 		plt.yticks((0,2,4,6,8,10,12),fontsize=0);
 	elif BG == 'U0=16':
 		plt.yticks((0,2,4,6,8,10,12),fontsize=0);
+	plt.legend(prop={'size': 18})
 	plt.xlim(-0.5,0.5);
 	plt.xticks((-0.5,-0.25,0.0,0.25,0.5));
 	plt.xlabel('y0',fontsize=18);
+	plt.grid()
 
 	plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
 	plt.savefig('fig4.png')

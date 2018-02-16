@@ -13,7 +13,7 @@ from inputFile import *
 plt.rcParams['animation.ffmpeg_path'] = '/usr/local/bin/ffmpeg';
 
 filename = '/home/mike/Documents/GulfStream/RSW/DATA/1L/STOCH/u.npy';
-filename = '/home/mike/Documents/GulfStream/RSW/PYTHON/1L/u.npy';
+filename = '/home/mike/Documents/GulfStream/RSW/PYTHON/1L/v.npy';
 
 u = np.load(filename);
 wn = np.shape(u)[2];
@@ -35,7 +35,7 @@ for i in range(0,wn):
 	print ii
 	s = str(int(i/2)) + ' days';
 	t = ax.annotate(s,(-0.4,-0.4));
-	im = plt.imshow(u[:,:,ii],animated=True,vmin=-ulim,vmax=ulim);
+	im = plt.imshow(u[:,:,ii],animated=True,vmin=-0.8*ulim,vmax=0.8*ulim);
 	#im = plt.pcolor(x_grid, y_grid, u[:,:,ii], cmap='bwr', vmin=-ulim, vmax=ulim);
 	##im.;
 	ims.append([im,t])

@@ -21,14 +21,8 @@ import sys
 
 import numpy as np
 
-import diagnostics
-import PV
-import buoy
-import forcing_1L
-import solver
+from core import diagnostics, PV, forcing, solver
 import output
-import energy
-import plotting
 
 from inputFile import *
 
@@ -36,68 +30,44 @@ from inputFile import *
 #====================================================
 #====================================================
 
-# Forcing
-if FORCE_TYPE == 'CTS':
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
-elif FORCE_TYPE == 'DCTS':
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing_1L.forcing_dcts(x,y,K,y0,r0,N,FORCE,AmpF,g,f,f0,dx,dy);
-else:
-	sys.exit('ERROR: Invalid forcing option selected.');
-#plotting.forcingPlot_save(x_grid,y_grid,F3_nd[:,0:N],FORCE,BG,Fpos,N);
-
-#F1_nd, F2_nd, F3_nd = forcing_1L.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
-#F1_nd, F2_nd = forcing_1L.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
-#F3_nd = forcing_1L.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
-#plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
-
-#sys.exit();
-
 u = np.zeros((N,N,Nt),dtype=complex);
 v = np.zeros((N,N,Nt),dtype=complex);
 h = np.zeros((N,N,Nt),dtype=complex);
 
-S = np.load('time_series.npy');
-plt.plot(S);
-plt.show();
-Om = np.fft.fftfreq(Nt,dt_nd);
-S_tilde = np.fft.fft(S) / dt_nd;
-plt.plot(S_tilde);
-plt.show();
+S = np.load('time_series1.npy');
+
+#Om = np.fft.fftfreq(Nt,dt_nd);
+S_tilde = np.fft.fft(S);
 
 for wi in range(1,Nt):
 	print(wi);
-	omega_nd = Om[wi];
 	# Coefficients
-	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
+	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N)
 	# Solver
 	if BC == 'NO-SLIP':
 		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,S_tilde[wi]*Ro*Ftilde1_nd,S_tilde[wi]*Ro*Ftilde2_nd,S_tilde[wi]*Ftilde3_nd,N,N2);
 	if BC == 'FREE-SLIP':
-		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,S_tilde[wi]*Ro*Ftilde1_nd,S_tilde[wi]*Ro*Ftilde2_nd,S_tilde[wi]*Ftilde3_nd,N,N2);
+		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,S_tilde[wi]*Ro*Ftilde1_nd,S_tilde[wi]*Ro*Ftilde2_nd,S_tilde[wi]*Ftilde3_nd,N,N2)
 
 	u[:,:,wi], v[:,:,wi], h[:,:,wi] = solver.extractSols(solution,N,N2,BC);
 
-u, v, h = solver.SPEC_TO_PHYS_STOCH(u,v,h,T_nd,dx_nd,Om,N);
-
-u = np.real(u);
-v = np.real(v);
-h = np.real(h);
+u, v, h = solver.SPEC_TO_PHYS_STOCH(u,v,h,dx_nd,N);
 
 # Normalise all solutions by the (non-dimensional) forcing amplitude. 
-#u = u / AmpF_nd;
-#v = v / AmpF_nd;
-#h = h / AmpF_nd;
+u = u / AmpF_nd;
+v = v / AmpF_nd;
+h = h / AmpF_nd;
 
-# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta
-h_full = np.zeros((N,N,Nt));
-u_full = np.zeros((N,N,Nt));
-for j in range(0,N):
-	h_full[j,:,:] = h[j,:,:] + H0_nd[j];
-	u_full[j,:,:] = u[j,:,:] + U0_nd[j];
+mass = sum(sum(h[:,:,ts]))/N**2
+print(mass)
 
-np.save('u.npy',u);
-np.save('v.npy',v);
-np.save('h.npy',h);
+plt.contourf(h[:,:,ts]);
+plt.colorbar()
+plt.show()
+
+#np.save('u.npy',u);
+#np.save('v.npy',v);
+#np.save('h.npy',h);
 
 sys.exit();
 

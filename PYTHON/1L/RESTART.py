@@ -18,13 +18,15 @@ from inputFile import *
 
 #=======================================================
 
-test = 'y0' # U0 or y0
+test = 'S' # U0 or y0
 
 #samples = ['00']
 #samples = ['-08','00','08','16']
 
-samples = ['-1','0','1.5']
+#samples = ['-1','0','1.5']
 #samples = ['-1','1.5'] 				# sigma samples
+
+samples = ['08']
 
 ns = len(samples)
 
@@ -58,7 +60,7 @@ for si in range(0,ns):
 		U0_nd = U0 / U
 		H0_nd = H0 / chi
 	
-	else:
+	elif test == 'y0':
 		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/'
 
 		u_tmp = np.load(path + 'u_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
@@ -67,16 +69,33 @@ for si in range(0,ns):
 		P[:,:,si] = np.load(path + 'P_y0='+sample+'.npy')
 		P_xav[:,si] = np.trapz(P[:,:,si],x_nd,dx_nd,axis=1);
 
+	elif test == 'S':
+		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/STOCH/'
+		U0_load = str(sample)
+		u_tmp = np.load(path + 'u.npy')[:,:,ts]
+		v_tmp = np.load(path + 'v.npy')[:,:,ts]
+		h_tmp = np.load(path + 'h.npy')[:,:,ts]
+
+		# Last step: redefine U0 and H0 for each sample
+		U0, H0 = BG_state.BG_uniform(0.08,Hflat,f0,beta,g,y,N);
+		U0_nd = U0 / U
+		H0_nd = H0 / chi
 
 	# Calculate full flows.
-	h_full = np.zeros((N,N))
-	u_full = np.zeros((N,N))
-	for j in range(0,N):
-		h_full[j,:] = np.real(h_tmp[j,:]) + H0_nd[j]
-		u_full[j,:] = np.real(u_tmp[j,:]) + U0_nd[j]
+	#h_full = np.zeros((N,N))
+	#u_full = np.zeros((N,N))
+	#for j in range(0,N):
+	#	h_full[j,:] = np.real(h_tmp[j,:]) + H0_nd[j]
+	#	u_full[j,:] = np.real(u_tmp[j,:]) + U0_nd[j]
+	plt.contourf(h_tmp)
+	plt.colorbar()
+	plt.show()
 
 	# Snapshot of PV
-	q[:,:,si] = PV.PV_instant(np.real(u_tmp),np.real(v_tmp),np.real(h_tmp),u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
+	#q[:,:,si] = PV.PV_instant(np.real(u_tmp),np.real(v_tmp),np.real(h_tmp),u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
+
+	if test == 'S':
+		P[:,:,si] = 0;
 
 	# Now we have snapshot of solution, snapshot of PV, and the footprint.
 	u[:,:,si] = u_tmp;	v[:,:,si] = v_tmp;	h[:,:,si] = h_tmp;
@@ -88,7 +107,7 @@ print('Plotting...')
 # Second, create all plots.
 
 # Solutions
-if False:
+if True:
 	fig, axes = plt.subplots(nrows=ns,ncols=3,figsize=(22,7*ns))
 
 	for si in range(0,ns):
@@ -129,7 +148,7 @@ if False:
 
 
 # Footprints
-if True:
+if False:
 	fig, axes = plt.subplots(nrows=ns,ncols=3,figsize=(22,7*ns))
 
 	for si in range(0,ns):

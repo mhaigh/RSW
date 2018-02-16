@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-N = 512+1; 			# Number of gridpoints
+N = 128+1; 			# Number of gridpoints
 
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -42,15 +42,15 @@ nu = 100.;		# Kinematic viscosity (m2 s-1)
 
 # Keep the unused options commented out.
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
+BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-#Umag = 0.16 #0.0688, -0.0233, 0.0213
+Umag = -0.233 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
-Umag = 0.8;		# Jet max speed
-sigma = 0.02 * 3840000.0;	# Jet width
-JET_POS = 'CENTER';
+#Umag = 0.8;		# Jet max speed
+#sigma = 0.02 * 3840000.0;	# Jet width
+#JET_POS = 'CENTER';
 
 # Shear options
 #Umag = 0.16;
@@ -66,7 +66,7 @@ FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 FORCE_TYPE = 'CTS';			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 
-Fpos = 'USER';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
+Fpos = 'NORTH';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
 							
 r0 = 90.0 * 1000.0;  		# Forcing radius
 AmpF = 1.0e-7; 				# Forcing amplitude
@@ -77,7 +77,7 @@ AmpF = 1.0e-7; 				# Forcing amplitude
 #=======================================================
 
 period_days = 60.;						# Periodicity of plunger (days)
-Nt = 200;								# Number of time samples
+Nt = 10;								# Number of time samples
 ts = Nt-1; 								# index at which the time-snapshot is taken
 
 # Output
