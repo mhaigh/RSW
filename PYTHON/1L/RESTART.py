@@ -70,32 +70,31 @@ for si in range(0,ns):
 		P_xav[:,si] = np.trapz(P[:,:,si],x_nd,dx_nd,axis=1);
 
 	elif test == 'S':
-		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/STOCH/'
+		path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/STOCH/'
+		#path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/STOCH/'
 		U0_load = str(sample)
 		u_tmp = np.load(path + 'u.npy')[:,:,ts]
 		v_tmp = np.load(path + 'v.npy')[:,:,ts]
 		h_tmp = np.load(path + 'h.npy')[:,:,ts]
 
+		P[:,:,si] = np.load(path + 'P.npy')
+		P_xav[:,si] = np.trapz(P[:,:,si],x_nd,dx_nd,axis=1);
+
+
 		# Last step: redefine U0 and H0 for each sample
 		U0, H0 = BG_state.BG_uniform(0.08,Hflat,f0,beta,g,y,N);
 		U0_nd = U0 / U
-		H0_nd = H0 / chi
+		H0_nd = H0 / chi		
 
 	# Calculate full flows.
-	#h_full = np.zeros((N,N))
-	#u_full = np.zeros((N,N))
-	#for j in range(0,N):
-	#	h_full[j,:] = np.real(h_tmp[j,:]) + H0_nd[j]
-	#	u_full[j,:] = np.real(u_tmp[j,:]) + U0_nd[j]
-	plt.contourf(h_tmp)
-	plt.colorbar()
-	plt.show()
+	h_full = np.zeros((N,N))
+	u_full = np.zeros((N,N))
+	for j in range(0,N):
+		h_full[j,:] = np.real(h_tmp[j,:]) + H0_nd[j]
+		u_full[j,:] = np.real(u_tmp[j,:]) + U0_nd[j]
 
-	# Snapshot of PV
-	#q[:,:,si] = PV.PV_instant(np.real(u_tmp),np.real(v_tmp),np.real(h_tmp),u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
-
-	if test == 'S':
-		P[:,:,si] = 0;
+	# Snapshot of PV anomaly
+	q[:,:,si] = PV.PV_instant(np.real(u_tmp),np.real(v_tmp),np.real(h_tmp),u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
 
 	# Now we have snapshot of solution, snapshot of PV, and the footprint.
 	u[:,:,si] = u_tmp;	v[:,:,si] = v_tmp;	h[:,:,si] = h_tmp;
@@ -114,13 +113,15 @@ if True:
 		sample = samples[si]
 		if test == 'U0':
 			string = r'$U_{0} = ' + str(float(sample)/100) + '$'	
-		else:
+		elif test == 'y0':
 			if sample == '0':
 				string = r'$y_{0}=0$'
 			elif sample == '-1':
 				string = r'$y_{0}=-\sigma$'
 			else:
 				string = r'$y_{0}=' + sample + '\sigma$'
+		else:
+			string = r'$U_{0} = 0.08$'
 		U0_str = 'U0 = ' + str(U0)
 		plotting_bulk.plotSolutions(np.real(u[:,:,si]),np.real(v[:,:,si]),np.real(h[:,:,si]),N,x_grid,y_grid,si,ns,string)
 		plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
@@ -134,13 +135,15 @@ if False:
 		sample = samples[si]
 		if test == 'U0':
 			string = r'$U_{0} = ' + str(float(sample)/100) + '$'
-		else:
+		elif test == 'y0':
 			if sample == '0':
 				string = r'$y_{0}=0$'
 			elif sample == '-1':
 				string = r'$y_{0}=-\sigma$'
 			else:
 				string = r'$y_{0}=' + sample + '\sigma$'
+		else:
+			string = r'$U_{0} = 0.08$'
 		U0_str = 'U0 = ' + str(U0)
 		plotting_bulk.plotSolutionsAmpPhase(u[:,:,si],v[:,:,si],h[:,:,si],N,x_grid,y_grid,si,ns,string,fig)
 		plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
@@ -148,20 +151,22 @@ if False:
 
 
 # Footprints
-if False:
+if True:
 	fig, axes = plt.subplots(nrows=ns,ncols=3,figsize=(22,7*ns))
 
 	for si in range(0,ns):
 		sample = samples[si]
 		if test == 'U0':
 			string = r'$U_{0} = ' + str(float(sample)/100) + '$'
-		else:
+		elif test == 'y0':
 			if sample == '0':
 				string = r'$y_{0}=0$'
 			elif sample == '-1':
 				string = r'$y_{0}=-\sigma$'
 			else:
 				string = r'$y_{0}=' + sample + '\sigma$'
+		else:
+			string = r'$U_{0} = 0.08$'
 		U0_str = 'U0 = ' + str(U0)
 		plotting_bulk.fp_PV_plot(q[:,:,si],P[:,:,si],P_xav[:,si],N,x_grid,y_grid,y_nd,si,ns,string)
 		plt.tight_layout(pad=0.3, w_pad=0.1, h_pad=0.6);

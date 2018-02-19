@@ -48,7 +48,7 @@ def RSW_main():
 		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
 	if BC == 'FREE-SLIP':
 		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
-		#solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2)
+		solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2)
 
 	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
 	u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
@@ -62,9 +62,9 @@ def RSW_main():
 
 	#sys.exit();
 
-	u = np.real(u);
-	v = np.real(v);
-	h = np.real(h);
+	u = np.real(u)
+	v = np.real(v)
+	h = np.real(h)
 	
 	# Normalise all solutions by the (non-dimensional) forcing amplitude. 
 	u = u / AmpF_nd;
@@ -208,6 +208,11 @@ def RSW_main():
 					EEF = EEF_north - EEF_south;
 				print(EEF_north - EEF_south, EEF_north, EEF_south);
 			
+
+	P = P/np.max(np.absolute(P))
+	plt.pcolor(x_grid,y_grid,P,vmin=-1.,vmax=1.)
+	plt.show()
+	np.save('P.npy',P)
 	# Buoyancy footprints
 	#====================================================
 	

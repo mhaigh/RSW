@@ -53,23 +53,23 @@ def plotForcing(x_grid,y_grid,F1_nd,F2_nd,F3_nd,F6_nd):
 #====================================================
 
 # solutionPlots
-def solutionPlots(x,y,x_grid,y_grid,u1,u2,v1,v2,h1,h2,ts,N,contour):
+def solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,contour):
 
 	# Take absolute maximum.
-	u1lim = np.max(abs(u1[:,:,ts]));
-	u2lim = np.max(abs(u2[:,:,ts]));
-	v1lim = np.max(abs(v1[:,:,ts]));
-	v2lim = np.max(abs(v2[:,:,ts]));
-	h1lim = np.max(abs(h1[:,:,ts]));
-	h2lim = np.max(abs(h2[:,:,ts]));
+	u1lim = np.max(abs(u[:,:,ts,0]));
+	u2lim = np.max(abs(u[:,:,ts,1]));
+	v1lim = np.max(abs(v[:,:,ts,0]));
+	v2lim = np.max(abs(v[:,:,ts,1]));
+	h1lim = np.max(abs(h[:,:,ts,0]));
+	h2lim = np.max(abs(h[:,:,ts,1]));
 
 	# Normalise each solution, extract snapshot.	
-	u1 = u1[:,:,ts] / u1lim;
-	u2 = u2[:,:,ts] / u2lim;
-	v1 = v1[:,:,ts] / v1lim;
-	v2 = v2[:,:,ts] / v2lim;
-	h1 = h1[:,:,ts] / h1lim;
-	h2 = h2[:,:,ts] / h2lim;	
+	u1 = u[:,:,ts,0]# / u1lim;
+	u2 = u[:,:,ts,1]# / u2lim;
+	v1 = v[:,:,ts,0]# / v1lim;
+	v2 = v[:,:,ts,1]# / v2lim;
+	h1 = h[:,:,ts,0]# / h1lim;
+	h2 = h[:,:,ts,1]# / h2lim;	
 
 	if contour:
 		
@@ -514,22 +514,15 @@ def footprintPlots_save(P,P_xav,x_nd,y_nd,ts,FORCE,BG,Fpos,N,U0_str,x_grid,y_gri
 
 # forcingPlots
 # Forcing plots 
-def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,FORCE,nu,r0,period_days,U0_nd,U,N):
+def footprintPlots(x,y,P,P_xav):
 # Function that plots the forcing, and its Fourier representation.
 
-	Umag = np.max(U0_nd);
 	Plim = np.max(abs(P));
 
 	plt.figure(1,figsize=(15,7))
 	plt.subplot(121)
-	#plt.contourf(x_nd,y_nd,P,cmap='coolwarm')
-	plt.contourf(x_nd,y_nd,P);
+	plt.contourf(x,y,P);
 	plt.text(0.0,0.4,'PV FOOTPRINT',fontsize=22);
-	#plt.text(0.25,0.4,str(Fpos),fontsize=18);		# Comment out this line if text on the plot isn't wanted.
-	#plt.text(0.15,0.4,'r0 = '+str(r0/1000) + ' km' ,fontsize=18);	
-	#plt.text(0.25,0.4,str(int(period_days))+' days',fontsize=18)
-	#plt.text(0.25,0.4,'U0 = ' + str(U*U0_nd[0]),fontsize=18);
-	#plt.text(0.25,0.4,r'$\nu$ = ' + str(int(nu)),fontsize=18);
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
@@ -537,8 +530,9 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,FORCE,nu,r0,period_days,U0_nd,U,N):
 	plt.ylabel('y',fontsize=16);
 	plt.clim(-Plim,Plim)
 	plt.colorbar()
+
 	plt.subplot(122)
-	plt.plot(P_xav,y_nd,linewidth=2)
+	plt.plot(P_xav,y,linewidth=2)
 	plt.text(10,0.40,'ZONAL AVERAGE',fontsize=22)
 	plt.yticks((-1./2,0,1./2))
 	plt.ylim(-0.5,0.5)
@@ -546,35 +540,7 @@ def footprintPlots(x_nd,y_nd,P,P_xav,Fpos,BG,FORCE,nu,r0,period_days,U0_nd,U,N):
 	plt.tight_layout()
 	plt.show();
 	
-	# These if loops are for constantly altering depending on the test being done.
-	if BG == 'GAUSSIAN':
-		plt.figure(2)
-		plt.contourf(x_nd,y_nd,P)
-		plt.plot(U*U0_nd/(1.5*Umag)-0.5,y_nd,'k--',linewidth=2);
-		plt.text(0.25,0.4,str(GAUSS),fontsize=18);
-		#plt.text(0.25,0.4,str(period_days)+' days',fontsize=18)
-		#plt.text(0.25,0.4,str(Fpos),fontsize=18);
-		#plt.plot(P_xav[:,ts],y_nd,linewidth=2)
-		#plt.text(0.25,0.4,'r0 = '+str(r0/1000),fontsize=18);	
-		plt.colorbar()
-		plt.ylim([-0.5,0.5]);
-		plt.xticks((-1./2,-1./4,0,1./4,1./2));
-		plt.yticks((-1./2,-1./4,0,1./4,1./2));
-		plt.grid(b=True, which='both', color='0.65',linestyle='--');
-		plt.xlabel('x');
-		plt.ylabel('y');
-		plt.tight_layout()
 
-	if BG == 'UNIFORM':
-		plt.figure(2)
-		plt.contourf(x_nd,y_nd,P);
-		plt.text(0.25,0.4,'U0 = ' + str(U*U0_nd[0]),fontsize=18);
-		plt.colorbar()
-		plt.xticks((-1./2,-1./4,0,1./4,1./2));
-		plt.yticks((-1./2,-1./4,0,1./4,1./2));
-		plt.grid(b=True, which='both', color='0.65',linestyle='--');
-		plt.tight_layout()
-		#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/FOOTPRINT_U0=' + str(U*U0_nd[0]) + '.png');
 
 #====================================================
 

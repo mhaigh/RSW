@@ -28,6 +28,10 @@ def BG_uniform_none(Umag1,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,N):
 	H1 = H1 + H1_flat;
 	H2 = H2 + H2_flat;
 
+	#plt.plot(H2)
+	#plt.plot(H1+H2)
+	#plt.show()
+
 	return U1, U2, H1, H2
 	
 #=======================================================

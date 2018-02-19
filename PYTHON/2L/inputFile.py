@@ -20,13 +20,13 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP.
 
-N = 256+1; 			# Number of gridpoints in each direction.
+N = 64+1; 			# Number of gridpoints in each direction.
 	
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
 
-H1_flat = 1000.		# Depth of upper layer for ocean at rest (i.e. without BG flow SSH adjustment) (m)		
-H2_flat = 3000.		# Depth of lower layer for ocean at rest
+H1_flat = 500.		# Depth of upper layer for ocean at rest (i.e. without BG flow SSH adjustment) (m)		
+H2_flat = 3500.		# Depth of lower layer for ocean at rest
 
 f0 = 0.83e-4; # 0.0001214  		# Base value of Coriolis parameter (s-1)
 beta = 2.0e-11;     		# Planetary vorticity gradient (m-1 s-1)
@@ -50,7 +50,7 @@ rho2 = 1030.;	# Density of lower layer (kg m-3) (should be greater than rho1)
 # Upper layer
 BG1 = 'UNIFORM';			# Options: UNIFORM, GAUSSIAN, NONE.
 
-Umag1 = 0.08; # 0.8 for Gaussian BG flow.
+Umag1 = -0.08; # 0.8 for Gaussian BG flow.
 
 #sigma = 0.02 * 3840000.0;	# Jet width
 #JET_POS = 'CENTER';
@@ -69,7 +69,7 @@ FORCE1 = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing,
 FORCE2 = 'NONE'				# NONE
 
 
-Fpos = 'CENTER';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
+Fpos = 'NORTH';			# 4 choices for positioning of plunger, 'NORTH', 'CENTER' and 'SOUTH'
 
 # Instead of defining the forcing amplitude in the forcing module, we define it here as other codes require this value for normalisation
 r0 = 90. * 1000.;	# (m)
@@ -170,7 +170,6 @@ t = T[ts];								# Time of the snapshot
 # Non-dimensionalisation
 #=======================================================
 #=======================================================
-# Here we denote all non-dimensional parameters by '_nd'.
 
 # To find the characteristic velocity U and depthscale H, we find the spatial-average of the 
 # geostrophic BG state U0 and H0.
@@ -183,46 +182,6 @@ chi = f0 * U * Ly / g;		# The scaling for eta0 and eta1
 
 T_adv = Lx / U;				# Advective timescale
 
-# Defining dimensionless parameters
-#=======================================================
-
-Lx_nd = Lx / Ly;		# In case Lx and Ly are chosen to be different, we still scale by the same length, Ly
-Ly_nd = Ly / Ly;				
-
-y_nd = y / Ly;    
-x_nd = x / Ly;
-yd_nd = yd / Ly;
-y0_nd = y0 / L;
-r0_nd = r0 / L;
-
-y_grid = y_grid / L;
-x_grid = x_grid / L;
-
-dy_nd = y_nd[1] - y_nd[0];
-dx_nd = x_nd[1] - x_nd[0];
-
-K_nd = K * Lx;		# The same as: K_nd = np.fft.fftfreq(N2,dx_nd)
-
-H1_nd = H1 / chi;	# BG SSH1 scales the same way as eta0.
-U1_nd = U1 / U;
-H2_nd = H2 / chi;	
-U2_nd = U2 / U;
-
-f0_nd = 1.0;				# =f0/f0      		 
-beta_nd = beta * Ly / f0;
-f_nd = f / f0;			# The same as: f_nd = f0_nd + beta_nd * y_nd      
-
-gamma_nd = gamma / f0			# Simply scaled by the base Coriolis frequency
-
-omega_nd = omega * T_adv;      # All time variable scale advectively, i.e. T_adv~L/U
-t_nd = t / T_adv;
-T_nd = T / T_adv;
-dt_nd = dt / T_adv;
-
-AmpF_nd = AmpF * g / (f0 * U**2);
-
-# Note that gravity g and kinematic viscosity aren't scaled, but rather used to define some extra dimensionless parameters
-
 # Important dimensionless numbers
 #=======================================================
 
@@ -231,15 +190,53 @@ Re = Ly * U / nu;				# Reynolds number: measures inertial forces relative to vis
 Ld1 = np.sqrt(g * H1_flat) / f0;	# Rossby def radius.
 Ld2 = np.sqrt(g* H2_flat) / f0;	# Rossby def radius.
 
+# Defining dimensionless parameters
+#=======================================================
+
+Lx_nd = Lx / Ly;		# In case Lx and Ly are chosen to be different, we still scale by the same length, Ly
+Ly_nd = Ly / Ly;				
+
+y = y / Ly;    
+x = x / Ly;
+yd = yd / Ly;
+y0 = y0 / L;
+r0 = r0 / L;
+
+y_grid = y_grid / L;
+x_grid = x_grid / L;
+
+dy = y[1] - y[0];
+dx = x[1] - x[0];
+
+K = K * Lx;		# The same as: K_nd = np.fft.fftfreq(N2,dx_nd)
+
+H1 = H1 / chi;	# BG SSH1 scales the same way as eta0.
+U1 = U1 / U;
+H2 = H2 / chi;	
+U2 = U2 / U;
+
+f = f / f0;			# The same as: f_nd = f0_nd + beta_nd * y_nd   
+
+gamma = gamma / f0			# Simply scaled by the base Coriolis frequency
+
+omega = omega * T_adv;      # All time variable scale advectively, i.e. T_adv~L/U
+t = t / T_adv;
+T = T / T_adv;
+dt = dt / T_adv;
+
+AmpF_nd = AmpF * g / (f0 * U**2);
+
+# Note that gravity g and kinematic viscosity aren't scaled, but rather used to define some extra dimensionless parameters
+
 # Forcing
 #=======================================================
 
 if FORCE_TYPE == 'CTS':
-		F1_nd, F2_nd, F3_nd, F4_nd, F5_nd, F6_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd, Ftilde4_nd, Ftilde5_nd, Ftilde6_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE1,AmpF_nd,f_nd,U,L,rho1_nd,rho2_nd,dx_nd,dy_nd);
+	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);
 elif FORCE_TYPE == 'DCTS':
-		F1_nd, F2_nd, F3_nd, F4_nd, F5_nd, F6_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd, Ftilde4_nd, Ftilde5_nd, Ftilde6_nd = forcing.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE1,AmpF_nd,f_nd,U,L,rho1_nd,rho2_nd,dx_nd,dy_nd);
+	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_dcts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);
 elif FORCE_TYPE == 'DELTA':
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_delta(AmpF_nd,y0_index,dx_nd,N);
+	F1, F2, F3, Ftilde1, Ftilde2, Ftilde3 = forcing.forcing_delta(AmpF_nd,y0_index,dx,N);
 else:
 	sys.exit('ERROR: Invalid forcing option selected.');
 

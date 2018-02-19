@@ -45,7 +45,7 @@ nu = 100.;		# Kinematic viscosity (m2 s-1)
 BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-Umag = -0.233 #0.0688, -0.0233, 0.0213
+Umag = 0.08 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
 #Umag = 0.8;		# Jet max speed
@@ -77,7 +77,7 @@ AmpF = 1.0e-7; 				# Forcing amplitude
 #=======================================================
 
 period_days = 60.;						# Periodicity of plunger (days)
-Nt = 10;								# Number of time samples
+Nt = 512;								# Number of time samples
 ts = Nt-1; 								# index at which the time-snapshot is taken
 
 # Output

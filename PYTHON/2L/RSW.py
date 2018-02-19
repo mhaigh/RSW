@@ -36,54 +36,51 @@ from inputFile import *
 def RSW_main():
 
 	# Coefficients
-	a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U1_nd,U2_nd,H1_nd,H2_nd,rho1_nd,rho2_nd,omega_nd,gamma_nd,dy_nd,N);
+	a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K,f,U1,U2,H1,H2,rho1_nd,rho2_nd,omega,gamma,dy,N)
 
 	# Solver
 	if BC == 'NO-SLIP':
-		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
+		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ro*Ftilde1,Ro*Ftilde2,Ftilde3,Ro*Ftilde4,Ro*Ftilde5,Ftilde6,N,N2)
 	if BC == 'FREE-SLIP':
-		u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd = (solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,Ftilde4_nd,Ftilde5_nd,Ftilde6_nd,N,N2));
+		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ro*Ftilde1,Ro*Ftilde2,Ftilde3,Ro*Ftilde4,Ro*Ftilde5,Ftilde6,N,N2)
 	
 	#===================================================
-	u1_nd, u2_nd, v1_nd, v2_nd, eta0_nd, eta1_nd = solver.SPEC_TO_PHYS(u1tilde_nd,u2tilde_nd,v1tilde_nd,v2tilde_nd,eta0tilde_nd,eta1tilde_nd,T_nd,Nt,dx_nd,omega_nd,N);
+
+	utilde, vtilde, htilde = solver.extractSols(solution,N,N2,BC)
+	u, v, h = solver.SPEC_TO_PHYS(utilde,vtilde,htilde,T,Nt,dx,omega,N)
 
 	# Before taking real part, can define an error calculator to call here.
 
-	u1_nd = np.real(u1_nd);
-	u2_nd = np.real(u2_nd);
-	v1_nd = np.real(v1_nd);
-	v2_nd = np.real(v2_nd);
-	eta0_nd = np.real(eta0_nd);
-	eta1_nd = np.real(eta1_nd);
+	u = np.real(u)
+	v = np.real(v)
+	h = np.real(h)
 
-	# The interface thicknesses defined via the interface heights.
-	h1_nd = eta0_nd - eta1_nd;
-	h2_nd = eta1_nd;
-
+	#u = u / AmpF_nd
+	#v = v / AmpF_nd
+	#h = h / AmpF_nd
+	
 	# For use in PV and footprint calculations: the 'full' zonal velocities and interface thicknesses.
-	u1_full = np.zeros((N,N,Nt));
-	u2_full = np.zeros((N,N,Nt));
-	h1_full = np.zeros((N,N,Nt));
-	h2_full = np.zeros((N,N,Nt));
+	u_full = np.zeros((N,N,Nt,2))
+	h_full = np.zeros((N,N,Nt,2))
 	for j in range(0,N):
-		u1_full[:,j,:] = u1_nd[:,j,:] + U1_nd[j];
-		u2_full[:,j,:] = u2_nd[:,j,:] + U2_nd[j];
-		h1_full[:,j,:] = h1_nd[:,j,:] + H1_nd[j];
-		h2_full[:,j,:] = h2_nd[:,j,:] + H2_nd[j];
+		u_full[j,:,:,0] = u[j,:,:,0] + U1[j]
+		u_full[j,:,:,1] = u[j,:,:,1] + U2[j]
+		h_full[j,:,:,0] = h[j,:,:,0] + H1[j]
+		h_full[j,:,:,1] = h[j,:,:,1] + H2[j]
 
 	# Call function calculate PV in each layer.
-	#PV1_prime, PV1_full, PV1_BG = PV.vort(u1_nd,v1_nd,h1_nd,u1_full,h1_full,H1_nd,U1_nd,N,Nt,dx_nd,dy_nd,f_nd);
-	#PV2_prime, PV2_full, PV2_BG = PV.vort(u2_nd,v2_nd,h2_nd,u2_full,h2_full,H2_nd,U2_nd,N,Nt,dx_nd,dy_nd,f_nd);
+	q = np.zeros((N,N,Nt,2)); q_full = np.zeros((N,N,Nt,2)); Q = np.zeros((N,2))
+	q[:,:,:,0], q_full[:,:,:,0], Q[:,0] = PV.vort(u[:,:,:,0],v[:,:,:,0],h[:,:,:,0],u_full[:,:,:,0],h_full[:,:,:,0],H1,U1,N,Nt,dx,dy,f)
+	q[:,:,:,1], q_full[:,:,:,1], Q[:,1] = PV.vort(u[:,:,:,1],v[:,:,:,1],h[:,:,:,1],u_full[:,:,:,1],h_full[:,:,:,1],H2,U2,N,Nt,dx,dy,f)
 
 	# Calculate footprints using previously calculated PV. Most interseted in the upper layer.
-	#P, P_xav = PV.footprint(u1_full,v1_nd,PV1_full,U1_nd,U1,x_nd,y_nd,dx_nd,dy_nd,AmpF_nd,FORCE1,r0,nu,BG1,Fpos,ts,period_days,N,Nt,GAUSS);
+	P, P_xav = PV.footprint(u_full[:,:,:,0],v[:,:,:,0],q_full[:,:,:,0],x,y,dx,dy,T,Nt)
 
 	# PLOTS
 	#====================================================
 
-	plotting.solutionPlots(x_nd,y_nd,x_grid,y_grid,u1_nd,u2_nd,v1_nd,v2_nd,h1_nd,h2_nd,ts,N,True);
-
-		
+	plotting.solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,True)
+	plotting.footprintPlots(x,y,P,P_xav)
 
 #====================================================
 

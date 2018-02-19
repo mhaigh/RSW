@@ -251,20 +251,8 @@ def NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f
 
 		solution[:,i] = np.linalg.solve(A,F);
 
-	u1tilde_nd = np.zeros((N,N),dtype=complex);
-	u2tilde_nd = np.zeros((N,N),dtype=complex);
-	v1tilde_nd = np.zeros((N,N),dtype=complex);
-	v2tilde_nd = np.zeros((N,N),dtype=complex);
-	eta0tilde_nd = np.zeros((N,N),dtype=complex);
-	eta1tilde_nd = np.zeros((N,N),dtype=complex);
-	for j in range(0,N2):
-		u1tilde_nd[j+1,:] = solution[j,:];
-		u2tilde_nd[j+1,:] = solution[N2+j,:];
-		v1tilde_nd[j+1,:] = solution[2*N2+j,:];
-		v2tilde_nd[j+1,:] = solution[3*N2+j,:];
-	for j in range(0,N):
-		eta0tilde_nd[j,:] = solution[4*N2+j,:];
-		eta1tilde_nd[j,:] = solution[4*N2+N+j,:];	
+	return solution
+	
 
 	return u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd;
 
@@ -464,23 +452,7 @@ def FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3
 		solution[:,i] = np.linalg.solve(A,F);
 
 
-	u1tilde_nd = np.zeros((N,N),dtype=complex);
-	u2tilde_nd = np.zeros((N,N),dtype=complex);
-	v1tilde_nd = np.zeros((N,N),dtype=complex);
-	v2tilde_nd = np.zeros((N,N),dtype=complex);
-	eta0tilde_nd = np.zeros((N,N),dtype=complex);
-	eta1tilde_nd = np.zeros((N,N),dtype=complex);
-	for j in range(0,N):
-		u1tilde_nd[j,:] = solution[j,:];
-		u2tilde_nd[j,:] = solution[u2s+j,:];
-		eta0tilde_nd[j,:] = solution[eta0s+j];
-		eta1tilde_nd[j,:] = solution[eta1s+j];		
-	for j in range(0,N2):
-		v1tilde_nd[j+1,:] = solution[v1s+j,:];
-		v2tilde_nd[j+1,:] = solution[v2s+j,:];
-	
-
-	return u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd;
+	return solution
 
 #=======================================================
 
@@ -668,52 +640,59 @@ def FREE_SLIP_SOLVER2(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f
 		for j in range(0,N-2):
 			F[2*N+j] = Ftilde2_nd[j+1,i];		# Forcing the v1 equation
 		
-
 		solution[:,i] = np.linalg.solve(A,F);
 
-	u1tilde_nd = np.zeros((N,N),dtype=complex);
-	u2tilde_nd = np.zeros((N,N),dtype=complex);
-	v1tilde_nd = np.zeros((N,N),dtype=complex);
-	v2tilde_nd = np.zeros((N,N),dtype=complex);
-	eta0tilde_nd = np.zeros((N,N),dtype=complex);
-	eta1tilde_nd = np.zeros((N,N),dtype=complex);
-	for j in range(0,N):
-		u1tilde_nd[j,:] = solution[j,:];
-		u2tilde_nd[j,:] = solution[N+j,:];
-		eta0tilde_nd[j,:] = solution[2*N+2*N2+j];
-		eta1tilde_nd[j,:] = solution[3*N+2*N2+j];		
-	for j in range(0,N2):
-		v1tilde_nd[j+1,:] = solution[2*N+j,:];
-		v2tilde_nd[j+1,:] = solution[2*N+N2+j,:];
-
-	return u1tilde_nd, u2tilde_nd, v1tilde_nd, v2tilde_nd, eta0tilde_nd, eta1tilde_nd;
+	return solution
 
 #=======================================================
+
+# extractSols
+def extractSols(solution,N,N2,BC):
+
+	utilde = np.zeros((N,N,2),dtype=complex)
+	vtilde = np.zeros((N,N,2),dtype=complex)
+	htilde = np.zeros((N,N,2),dtype=complex)	
+
+	if BC == 'FREE-SLIP':
+		for j in range(0,N):
+			utilde[j,:,0] = solution[j,:]
+			utilde[j,:,1] = solution[N+j,:]
+			htilde[j,:,0] = solution[2*N+2*N2+j] - solution[3*N+2*N2+j]
+			htilde[j,:,1] = solution[3*N+2*N2+j]
+		for j in range(0,N2):
+			vtilde[j+1,:,0] = solution[2*N+j,:]
+			vtilde[j+1,:,1] = solution[2*N+N2+j,:]
+	
+	else:
+		for j in range(0,N):
+			htilde[j,:,0] = solution[4*N2+j] - solution[4*N2+N+j]
+			htilde[j,:,1] = solution[4*N2+N+j]
+		for j in range(0,N2):
+			utilde[j+1,:,0] = solution[j,:]
+			utilde[j+1,:,1] = solution[N2+j,:]
+			vtilde[j+1,:,0] = solution[2*N2+j,:]
+			vtilde[j+1,:,1] = solution[3*N2+j,:]
+
+	return utilde, vtilde, htilde
 
 # SPEC_TO_PHYS
 #=======================================================
-def SPEC_TO_PHYS(u1tilde_nd,u2tilde_nd,v1tilde_nd,v2tilde_nd,eta0tilde_nd,eta1tilde_nd,T_nd,Nt,dx_nd,omega_nd,N):
+def SPEC_TO_PHYS(utilde,vtilde,htilde,T_nd,Nt,dx_nd,omega_nd,N):
 # Function takes the spectral-physical solutions produced by the solver and returns the time-dependent solutions in physical space.
 	
-	I = np.complex(0,1);	
+	I = np.complex(0,1)
 	
-	u1_nd = np.zeros((N,N,Nt),dtype=complex);
-	u2_nd = np.zeros((N,N,Nt),dtype=complex);
-	v1_nd = np.zeros((N,N,Nt),dtype=complex);
-	v2_nd = np.zeros((N,N,Nt),dtype=complex);
-	eta0_nd = np.zeros((N,N,Nt),dtype=complex);
-	eta1_nd = np.zeros((N,N,Nt),dtype=complex);
+	u = np.zeros((N,N,Nt,2),dtype=complex)
+	v = np.zeros((N,N,Nt,2),dtype=complex)
+	h = np.zeros((N,N,Nt,2),dtype=complex)
 	
 	for ti in range(0,Nt):
 		# Calculate the solutions in physical space at some instant t. Solutions are divided (later) by extra factor AmpF, so that they are normalised by the forcing amplitude.
-		u1_nd[:,:,ti] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(u1tilde_nd,axis=1) / dx_nd;
-		u2_nd[:,:,ti] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(u2tilde_nd,axis=1) / dx_nd; 
-		v1_nd[:,:,ti] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(v1tilde_nd,axis=1) / dx_nd;
-		v2_nd[:,:,ti] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(v2tilde_nd,axis=1) / dx_nd; 		
-		eta0_nd[:,:,ti] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(eta0tilde_nd,axis=1) / dx_nd;
-		eta1_nd[:,:,ti] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(eta1tilde_nd,axis=1) / dx_nd;
+		u[:,:,ti,:] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(utilde,axis=1) / dx_nd
+		v[:,:,ti,:] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(vtilde,axis=1) / dx_nd 		
+		h[:,:,ti,:] = np.exp(2.*np.pi*I*omega_nd*T_nd[ti])*np.fft.ifft(htilde,axis=1) / dx_nd
 
-	return u1_nd, u2_nd, v1_nd, v2_nd, eta0_nd, eta1_nd;
+	return u, v, h
 
 
 
