@@ -41,11 +41,16 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 	grsp = gs.GridSpec(nrows,3,width_ratios=[1,1,1.2])
 	x_grid = x_grid[0:N]
 
+	#cmap = 'bwr'
+	cmap = 'jet'
+
+	lm = 0.5 
+
 	# Now plots
 	#==========
 	
 	plt.subplot(grsp[row,0])	
-	plt.pcolor(x_grid, y_grid, u, cmap='bwr',vmin=-1.,vmax=1.);
+	plt.pcolor(x_grid, y_grid, u, cmap=cmap,vmin=-lm,vmax=lm);
 	plt.yticks(y_ticks,fontsize=fs);	
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	if row == nrows-1:
@@ -60,7 +65,7 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 	plt.grid()
 
 	plt.subplot(grsp[row,1])	
-	plt.pcolor(x_grid, y_grid, v, cmap='bwr',vmin=-1.,vmax=1.);
+	plt.pcolor(x_grid, y_grid, v, cmap=cmap,vmin=-lm,vmax=lm);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.text(0.4,0.4,r'$v^{\prime}$',fontsize=fs+12);
@@ -73,7 +78,7 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 	plt.grid()
 
 	plt.subplot(grsp[row,2])	
-	plt.pcolor(x_grid, y_grid, eta, cmap='bwr',vmin=-1.,vmax=1.)
+	plt.pcolor(x_grid, y_grid, eta, cmap=cmap,vmin=-lm,vmax=lm)
 	plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 	plt.yticks(y_ticks,fontsize=0);
 	if row == nrows-1:
@@ -208,9 +213,12 @@ def fp_PV_plot(PV_prime,P,P_xav,N,x_grid,y_grid,y_nd,row,nrows,string):
 
 	grsp = gs.GridSpec(nrows,3,width_ratios=[1,1.25,1])
 
+	#cmap = 'bwr'
+	cmap = 'jet'
+
 	#plt.subplot(nrows,3,1+3*row)
 	plt.subplot(grsp[row,0])	
-	plt.pcolor(x_grid, y_grid, PV_prime, cmap='bwr',vmin=-lim,vmax=lim);
+	plt.pcolor(x_grid, y_grid, PV_prime, cmap=cmap,vmin=-lim,vmax=lim);
 	plt.yticks(y_ticks,fontsize=fs);	
 	plt.axis(axs);
 	if row == nrows-1:
@@ -226,7 +234,7 @@ def fp_PV_plot(PV_prime,P,P_xav,N,x_grid,y_grid,y_nd,row,nrows,string):
 
 	#plt.subplot(nrows,3,2+3*row)
 	plt.subplot(grsp[row,1])	
-	plt.pcolor(x_grid, y_grid, P, cmap='bwr',vmin=-lim,vmax=lim);
+	plt.pcolor(x_grid, y_grid, P, cmap=cmap,vmin=-lim,vmax=lim);
 	plt.yticks(y_ticks,fontsize=0);
 	plt.axis(axs);
 	plt.text(0.2,y_loc,r'$P$',fontsize=fs+12);

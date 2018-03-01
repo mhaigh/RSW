@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP.
 
-N = 64+1; 			# Number of gridpoints in each direction.
+N = 2*128+1; 			# Number of gridpoints in each direction.
 	
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -239,6 +239,10 @@ elif FORCE_TYPE == 'DELTA':
 	F1, F2, F3, Ftilde1, Ftilde2, Ftilde3 = forcing.forcing_delta(AmpF_nd,y0_index,dx,N);
 else:
 	sys.exit('ERROR: Invalid forcing option selected.');
+
+
+forcing.forcingTest(F1,F2,F3,F6,f,rho1_nd,rho2_nd,dy,dx,N)
+
 
 # ======================================================
 

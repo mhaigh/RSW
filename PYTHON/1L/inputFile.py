@@ -77,7 +77,7 @@ AmpF = 1.0e-7; 				# Forcing amplitude
 #=======================================================
 
 period_days = 60.;						# Periodicity of plunger (days)
-Nt = 512;								# Number of time samples
+Nt = 200;								# Number of time samples
 ts = Nt-1; 								# index at which the time-snapshot is taken
 
 # Output

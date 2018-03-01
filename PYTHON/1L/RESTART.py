@@ -18,15 +18,15 @@ from inputFile import *
 
 #=======================================================
 
-test = 'S' # U0 or y0
+test = 'U0' # U0 or y0
 
-#samples = ['00']
+samples = ['08']
 #samples = ['-08','00','08','16']
 
 #samples = ['-1','0','1.5']
 #samples = ['-1','1.5'] 				# sigma samples
 
-samples = ['08']
+#samples = ['08']
 
 ns = len(samples)
 

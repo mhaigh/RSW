@@ -45,7 +45,8 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE1,AmpF_nd,f_nd,U,L,rho1_nd,rho
 						F1_nd[j,i] = 0.5 * AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
 						F2_nd[j,i] = - 0.5 * AmpF_nd * np.pi * x_nd[i] / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
 					F3_nd[j,i] = 0.5 * AmpF_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd)) / rho2_nd;
-					mass = mass + F3_nd[j,i];
+
+ 					mass = mass + F3_nd[j,i];
 		mass = mass / (N*Nx);
 		print(mass)
 		F3_nd = F3_nd - mass;
@@ -223,106 +224,82 @@ def forcing_dcts(x,y,K,y0,r0,N,FORCE1,FORCE2,AmpF,g,f,f0,U,L,rho1_nd,rho2_nd,dx,
 
 # forcingTest
 def forcingTest(F1_nd,F2_nd,F3_nd,F6_nd,f_nd,rho1_nd,rho2_nd,dy_nd,dx_nd,N):
-# This function takes as input the forcing terms defined in a previous function, as tests (visually) whether or not they are in geostrophic balance.
-
+# This function takes as input the forcing terms defined in a previous function, as tests (visually) whether or not they are in geostrophic balance.	
+	
 	print('Max F1 = ' + str(np.max(F1_nd)));
 	
 	# First calculate all the terms we require.
-	F0 = F3_nd + F6_nd; # F0 can be interpreted as the surface forcing.
+	F0 = F3_nd + F6_nd; # F0 can be interpreted as the SSH forcing.
+
 	F0_x = diff(F0,1,1,dx_nd);
 	F0_y = diff(F0,0,0,dy_nd);
 	F6_x = diff(F6_nd,1,1,dx_nd);
 	F6_y = diff(F6_nd,0,0,dy_nd);
 
-	geo1 = np.zeros((N,N));
-	geo2 = np.zeros((N,N));
+	geo1 = np.zeros((N,N))
+	geo2 = np.zeros((N,N))
+	MOM1 = np.zeros((N,N))
 	for j in range(0,N):
 		for i in range(0,N):
-			geo1[j,i] = f_nd[j] * F2_nd[j,i] - F0_x[j,i];
+			MOM1[j,i] = f_nd[j] * F2_nd[j,i]
+			geo1[j,i] = MOM1[j,i] - F0_x[j,i];
 			geo2[j,i] = f_nd[j] * F1_nd[j,i] + F0_y[j,i];
 	geo3 = rho1_nd * F0_x + rho2_nd * F6_x; 
 	geo4 = rho1_nd * F0_y + rho2_nd * F6_y; 
-	
-	#plt.subplot(121);
-	#plt.contourf(geo1);
-	#plt.colorbar();
-	#plt.subplot(122);
-	#plt.contourf(F0_x);
-	#plt.colorbar();
-	#plt.show();
-	
+
+	#====
+
 	plt.subplot(221);
-	plt.contourf(geo1);
+	plt.contourf(F0);
 	plt.colorbar();
+	plt.title('F0')
+
 	plt.subplot(222);
-	plt.contourf(geo2);
+	plt.contourf(F0_x);
 	plt.colorbar();
+	plt.title('F0_x')
+
 	plt.subplot(223);
-	plt.contourf(geo3);
+	plt.contourf(MOM1);
 	plt.colorbar();
+	plt.title('f*F2')
+
 	plt.subplot(224);
-	plt.contourf(geo4);
+	plt.contourf(geo1);
 	plt.colorbar();	
+	plt.title('Geo bal 1')
+
 	plt.tight_layout();
 	plt.show();
 
-#=======================================================
+	#===
 
-# A function that calculates the inverse of the forcing the check that the original forcing is retrieved.
-def forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N):
+	plt.subplot(221);
+	plt.contourf(F6_x);
+	plt.colorbar();
+	plt.title('F6_x')
 
-	F1i = np.real(np.fft.ihfft(Ftilde1_nd,axis=1)) / dx_nd;
-	F2 = np.fft.fftshift(np.fft.ifft(Ftilde2_nd,axis=1),axes=1) / dx_nd;
-	F3i = np.real(np.fft.ihfft(Ftilde3_nd,axis=1)) / dx_nd;
+	plt.subplot(222);
+	plt.contourf(F6_y);
+	plt.colorbar();
+	plt.title('F6_y')
 
-	F1 = np.zeros((N,N));
-	F3 = np.zeros((N,N));
-	for i in range(0,N/2):
-		F1[:,i] = F1i[:,i];
-		F1[:,N-1-i] = F1i[:,i]; 
-		F3[:,i] = F3i[:,i];
-		F3[:,N-1-i] = F3i[:,i];
-
-	F1 = np.fft.fftshift(F1,axes=1);
-	F3 = np.fft.fftshift(F3,axes=1);
+	plt.subplot(223)
+	plt.contourf(geo3)
+	plt.colorbar()
+	plt.title('v2 geo bal')
 	
-	F1 = extend(F1);
-	F2 = extend(F2);
-	F3 = extend(F3);
+	plt.subplot(224)
+	plt.contourf(geo4)
+	plt.colorbar()
+	plt.title('u2 geo bal')
 
-	plt.figure(2);
-
-	plt.subplot(331);
-	plt.contourf(x_nd,y_nd,F1);
-	plt.colorbar();
-	plt.subplot(332);
-	plt.contourf(x_nd,y_nd,F2);
-	plt.colorbar();
-	plt.subplot(333);
-	plt.contourf(x_nd,y_nd,F3);
-	plt.colorbar()
-
-	plt.subplot(334);
-	plt.contourf(np.real(Ftilde1_nd));
-	plt.colorbar()
-	plt.subplot(335);
-	plt.contourf(np.real(Ftilde2_nd));
-	plt.colorbar()
-	plt.subplot(336);
-	plt.contourf(np.real(Ftilde3_nd));
-	plt.colorbar()
-
-	plt.subplot(337);
-	plt.contourf(np.imag(Ftilde1_nd));
-	plt.colorbar()
-	plt.subplot(338);
-	plt.contourf(np.imag(Ftilde2_nd));
-	plt.colorbar()
-	plt.subplot(339);
-	plt.contourf(np.imag(Ftilde3_nd));
-	plt.colorbar()
-
+	plt.tight_layout();
 	plt.show();
+	
+
+
+
 
 #=======================================================
 

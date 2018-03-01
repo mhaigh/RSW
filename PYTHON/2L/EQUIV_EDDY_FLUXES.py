@@ -28,7 +28,7 @@ TEST = 'U0';
 # Initialise tests
 
 if TEST == 'U0':
-	nn = 21;
+	nn = 41;
 	U0_set = np.linspace(-0.1,0.1,nn);
 	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);
 
@@ -73,7 +73,7 @@ l = np.zeros((nn,2));
 
 # Now start the loop over each forcing index.
 for ii in range(0,nn):
-	#print(ii);
+	print(ii);
 	
 	if EEF_PV[ii,0] == 0:
 

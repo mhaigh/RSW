@@ -90,17 +90,17 @@ def forcingPlot_save(x_grid,y_grid,F3_nd,FORCE,BG,Fpos,N):
 
 	aa = 1./24;
 	Fmax = np.max(np.max(F3_nd,axis=0));
-	Flim = np.max(abs(F3_nd/(1.05*Fmax)));
+	Flim = np.max(abs(F3_nd/(1.0*Fmax)));
 	#F3[0,0] = - Fmax;
 
-	plt.pcolor(x_grid,y_grid,F3_nd/(1.1*Fmax),cmap='bwr',vmin=-Flim,vmax=Flim);
+	plt.pcolor(x_grid,y_grid,F3_nd/(1.1*Fmax),vmin=0.0,vmax=1.0);
 	plt.xlabel('x',fontsize=22);
 	plt.ylabel('y',fontsize=22);
-	plt.text(0.4,0.4,r'$F_{3}$',fontsize=26);
-	plt.arrow(-aa,2*aa+0.25,2*aa,0,head_width=0.02, head_length=0.02,color='k');
-	plt.arrow(2*aa,aa+.25,0,-2*aa,head_width=0.02, head_length=0.02,color='k');
-	plt.arrow(aa,-2*aa+.25,-2*aa,0,head_width=0.02, head_length=0.02,color='k');
-	plt.arrow(-2*aa,-aa+.25,0,2*aa,head_width=0.02, head_length=0.02,color='k');
+	plt.text(0.4,0.4,r'$F_{3}$',fontsize=26,color='w');
+	plt.arrow(-aa,2*aa+0.25,2*aa,0,head_width=0.02, head_length=0.02,color='w');
+	plt.arrow(2*aa,aa+.25,0,-2*aa,head_width=0.02, head_length=0.02,color='w');
+	plt.arrow(aa,-2*aa+.25,-2*aa,0,head_width=0.02, head_length=0.02,color='w');
+	plt.arrow(-2*aa,-aa+.25,0,2*aa,head_width=0.02, head_length=0.02,color='w');
 	plt.xticks((-1./2,-1./4,0,1./4,1./2));
 	plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 	plt.xlabel('x',fontsize=16);
@@ -109,8 +109,10 @@ def forcingPlot_save(x_grid,y_grid,F3_nd,FORCE,BG,Fpos,N):
 	plt.grid(b=True, which='both', color='0.65',linestyle='--');
 	plt.colorbar();
 	plt.tight_layout();
-	plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/F_' + str(Fpos) + '_'  + str(N) + '.png');
-	plt.close();
+	plt.show()
+
+	#plt.savefig('/home/mike/Documents/GulfStream/RSW/IMAGES/1L/' + str(FORCE) + '/' + str(BG) +  '/F_' + str(Fpos) + '_'  + str(N) + '.png');
+	#plt.close();
 
 #====================================================
 
@@ -373,9 +375,9 @@ def solutionPlotsAmp(x_grid,y_grid,u,v,h,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 # Plots of phase 
 def solutionPlotsPhase(x_grid,y_grid,u,v,h,ts,FORCE,BG,Fpos,U0_name,U0_str,N):
 
-	u = extend(u);
-	v = extend(v);
-	h = extend(h);
+	u = extend(u)
+	v = extend(v)
+	h = extend(h)
 
 	plt.pcolor(x_grid, y_grid, np.angle(u), cmap='hsv',vmin=-np.pi, vmax=np.pi);
 	plt.text(0.4,-0.4,r'$u^{\prime}$',fontsize=26,color='k');

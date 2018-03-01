@@ -43,7 +43,7 @@ def forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_
 					F3_nd[j,i] = AmpF_nd * np.cos((np.pi / 2) * r_nd / r0_nd);
 					mass = mass + F3_nd[j,i];
 		mass = mass / (N*Nx)
-		F3_nd[j,i] = F3_nd[j,i] - mass;
+		F3_nd = F3_nd - mass;
 		#F3x = diff(F3,1,1,dx);
 		#F3y = diff(F3,0,0,dy);
 		#for j in range(0,N):
@@ -91,30 +91,30 @@ def forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_
 
 def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd):
 	
-	Nx = N;	
+	Nx = N	
 
-	I = np.complex(0,1);
-	F1_nd = np.zeros((N,Nx));
-	F2_nd = np.zeros((N,Nx));
-	F3_nd = np.zeros((N,Nx));
+	I = np.complex(0,1)
+	F1_nd = np.zeros((N,Nx))
+	F2_nd = np.zeros((N,Nx))
+	F3_nd = np.zeros((N,Nx))
 
 	# Balanced
 	if FORCE == 'BALANCED':
-		mass = 0;
+		mass = 0
 		for i in range(0,Nx):
 			for j in range(0,N):
-				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2)
 				if r_nd < r0_nd:
 					if r_nd == 0:
-						F1_nd[j,i] = 0.0;
-						F2_nd[j,i] = 0.0;						
+						F1_nd[j,i] = 0.0
+						F2_nd[j,i] = 0.0						
 					else:	
-						F1_nd[j,i] = 0.5 * AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
-						F2_nd[j,i] = - 0.5 * AmpF_nd * np.pi * x_nd[i] / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd);
-					F3_nd[j,i] = 0.5 * AmpF_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd));
-					mass = mass + F3_nd[j,i];
-		mass = mass / (N*Nx);
-		F3_nd = F3_nd - mass;
+						F1_nd[j,i] = 0.5 * AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd)
+						F2_nd[j,i] = - 0.5 * AmpF_nd * np.pi * x_nd[i] / (r0_nd * f_nd[j] * r_nd) * np.sin(np.pi * r_nd / r0_nd)
+					F3_nd[j,i] = 0.5 * AmpF_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd))
+					mass = mass + F3_nd[j,i]
+		mass = mass / (N*Nx)
+		F3_nd = F3_nd - mass
 
 	# Buoyancy only
 	if FORCE == 'BUOYANCY':

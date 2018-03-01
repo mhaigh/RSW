@@ -294,6 +294,13 @@ if __name__ == '__main__':
 		# Decompose solution into eigenmodes.
 		theta[:,:,ui], mean[:,ui], var[:,ui], p[:,:,ui], proj[:,:,ui], solution[:,:,ui], scatter_k[:,ui], scatter_l[:,ui], scatter_p[:,ui] = EIG_DECOMP_main(U0_nd,H0_nd,dim);
 
+
+theta_abs = np.absolute(theta[:,:,0])
+t = np.sum(theta_abs,0)
+plt.plot(t)
+plt.show()
+
+sys.exit()
 # Save data
 
 np.save('theta',theta);

@@ -64,12 +64,12 @@ def solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,contour):
 	h2lim = np.max(abs(h[:,:,ts,1]));
 
 	# Normalise each solution, extract snapshot.	
-	u1 = u[:,:,ts,0]# / u1lim;
-	u2 = u[:,:,ts,1]# / u2lim;
-	v1 = v[:,:,ts,0]# / v1lim;
-	v2 = v[:,:,ts,1]# / v2lim;
-	h1 = h[:,:,ts,0]# / h1lim;
-	h2 = h[:,:,ts,1]# / h2lim;	
+	u1 = u[:,:,ts,0] / u1lim;
+	u2 = u[:,:,ts,1] / u2lim;
+	v1 = v[:,:,ts,0] / v1lim;
+	v2 = v[:,:,ts,1] / v2lim;
+	h1 = h[:,:,ts,0] / h1lim;
+	h2 = h[:,:,ts,1] / h2lim;	
 
 	if contour:
 		
@@ -131,10 +131,11 @@ def solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,contour):
 
 	else:
 
-		plt.figure(1,figsize=(22,6.4));
+		plt.figure(1,figsize=(22.,13.));
 
-		plt.subplot(131);
-		plt.pcolor(x_grid, y_grid, u_nd[:,:,ts], cmap='bwr', vmin=-ulim, vmax=ulim);
+		# 1
+		plt.subplot(231);
+		plt.pcolor(x_grid, y_grid, u1, cmap='bwr', vmin=-1.,vmax=1.);
 		plt.text(0.3,0.45,'u',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -143,8 +144,8 @@ def solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,contour):
 		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 		plt.colorbar();
 
-		plt.subplot(132);
-		plt.pcolor(x_grid, y_grid, v_nd[:,:,ts], cmap='bwr', vmin=-vlim, vmax=vlim);
+		plt.subplot(232);
+		plt.pcolor(x_grid, y_grid, v1, cmap='bwr', vmin=-1.,vmax=1.);
 		plt.text(0.3,0.45,'v',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -153,8 +154,39 @@ def solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,contour):
 		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 		plt.colorbar();
 
-		plt.subplot(133);
-		plt.pcolor(x_grid, y_grid, eta_nd[:,:,ts], cmap='bwr', vmin=-etalim, vmax=etalim);
+		plt.subplot(233);
+		plt.pcolor(x_grid, y_grid, h1, cmap='bwr', vmin=-1.,vmax=1.);
+		plt.text(0.3,0.45,'eta',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		# 2
+		plt.subplot(234);
+		plt.pcolor(x_grid, y_grid, u2, cmap='bwr', vmin=-1.,vmax=1.);
+		plt.text(0.3,0.45,'u',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.subplot(235);
+		plt.pcolor(x_grid, y_grid, v2, cmap='bwr', vmin=-1.,vmax=1.);
+		plt.text(0.3,0.45,'v',fontsize=22);
+		plt.xticks((-1./2,-1./4,0,1./4,1./2));
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
+		plt.xlabel('x',fontsize=16);
+		plt.ylabel('y',fontsize=16);
+		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
+		plt.colorbar();
+
+		plt.subplot(236);
+		plt.pcolor(x_grid, y_grid, h2, cmap='bwr', vmin=-1.,vmax=1.);
 		plt.text(0.3,0.45,'eta',fontsize=22);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	

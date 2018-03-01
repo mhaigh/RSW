@@ -79,7 +79,7 @@ def RSW_main():
 	# PLOTS
 	#====================================================
 
-	plotting.solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,True)
+	plotting.solutionPlots(x,y,x_grid,y_grid,u,v,h,ts,N,False)
 	plotting.footprintPlots(x,y,P,P_xav)
 
 #====================================================

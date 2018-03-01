@@ -8,13 +8,13 @@ from inputFile import *
 from output import output_read
 
 
-vs = 'y0';
+vs = 'U0';
 
-BG = 'U0=Gaussian'
+#BG = 'U0=Gaussian'
 #BG = 'U0=16';
 #BG = 'U0=0';
 #BG = 'U0=-08';
-#BG = 'vsU0';
+BG = 'vsU0';
 
 opt = 'w';
 
@@ -321,6 +321,46 @@ elif vs == 'U0':
 
 	plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
 	plt.savefig('fig3.png')
+
+else:
+
+	fs = 12
+	grsp = gs.GridSpec(1,4,height_ratios=[1.2,1])
+
+	fig, axes = plt.subplots(nrows=4,ncols=1,figsize=(16,5))
+
+
+	plt.subplot(121)
+	plt.plot(U_range,EEF_k0,label=lk0,linewidth=1.3);
+	plt.plot(U_range,EEF_k1,label=lk1,linewidth=1.3);
+	plt.plot(U_range,EEF_k2,label=lk2,linewidth=1.3);
+	plt.legend(prop={'size': 15})
+	
+	plt.xticks((-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5),fontsize=fs)
+	plt.xlabel('U0',fontsize=fs+10)
+	plt.xlim(-0.3,0.5);	
+	plt.yticks(fontsize=fs)
+	plt.ylabel('EEF',fontsize=fs+10)
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+
+	plt.subplot(122)
+	plt.plot(U_range,EEF_w0,label=lw0,linewidth=1.3);
+	plt.plot(U_range,EEF_w1,label=lw1,linewidth=1.3);
+	plt.plot(U_range,EEF_w2,label=lw2,linewidth=1.3);
+	plt.legend(prop={'size': 15})
+
+	plt.xticks((-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5),fontsize=fs);
+	plt.xlabel('U0',fontsize=fs+10)
+	plt.xlim(-0.3,0.5);	
+	plt.yticks(fontsize=fs)
+
+	plt.grid(b=True, which='both', color='0.65',linestyle='--');
+	#plt.title(BG+', '+k)
+
+
+	plt.tight_layout(pad=0.3, w_pad=0.2, h_pad=1.0);
+	plt.savefig('fig3.png')
+
 
 
 

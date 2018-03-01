@@ -7,9 +7,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-import plotly.graph_objs as go
-import plotly.plotly as py
-
 #====================================================
 
 # eigPlot
@@ -388,9 +385,6 @@ def vec2field(u_vec,freq,x_nd,k,N,Ts):
 def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 # A function that takes the set of eigenmodes, given by vec, and orders them according to the number of zero crossings.
 # When two or more eigenmodes cross zeros the same amount of times, they are ordered by their frequency, smallest firs
-
-
-	from statistics import mode
 	
 	Ns = 1 # Number of samples
 	
@@ -603,6 +597,33 @@ def diff(f,d,p,delta):
 	return df
 
 #====================================================
+
+# mode
+def mode(A):
+# Mode of an array A
+
+	# List A
+	A = list(A)
+	
+	# Set A
+	S = set(A)
+
+	# Length of A
+	N = len(S)
+	
+	# Initialise tally
+	tally = np.zeros(N)
+	for i in range(0,N):
+		s = list(S)[i]
+		tally[i] = A.count(s)
+
+	# Index of mode
+	mode_i = np.argsort(-tally)[0]
+
+	# Mode
+	Mode = list(S)[mode_i]
+
+	return Mode	
 
 #====================================================
 

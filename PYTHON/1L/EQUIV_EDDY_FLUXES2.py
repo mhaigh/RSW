@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import time
 
 from core import diagnostics, PV, momentum, solver, thickness
-from initialisation import forcing
 
 from inputFile import *
 
