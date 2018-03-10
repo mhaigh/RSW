@@ -89,11 +89,11 @@ errorPhys = False;     	# Print error of full solutions
 errorSpec = False;		# Print error of spectral solutions
 
 doEnergy = False;				# Energy
-doPV = True;					# Calculate potential vorticity
+doPV = False;					# Calculate potential vorticity
 doFootprints = True;			# Calculate footprints, requires findPV = True.
-doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
+doEEFs = False;					# Calculate equivalent eddy fluxes, require findFootprints = True.
 footprintComponents = False;		# If true, calculates the footprint in terms of its components.
-doMomentum = False;
+doMomentum = True;
 doThickness = False;
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.

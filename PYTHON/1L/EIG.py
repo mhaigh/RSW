@@ -111,7 +111,7 @@ for ii in loop:
 	update_i = [];		# Used to store the set of wi indices that need updating.
 	wiii = 0
 	while wiii < dim:
-		wii = wiii;
+		wii = dim-wiii-1;
 		#wii = p_sort[wiii];
 		print('i_count = ' + str(wii));
 		u = eigDiagnostics.vec2field(u_vec[:,wii],val[wii],x_nd,k,N,T_nd[ts])

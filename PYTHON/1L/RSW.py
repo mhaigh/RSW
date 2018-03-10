@@ -144,20 +144,32 @@ def RSW_main():
 		
 		Mu = Mu / np.max(abs(Mu));
 		Mv = Mv / np.max(abs(Mv));	
+
+
+		plt.plot(Mu_xav/np.max(Mu_xav),y_nd,linewidth=2.,color='k');
+		plt.xlabel('Zonal mom. flux convergence',fontsize=18)
+		plt.ylabel('y',fontsize=18)
+		plt.ylim([-.5,.5])
+		plt.yticks((-1./2,-1./4,0,1./4,1./2));
+		plt.grid()
+		plt.show()
 	
-		plt.subplot(221);
-		plt.pcolor(x_grid,y_grid,Mu,cmap='bwr', vmin=-1., vmax=1.);
+		plt.subplot(121);
+		plt.pcolor(x_grid,y_grid,Mu,cmap='bwr', vmin=-.5, vmax=.5);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
 		plt.xlabel('x',fontsize=16);
 		plt.ylabel('y',fontsize=16);
 		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar()
 
-		plt.subplot(222);
+		plt.subplot(122);
 		plt.plot(Mu_xav,y_nd);
+		plt.xlabel('y')
+		plt.show()
 
-		plt.subplot(223);
+		plt.subplot(121);
 		plt.pcolor(x_grid,y_grid,Mv,cmap='bwr', vmin=-1., vmax=1.);
 		plt.xticks((-1./2,-1./4,0,1./4,1./2));
 		plt.yticks((-1./2,-1./4,0,1./4,1./2));	
@@ -166,7 +178,7 @@ def RSW_main():
 		plt.axis([x_grid.min(), x_grid.max(), y_grid.min(), y_grid.max()]);
 		plt.grid(b=True, which='both', color='0.65',linestyle='--');
 
-		plt.subplot(224);
+		plt.subplot(122);
 		plt.plot(Mv_xav,y_nd);
 
 		plt.tight_layout();

@@ -387,6 +387,8 @@ def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 # When two or more eigenmodes cross zeros the same amount of times, they are ordered by their frequency, smallest firs
 	
 	Ns = 1 # Number of samples
+
+	L = np.fft.fftfreq(N) * N
 	
 	u_vec, v_vec, h_vec = vec2vecs(vec,N,dim,BC)
 	count = np.zeros((dim),dtype=int)
@@ -400,7 +402,7 @@ def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 			# At each x-value, organise in terms of power,
 			# and extract the dominant mode (index).
 			dom_i[i] = np.argsort(-np.abs(u_tilde))[0]
-		count[wi] = mode(dom_i)
+		count[wi] = L[mode(dom_i)]
 
 	#	if count[wi] < 4:
 	#		print(count[wi])
