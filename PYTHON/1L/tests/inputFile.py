@@ -10,8 +10,8 @@ import sys
 import numpy as np
 from scipy.special import erf
 
-from core.diagnostics import diff
-from core import forcing, BG_state
+from diagnostics import diff
+import forcing, BG_state
 
 import matplotlib.pyplot as plt
 
@@ -44,19 +44,20 @@ nu = 100.;		# Kinematic viscosity (m2 s-1)
 
 # Keep the unused options commented out.
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
+BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-#Umag = 0.08 #0.0688, -0.0233, 0.0213
+Umag = 0.08 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
-Umag = 0.8;		# Jet max speed
-sigma = 0.02 * 3840000.0;	# Jet width
-JET_POS = 'CENTER';
+#Umag = 0.8;		# Jet max speed
+#sigma = 0.02 * 3840000.0;	# Jet width
+#JET_POS = 'CENTER';
 
 # Shear options
 #Umag = 100.0;
 #shear = 1.0;	# Shear
+
 # Forcing
 #=======================================================
 
@@ -159,16 +160,6 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 
 if BG == 'UNIFORM':
 	U0, H0 = BG_state.BG_uniform(Umag,Hflat,f0,beta,g,y,N);	
-elif BG == 'SHEAR':
-	U0, H0 = BG_state.BG_shear(Umag,shear,Hflat,f0,beta,g,y,Ly,N);
-elif BG == 'GAUSSIAN':
-	U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N);
-elif BG == 'LAPGAUSS':
-	U0, H0 = BG_state.BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N);
-elif BG == 'ZERO':
-	U0, H0 = BG_state.BG_zero(Hflat,N);
-else:
-	raise ValueError('Invalid BG flow option selected');
 
 # Forcing
 #=======================================================
@@ -293,7 +284,7 @@ print('N = ' + str(N))
 #plt.plot(Q)
 #plt.subplot(122)
 #plt.plot(Qy)
-#plt.plot(U0)
+#plt.plot(Qy2)
 #plt.show()
 
 #from output.plotting import bgPV

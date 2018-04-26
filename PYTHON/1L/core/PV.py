@@ -243,6 +243,16 @@ def EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N):
 
 #====================================================
 
+# firstMoment
+def firstMoment(P_xav,y_nd,y0_nd,dy_nd,N):
+
+	fm = np.trapz(P_xav * (y_nd - y0_nd),y_nd,dy_nd)
+
+	return fm
+
+#====================================================
+
+
 # EEF_components
 def EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N):
 # This function works in the same way as the EEF function, but instead takes as input each individual component of the zonally averaged footprint

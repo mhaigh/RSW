@@ -36,18 +36,18 @@ def RSW_main():
 	#plotting.forcingPlot_save(x_grid,y_grid,F3_nd[:,0:N],FORCE,BG,Fpos,N);
 
 	#F1_nd, F2_nd, F3_nd = forcing.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
-	#F1_nd, F2_nd = forcing.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N);
-	#F3_nd = forcing.F3_from_F1(F1_nd,f_nd,y_nd,dy_nd,N);
+	#F1_nd, F2_nd = forcing.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N,N);
 	#plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
 	#sys.exit();
+	
 	# Coefficients
-	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
+	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N)
 	# Solver
 	if BC == 'NO-SLIP':
-		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2)
 	if BC == 'FREE-SLIP':
-		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2);
+		#solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ftilde3_nd,N,N2)
 		solution = solver.FREE_SLIP_SOLVER4(a1,a2,a3,a4,f_nd,b4,c1,c2,c3,c4,Ro*Ftilde1_nd,Ro*Ftilde2_nd,Ro*Ftilde3_nd,N,N2)
 
 	utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
@@ -67,9 +67,9 @@ def RSW_main():
 	h = np.real(h)
 	
 	# Normalise all solutions by the (non-dimensional) forcing amplitude. 
-	u = u / AmpF_nd;
-	v = v / AmpF_nd;
-	h = h / AmpF_nd;
+	u = u / AmpF_nd
+	v = v / AmpF_nd
+	h = h / AmpF_nd
 
 	#np.save('u.npy',u);
 	#np.save('v.npy',v);
@@ -186,7 +186,7 @@ def RSW_main():
 
 		EEF_u, EEF_v = momentum.EEF_mom(Mu_xav,Mv_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 		
-		print(EEF_u, EEF_v);
+		#print(EEF_u, EEF_v);
 
 
 	# PV and PV footprints
@@ -215,16 +215,12 @@ def RSW_main():
 					# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
 					EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
 				else:
-					EEF_array = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
-					EEF_north = EEF_array[0]; EEF_south = EEF_array[1];
+					EEF, l = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
+					EEF_north = EEF[0]; EEF_south = EEF[1];
 					EEF = EEF_north - EEF_south;
-				print(EEF_north - EEF_south, EEF_north, EEF_south);
+				print(EEF);
 			
 
-	P = P/np.max(np.absolute(P))
-	plt.pcolor(x_grid,y_grid,P,vmin=-1.,vmax=1.)
-	plt.show()
-	np.save('P.npy',P)
 	# Buoyancy footprints
 	#====================================================
 	
@@ -241,93 +237,93 @@ def RSW_main():
 	
 	#====================================================
 
-	# Take relevant derivatives
-	v_y = np.zeros((N,N,Nt));
-	u_y = np.zeros((N,N,Nt));
-	u_yy = np.zeros((N,N,Nt));
-	for ti in range(0,Nt):
-		v_y[:,:,ti] = diagnostics.diff(v[:,:,ti],0,0,dy_nd);
-		u_y[:,:,ti] = diagnostics.diff(u[:,:,ti],0,0,dy_nd);
-		u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
+	if False:
+
+		# Take relevant derivatives
+		v_y = np.zeros((N,N,Nt));
+		u_y = np.zeros((N,N,Nt));
+		u_yy = np.zeros((N,N,Nt));
+		for ti in range(0,Nt):
+			v_y[:,:,ti] = diagnostics.diff(v[:,:,ti],0,0,dy_nd);
+			u_y[:,:,ti] = diagnostics.diff(u[:,:,ti],0,0,dy_nd);
+			u_yy[:,:,ti] = diagnostics.diff(u_y[:,:,ti],0,0,dy_nd);
 	
-	uv1 = v_y * u_y;
-	uv2 = v * u_yy;
-	uv3 = v * u_y
+		uv1 = v_y * u_y;
+		uv2 = v * u_yy;
+		uv3 = v * u_y
 
 
-	plt.subplot(131);
-	plt.contourf(x_nd[0:N],y_nd,v[:,:,ts]);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.subplot(132);
-	plt.contourf(x_nd[0:N],y_nd,u_yy[:,:,ts]);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.subplot(133);
-	plt.contourf(x_nd[0:N],y_nd,uv2[:,:,ts]);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.show()
+		plt.subplot(131);
+		plt.contourf(x_nd[0:N],y_nd,v[:,:,ts]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.subplot(132);
+		plt.contourf(x_nd[0:N],y_nd,u_yy[:,:,ts]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.subplot(133);
+		plt.contourf(x_nd[0:N],y_nd,uv2[:,:,ts]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.show()
 
-	plt.subplot(221);
-	plt.contourf(x_nd[0:N],y_nd,uv1[:,:,20]);
-	plt.colorbar();
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.subplot(222);
-	plt.contourf(x_nd[0:N],y_nd,uv1[:,:,100]);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.subplot(223);
-	plt.contourf(x_nd[0:N],y_nd,uv2[:,:,20]);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.subplot(224);
-	plt.contourf(x_nd[0:N],y_nd,uv2[:,:,100]);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.show();
+		plt.subplot(221);
+		plt.contourf(x_nd[0:N],y_nd,uv1[:,:,20]);
+		plt.colorbar();
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.subplot(222);
+		plt.contourf(x_nd[0:N],y_nd,uv1[:,:,100]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.subplot(223);
+		plt.contourf(x_nd[0:N],y_nd,uv2[:,:,20]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.subplot(224);
+		plt.contourf(x_nd[0:N],y_nd,uv2[:,:,100]);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.show();
 
-	# Define initial footprint contributions (include SSH terms later)
-	P1 = diagnostics.timeAverage(uv1,T_nd,Nt);
-	P2 = diagnostics.timeAverage(uv2,T_nd,Nt);
-	P3 = diagnostics.timeAverage(uv3,T_nd,Nt);
+		# Define initial footprint contributions (include SSH terms later)
+		P1 = diagnostics.timeAverage(uv1,T_nd,Nt);
+		P2 = diagnostics.timeAverage(uv2,T_nd,Nt);
+		P3 = diagnostics.timeAverage(uv3,T_nd,Nt);
 	
-
-	P1 = diagnostics.extend(P1);
-	P2 = diagnostics.extend(P2);
-	P3 = diagnostics.extend(P3);
-
-	plt.subplot(121);
-	plt.contourf(x_nd,y_nd,P1);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.subplot(122);	
-	plt.contourf(x_nd,y_nd,P2);
-	plt.grid(b=True, which='both', color='0.65',linestyle='--');
-	plt.colorbar();
-	plt.show();
-
-	# Account for H0_nd terms
-	#H0_y = diagnostics.diff(H0_nd,2,0,dy_nd);
-	#for i in range(0,N):
-	#	P1[:,i] = P1[:,i] / H0_nd[:];
-	#	P2[:,i] = P2[:,i] / H0_nd[:];
-	#	P3[:,i] = P3[:,i] * H0_y[:] / H0_nd[:]**2;
 	
+		P1 = diagnostics.extend(P1);
+		P2 = diagnostics.extend(P2);
+		P3 = diagnostics.extend(P3);
 
+		plt.subplot(121);
+		plt.contourf(x_nd,y_nd,P1);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.subplot(122);	
+		plt.contourf(x_nd,y_nd,P2);
+		plt.grid(b=True, which='both', color='0.65',linestyle='--');
+		plt.colorbar();
+		plt.show();
 
-	P1 = np.trapz(P1,x_nd,dx_nd,axis=1);
-	P2 = np.trapz(P2,x_nd,dx_nd,axis=1);
-	P3 = np.trapz(P3,x_nd,dx_nd,axis=1);
+		# Account for H0_nd terms
+		#H0_y = diagnostics.diff(H0_nd,2,0,dy_nd);
+		#for i in range(0,N):
+		#	P1[:,i] = P1[:,i] / H0_nd[:];
+		#	P2[:,i] = P2[:,i] / H0_nd[:];
+		#	P3[:,i] = P3[:,i] * H0_y[:] / H0_nd[:]**2;
+	
+		P1 = np.trapz(P1,x_nd,dx_nd,axis=1);
+		P2 = np.trapz(P2,x_nd,dx_nd,axis=1);
+		P3 = np.trapz(P3,x_nd,dx_nd,axis=1);
 
-	plt.subplot(121);
-	#plt.plot(P1,label='P1');
-	plt.plot(P2,label='P2');
-	plt.legend();
-	plt.subplot(122);
-	plt.plot(H0_nd*P_xav);
-	plt.plot(P1+P2+P3);
-	plt.show();
+		plt.subplot(121);
+		#plt.plot(P1,label='P1');
+		plt.plot(P2,label='P2');
+		plt.legend();
+		plt.subplot(122);
+		plt.plot(H0_nd*P_xav);
+		plt.plot(P1+P2+P3);
+		plt.show();
 
 	# Plots
 	#====================================================

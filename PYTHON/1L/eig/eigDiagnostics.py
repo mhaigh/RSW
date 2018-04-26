@@ -386,7 +386,7 @@ def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 # A function that takes the set of eigenmodes, given by vec, and orders them according to the number of zero crossings.
 # When two or more eigenmodes cross zeros the same amount of times, they are ordered by their frequency, smallest firs
 	
-	Ns = 1 # Number of samples
+	Ns = 20 # Number of samples
 
 	L = np.fft.fftfreq(N) * N
 	
@@ -409,7 +409,7 @@ def orderEigenmodes(vec,val,x_nd,k,Ts,N,dim,BC):
 	#		plt.contourf(u);
 	#		plt.show();
 		
-	i_count = np.argsort(count);
+	i_count = np.argsort(count)
 
 	return count, i_count;
 

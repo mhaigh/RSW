@@ -12,6 +12,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
+import time
 
 from eig import eigSolver, eigDiagnostics
 from core import diagnostics, solver, forcing, energy
@@ -20,6 +21,8 @@ from output import output, output_read
 from inputFile import *
 
 #====================================================
+
+start = time.time()
 
 def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 
@@ -147,6 +150,9 @@ if __name__ == '__main__':
 
 		# Decompose solution into eigenmodes.
 		theta[ui,:,:], val[ui,:,:], count[ui,:,:] = EIG_DECOMP_main(U0_nd,H0_nd,dim);
+
+end = time.time()
+print(end-start)
 
 theta_abs = np.absolute(theta[0,:,:])
 t = np.sum(theta_abs,1) # t for every mode k

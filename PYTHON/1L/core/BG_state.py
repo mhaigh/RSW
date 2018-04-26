@@ -61,7 +61,6 @@ def BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N):
 					- np.sqrt(np.pi/2.) * sigma * f0 * np.exp(l**2 / (2. * sigma**2)) * erf(yy0 / (np.sqrt(2) * sigma))
 					+ f0 * y[j] + beta * y[j]**2 / 2.) / g + Hflat; #erf(0);
 
-
 	return U0, H0
 	
 

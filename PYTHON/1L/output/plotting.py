@@ -815,6 +815,27 @@ def bgPlots(y_nd,H0_nd,U0_nd,PV_BG):
 
 #====================================================
 
+def bgPV(U,Q,y_nd):
+	
+	fig, ax1 = plt.subplots()
+	ax1.plot(y_nd,Q/np.max(Q),'b-',linewidth=1.3)
+	ax1.tick_params('y',colors='b');
+	ax1.set_xticks((-1./2,-1./4,0,1./4,1./2));
+	ax1.set_xlabel('latitude,y',fontsize=18);
+	plt.grid()
+	#ax1.tick_params('y');
+	ax2 = ax1.twinx();
+	ax2.plot(y_nd,U,'r-',linewidth=1.3);
+	#ax2.set_xlabel(r'$\langle P_{v}\rangle$', color='r',fontsize=24);
+	ax2.tick_params('y',colors='r');
+	ax2.text(-0.4,0.1,r'$Q_{y}$',color='b',fontsize=26);
+	ax2.text(0.4,0.1,r'$U_{0}$',color='r',fontsize=26);
+	#ax2.tick_params('y', colors='r');
+	fig.tight_layout();
+	plt.show()
+
+#====================================================
+
 # plot_xshift
 def plot_xshift():
 
