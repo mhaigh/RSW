@@ -21,38 +21,38 @@ import matplotlib.pyplot as plt
 # Domain
 #=======================================================
 
-BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
+BC = 'FREE-SLIP'			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-N = 257; 			# Number of gridpoints
+N = 257 			# Number of gridpoints
 
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
 Hflat = 4000.		# Motionless ocean depth (i.e. without BG flow SSH adjustment) (m)		
 
-f0 = 0.83e-4;      		# Base value of Coriolis parameter (s-1)
-beta = 2.0e-11;     	# Planetary vorticity gradient (m-1 s-1)
+f0 = 0.83e-4      		# Base value of Coriolis parameter (s-1)
+beta = 2.0e-11     	# Planetary vorticity gradient (m-1 s-1)
 
 # Other physical parameters
 #=======================================================
 
-g = 9.81;		# Acceleration due to gravity (m s-2)
-gamma = 4.0e-8;	# Frictional coefficient (s-1)
-nu = 100.;		# Kinematic viscosity (m2 s-1)
+g = 9.81			# Acceleration due to gravity (m s-2)
+gamma = 4.0e-8		# Linear friction (s-1)
+nu = 100.			# Eddy viscosity (m2 s-1)
 
 # Background flow
 #=======================================================
 
 # Keep the unused options commented out.
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
+BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-#Umag = 0.08 #0.0688, -0.0233, 0.0213
+Umag = -.04 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
-Umag = 0.8;		# Jet max speed
-sigma = 0.02 * 3840000.0;	# Jet width
-JET_POS = 'CENTER';
+#Umag = 0.8;		# Jet max speed
+#sigma = 0.02 * 3840000.0;	# Jet width
+#JET_POS = 'CENTER';
 
 # Shear options
 #Umag = 100.0;
@@ -60,56 +60,57 @@ JET_POS = 'CENTER';
 # Forcing
 #=======================================================
 
-FORCE = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing, 
+FORCE = 'BALANCED'       	# 'BALANCED' for geostrophically balanced forcing, 
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
 
-FORCE_TYPE = 'CTS2'		# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
+FORCE_TYPE = 'CTS2'			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 
-Fpos = 'CENTER';				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
+Fpos = 'CENTER'				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
 							
-r0 = 90.0 * 1000.0;  		# Forcing radius
-AmpF = 1.0e-7; 				# Forcing amplitude
+r0 = 90.0 * 1000.0	 		# Forcing radius
+AmpF = 1.0e-7				# Forcing amplitude
 
 # Be careful here to make sure that the plunger is not forcing boundary terms.
 
 # Time parameters
 #=======================================================
 
-period_days = 60.;						# Periodicity of plunger (days)
-Nt = 200;								# Number of time samples
-ts = Nt-1; 								# index at which the time-snapshot is taken
+period_days = 60.						# Periodicity of plunger (days)
+Nt = 200								# Number of time samples
+ts = Nt-1 								# index at which the time-snapshot is taken
 
 # Output
 #=======================================================
 
 outputPath = '/home/mike/Documents/GulfStream/RSW/DATA/1L/';
 
-errorPhys = False;     	# Print error of full solutions 
-errorSpec = False;		# Print error of spectral solutions
+errorPhys = False     	# Print error of full solutions 
+errorSpec = False		# Print error of spectral solutions
 
-doEnergy = False;				# Energy
-doPV = True;					# Calculate potential vorticity
-doFootprints = True;			# Calculate footprints, requires findPV = True.
-doEEFs = True;					# Calculate equivalent eddy fluxes, require findFootprints = True.
-footprintComponents = False;		# If true, calculates the footprint in terms of its components.
-doMomentum = False;
-doThickness = False;
+doEnergy = False				# Energy
+doPV = True					# Calculate potential vorticity
+doFootprints = True			# Calculate footprints, requires findPV = True.
+doEEFs = True					# Calculate equivalent eddy fluxes, require findFootprints = True.
+footprintComponents = False		# If true, calculates the footprint in terms of its components.
+doMomentum = False
+doThickness = False
+doCorr = True
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
-PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None;
+PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None
 
 # Plots
 #======================================================
 
-plotForcing = False;
-plotBG = False;
-plotSol = True;
-plotPV = False;
-plotPV_av = False;
-plotFootprint = True;
-plotPhaseAmp = False;
+plotForcing = False
+plotBG = False
+plotSol = True
+plotPV = False
+plotPV_av = False
+plotFootprint = True
+plotPhaseAmp = False
 
 #======================================================================================================================================================================================================
 #======================================================================================================================================================================================================
@@ -287,16 +288,6 @@ print('N = ' + str(N))
 #U0y =  diff(U0_nd,2,0,dy_nd)
 #Q = (f_nd / Ro - U0y) / H0_nd
 #Qy = diff(Q,2,0,dy_nd)
-#Qyy = diff(Qy,2,0,dy_nd)
-#Qy2 = (bh / Ro - diff(U0y,2,0,dy_nd)) / H0_nd #  - Q * diff(H0_nd,2,0,dy_nd) / H0_nd)
-#plt.subplot(121)
-#plt.plot(Q)
-#plt.subplot(122)
-#plt.plot(Qy)
-#plt.plot(U0)
-#plt.show()
-
 #from output.plotting import bgPV
-
 #bgPV(U0,Qy,y_nd)
 

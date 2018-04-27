@@ -21,7 +21,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-from core import solver, PV, momentum, thickness, energy, diagnostics
+from core import solver, PV, momentum, thickness, energy, diagnostics, corr
 from output import plotting, plotting_bulk
 
 from inputFile import *
@@ -81,7 +81,7 @@ def RSW_main():
 	# Central half?
 	#cs = N / 4; 
 	#ce = N - N / 4;
-	#corr = diagnostics.arrayCorrTime(u[cs:ce,cs:ce,:],v[cs:ce,cs:ce,:]);
+	#corr = corr.arrayCorrTime(u[cs:ce,cs:ce,:],v[cs:ce,cs:ce,:]);
 	#print corr
 
 	# In order to calculate the vorticities/energies of the system, we require full (i.e. BG + forced response) u and eta.
@@ -111,6 +111,47 @@ def RSW_main():
 
 	#====================================================
 
+	if doCorr:
+		print('here')
+	
+		ulim = np.max(np.abs(u))
+		u = u / ulim
+		v = v / ulim
+		h = h / ulim		
+		
+		M = corr.M(u,v,T_nd)
+		N_ = corr.N(u,v,T_nd)
+		K = corr.K(u,v,T_nd)
+		D = corr.D(u,v,1,dx_nd,dy_nd)
+		Curl_uD = corr.Curl_uD(u,v,D,T,dx_nd,dy_nd)
+
+		Dv,Du = corr.Curl_uD_components(u,v,D,T,dx_nd,dy_nd)
+
+		corr.plotComponents(x_nd,y_nd,M,N_,K,Du)
+
+		Nyy = diagnostics.diff(diagnostics.diff(N_,0,0,dy_nd),0,0,dy_nd)
+		Nyy_av = np.trapz(diagnostics.extend(Nyy),x_nd,dx_nd,axis=1)
+		Curl_uD_av = np.trapz(diagnostics.extend(Curl_uD),x_nd,dx_nd,axis=1)
+
+		plt.subplot(121)
+		plt.contourf(N_)
+		plt.colorbar()
+		plt.subplot(122)
+		plt.contourf(Nyy)
+		plt.colorbar()
+		plt.show()
+
+		uav = np.trapz(diagnostics.extend(Du),x_nd,dx_nd,axis=1)
+		vav = np.trapz(diagnostics.extend(Dv),x_nd,dx_nd,axis=1)
+
+		#plt.plot(uav,label='u')
+		plt.plot(vav,label='v')
+		#plt.plot(Curl_uD_av,label='full')	
+		plt.legend()
+		plt.show()
+
+	#====================================================
+	
 	# Error - if calculated, should be done before real part of solution is taken
 	if errorPhys:
 		e1, e2, e3 = diagnostics.error(u,v,h,dx_nd,dy_nd,dt_nd,U0_nd,H0_nd,Ro,gamma_nd,Re,f_nd,F1_nd,F2_nd,F3_nd,T_nd,ts,omega_nd,N);
@@ -124,13 +165,6 @@ def RSW_main():
 		for eq in range(0,3):
 			error = sum(error_spec[eq,:]) / N;
 			print('Error' + str(int(eq+1)) + '=' + str(error));
-
-	#====================================================
-
-	# Dimensional solutions
-	u = u * U;
-	v = v * U;
-	eta = h * chi;
 
 	#====================================================
 
@@ -219,8 +253,14 @@ def RSW_main():
 					EEF_north = EEF[0]; EEF_south = EEF[1];
 					EEF = EEF_north - EEF_south;
 				print(EEF);
-			
 
+	#plt.plot((Nyy-Curl_uD_av)/np.max(np.abs(Nyy-Curl_uD_av)),label='both')
+	plt.plot(P_xav,label='full')
+	plt.plot(Nyy_av/H0_nd[N//2],label='N')
+	plt.legend()
+	plt.show()
+
+	sys.exit()
 	# Buoyancy footprints
 	#====================================================
 	

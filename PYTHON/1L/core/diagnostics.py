@@ -564,52 +564,7 @@ def timeAverage(u,T,Nt):
 
 	return u_tav
 
-#====================================================
 
-# arrayCorr
-def arrayCorr(u,v):
-# Takes as input a pair of 2D arrays (e.g. solution snapshots), 
-# and calculates their correlation by rewriting them as 1D lists.
-
-	Ny, Nx = np.shape(u);
-	
-	dim = Ny * Nx;
-
-	u_list = np.zeros((dim));
-	v_list = np.zeros((dim));
-
-	# Rearrange square arrays into lists.
-	for i in range(0,Nx):
-		for j in range(0,Ny):
-			u_list[i*Nx+j] = u[j,i];
-			v_list[i*Nx+j] = v[j,i];
-
-	# Correlation between two lists.
-	corr = np.corrcoef(u_list,v_list)[0,1];
-	
-	return corr
-
-#====================================================
-
-# arrayCorrTime
-def arrayCorrTime(u,v):
-# Uses the above-defined function to calculate the average correlation between two time-dependent arrays.
-	
-	Nt = np.shape(u)[2];
-	
-	# Initialise the correlation.
-	corr = 0;
-
-	# Add the correlation between u and v at each time step.
-	for ti in range(0,Nt):
-		corr = corr + arrayCorr(u[:,:,ti],v[:,:,ti]);
-	
-	# Average.
-	corr = corr / Nt;
-
-	return corr
-
-#====================================================
 
 
 
