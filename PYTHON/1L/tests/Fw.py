@@ -21,7 +21,7 @@ Ks = np.fft.fftshift(K_nd)
 F = F1_nd
 Ftilde = np.fft.fftshift(np.fft.fft2(F))
 
-om = 1. / (60. * 3600. * 24.)
+om = 1. / (30. * 3600. * 24.)
 beta = 2.0e-11
 
 

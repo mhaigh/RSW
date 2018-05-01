@@ -11,6 +11,11 @@ from inputFile import *
 
 #========================================================
 
+
+path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/med_res/G/'
+EEF = np.load(path + 'EEF.npy')
+EEF = 1e7 * (EEF[:,:,0] - EEF[:,:,1])
+
 Ns = 151
 
 sigma_set = np.linspace(0.015,0.045,Ns) * 3840000.0
@@ -47,12 +52,16 @@ for ui in range(0,Ns):
 	Qy[ui,:] = diff(Q,2,0,dy_nd)
 	
 
-fs = 18
+fs = 16
+cm = 'bwr'
+Elim = 2. #0.8*np.max(np.abs(EEF))
 
 CS = plt.contour(y0_set,sigma_set/1000.,Qy,1,colors='k')
 plt.clabel(CS, fontsize=9, inline=1)
-plt.pcolormesh(y0_mesh,sigma_mesh,Qy)
+plt.pcolormesh(y0_mesh,sigma_mesh,EEF,vmin=-Elim,vmax=Elim,cmap=cm)
+plt.colorbar()
 
+plt.grid()
 plt.xlabel('y0',fontsize=fs)
 plt.ylabel('Jet width (km)',fontsize=fs)
 plt.xticks(fontsize=fs-2)

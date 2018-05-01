@@ -21,6 +21,8 @@ filename = 'EEF_PV';
 
 #=======================================================
 
+pe = 11		# Number of processors
+
 # Initialise tests
 
 Nu = 50;
@@ -39,6 +41,20 @@ y0_index_set = np.array(y0_index_set);
 nn = np.shape(y0_set)[0];
 #print(nn)
 
+# Now split the input set into pe sample sets.
+sets = [];
+d = nn // pe + 1	  	# Number of elements in each set (apart from the last one).
+r = nn % d				# Number of elements left over, for the last processor.
+#print(nn,d,r);
+for pe_no in range(1,pe):
+	exec('test_set_' + str(pe_no) + '= sigma_set[(pe_no-1)*d:pe_no*d]');
+	exec('sets.append(test_set_'+str(pe_no)+')');
+for pe_no in range(pe,pe+1):
+	exec('test_set_' + str(pe_no) + '= sigma_set[(pe_no-1)*d:pe_no*d+1]');
+	exec('sets.append(test_set_'+str(pe_no)+')');
+print(sets)
+
+
 EEF_PV = np.zeros((Nu,nn,2))
 
 #=======================================================
@@ -49,17 +65,11 @@ for ui in range(0,Nu):
 	# Redefine U0 and H0.
 	sigma = sigma_set[ui]
 	U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,L,N)
-	import matplotlib.pyplot as plt
-	plt.plot(U0)
-	plt.show()
 	U0_nd = U0 / U;
 	H0_nd = H0 / chi; 
 	a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
-
-
-				
+	
 	for yi in range(0,1):
-		print(yi)
 
 		y0 = y0_set[yi];				# Redefine y0 and the forcing in each run.
 		y0_index = y0_index_set[yi];
@@ -81,7 +91,6 @@ for ui in range(0,Nu):
 		u = u / AmpF_nd
 		v = v / AmpF_nd
 		h = h / AmpF_nd
-		print(np.max(u))
 		
 		# In order to calculate the vorticities of the system, we require full (i.e. BG + forced response) u and eta.
 		h_full = np.zeros((N,N,Nt));
@@ -95,7 +104,7 @@ for ui in range(0,Nu):
 		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt)
 		P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt)			
 		EEF_PV[ui,yi,:], l_PV = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N)
-		print(EEF_PV[ui,yi,:])
+
 np.save(filename,EEF_PV);
 	
 elapsed = time.time() - start;

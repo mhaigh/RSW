@@ -113,19 +113,14 @@ def RSW_main():
 
 	if doCorr:
 		print('here')
-	
-		ulim = np.max(np.abs(u))
-		u = u / ulim
-		v = v / ulim
-		h = h / ulim		
-		
+			
 		M = corr.M(u,v,T_nd)
 		N_ = corr.N(u,v,T_nd)
 		K = corr.K(u,v,T_nd)
 		D = corr.D(u,v,1,dx_nd,dy_nd)
 		Curl_uD = corr.Curl_uD(u,v,D,T,dx_nd,dy_nd)
 
-		Dv,Du = corr.Curl_uD_components(u,v,D,T,dx_nd,dy_nd)
+		Dv, Du = corr.Curl_uD_components(u,v,D,T,dx_nd,dy_nd)
 
 		corr.plotComponents(x_nd,y_nd,M,N_,K,Du)
 
@@ -133,18 +128,21 @@ def RSW_main():
 		Nyy_av = np.trapz(diagnostics.extend(Nyy),x_nd,dx_nd,axis=1)
 		Curl_uD_av = np.trapz(diagnostics.extend(Curl_uD),x_nd,dx_nd,axis=1)
 
-		plt.subplot(121)
-		plt.contourf(N_)
+		plt.subplot(131)
+		plt.contourf(Du)
 		plt.colorbar()
-		plt.subplot(122)
-		plt.contourf(Nyy)
+		plt.subplot(132)
+		plt.contourf(Dv)
+		plt.colorbar()
+		plt.subplot(133)
+		plt.contourf(Curl_uD)
 		plt.colorbar()
 		plt.show()
 
 		uav = np.trapz(diagnostics.extend(Du),x_nd,dx_nd,axis=1)
 		vav = np.trapz(diagnostics.extend(Dv),x_nd,dx_nd,axis=1)
 
-		#plt.plot(uav,label='u')
+		plt.plot(uav,label='u')
 		plt.plot(vav,label='v')
 		#plt.plot(Curl_uD_av,label='full')	
 		plt.legend()
@@ -256,11 +254,10 @@ def RSW_main():
 
 	#plt.plot((Nyy-Curl_uD_av)/np.max(np.abs(Nyy-Curl_uD_av)),label='both')
 	plt.plot(P_xav,label='full')
-	plt.plot(Nyy_av/H0_nd[N//2],label='N')
+	plt.plot(Nyy_av/H0[N//2],label='N')
 	plt.legend()
 	plt.show()
 
-	sys.exit()
 	# Buoyancy footprints
 	#====================================================
 	

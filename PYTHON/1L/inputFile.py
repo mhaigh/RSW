@@ -44,15 +44,15 @@ nu = 100.			# Eddy viscosity (m2 s-1)
 
 # Keep the unused options commented out.
 
-BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
+BG = 'GAUSSIAN';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
 Umag = -.04 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
-#Umag = 0.8;		# Jet max speed
-#sigma = 0.02 * 3840000.0;	# Jet width
-#JET_POS = 'CENTER';
+Umag = 0.8;		# Jet max speed
+sigma = 0.02 * 3840000.0;	# Jet width
+JET_POS = 'CENTER';
 
 # Shear options
 #Umag = 100.0;
@@ -205,9 +205,9 @@ t = T[ts];								# Time of the snapshot
 
 #=======================================================
 
-L = Lx;
-U = 1.0e-2;
-H = Hflat;
+L = Lx
+U = 1.0e-2
+H = Hflat
 
 chi = f0 * U * L / g;
 T_adv = L / U;			# The advective timescale
