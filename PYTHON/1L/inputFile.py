@@ -44,15 +44,15 @@ nu = 100.			# Eddy viscosity (m2 s-1)
 
 # Keep the unused options commented out.
 
-BG = 'GAUSSIAN';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
+BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-Umag = -.04 #0.0688, -0.0233, 0.0213
+Umag = -0.04 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
-Umag = 0.8;		# Jet max speed
-sigma = 0.02 * 3840000.0;	# Jet width
-JET_POS = 'CENTER';
+#Umag = 0.4;		# Jet max speed
+#sigma = 0.02 * 3840000.0;	# Jet width
+#JET_POS = 'CENTER';
 
 # Shear options
 #Umag = 100.0;
@@ -64,7 +64,7 @@ FORCE = 'BALANCED'       	# 'BALANCED' for geostrophically balanced forcing,
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
 
-FORCE_TYPE = 'CTS2'			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
+FORCE_TYPE = 'ELLIPSE'			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 
 Fpos = 'CENTER'				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
@@ -269,6 +269,8 @@ elif FORCE_TYPE == 'CTS2':
 	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts2(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,bh,dx_nd,dy_nd)
 elif FORCE_TYPE == 'DCTS':
 	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd)
+elif FORCE_TYPE == 'ELLIPSE':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_ellipse(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,bh,dx_nd,dy_nd,9.)
 elif FORCE_TYPE == 'DELTA':
 	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_delta(AmpF_nd,y0_index,dx_nd,N)
 else:

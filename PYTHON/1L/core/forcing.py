@@ -231,29 +231,58 @@ def forcing_cts2(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,beta_nd,d
 						F1_nd[j,i] = AmpF_nd * np.pi * (y_nd[j]-y0_nd) / (r0_nd * r_nd) * np.sin(np.pi * r_nd / r0_nd)
 						F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (r0_nd * r_nd) * np.sin(np.pi * r_nd / r0_nd)
 
-	PLOT = False;
-	if PLOT:
-		aa = 1./24;
-		Fmax = np.max(np.max(F3_nd,axis=0));
-		Flim = np.max(abs(F3_nd/(1.05*Fmax)));
-		#F3[0,0] = - Fmax;
-		L = 3840000.
-		plt.contourf(x_nd[0:Nx],y_nd,F3_nd/(1.1*Fmax));
-		plt.xlabel('x',fontsize=22);
-		plt.ylabel('y',fontsize=22);
-		plt.text(y_nd[N-130],x_nd[N-130],'F3',color='k',fontsize=22);
-		plt.arrow(-aa,2*aa+0.25,2*aa,0,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.arrow(2*aa,aa+.25,0,-2*aa,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.arrow(aa,-2*aa+.25,-2*aa,0,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.arrow(-2*aa,-aa+.25,0,2*aa,head_width=0.7e5/L, head_length=0.7e5/L,color='k');
-		plt.xticks((-1./2,-1./4,0,1./4,1./2),['-0.5','-0.25','0','0.25','0.5'],fontsize=14);
-		plt.yticks((-1./2,-1./4,0,1./4,1./2),['-0.5','-0.25','0','0.25','0.5'],fontsize=14);
-		plt.clim(-Flim,Flim);
-		plt.colorbar();
-		plt.tight_layout();
-		plt.grid()
-		plt.show();
 	
+	# Lastly, Fourier transform the three forcings in the x-direction
+		
+	Ftilde1_nd = dx_nd * np.fft.hfft(F1_nd,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3_nd = dx_nd * np.fft.hfft(F3_nd,N,axis=1); 
+	Ftilde2_nd = dx_nd * np.fft.fft(F2_nd,axis=1);
+	#Ftilde2_nd = np.zeros((N,Nx),dtype=complex);
+	#for j in range(0,N):
+	#	for i in range(0,Nx):
+	#		Ftilde2_nd[j,i] = 2 * np.pi * I * K_nd[i] * Ftilde3_nd[j,i] / f_nd[j];
+
+	return F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd;
+
+#======================================================
+
+def forcing_ellipse(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,beta_nd,dx_nd,dy_nd,a):
+# The same as forcing_cts, but the momentum forcing is constant with latitude.
+
+	th = np.pi / 1.0
+	si = np.sin(th)
+	co = np.cos(th)
+
+	b = 1./a
+
+	Nx = N	
+
+	I = np.complex(0,1)
+	F1_nd = np.zeros((N,Nx))
+	F2_nd = np.zeros((N,Nx))
+	F3_nd = np.zeros((N,Nx))
+
+	# Balanced
+	if FORCE == 'BALANCED':
+		mass = 0
+		for i in range(0,Nx):
+			for j in range(0,N):
+				x = x_nd[i] * co + (y_nd[j] - y0_nd) * si
+				y = (y_nd[j] - y0_nd) * co - x_nd[i] * si 
+				r_nd = np.sqrt(x**2 / a + y**2 / b)
+				if r_nd < r0_nd:
+					if r_nd == 0:
+						F1_nd[j,i] = 0.0
+						F2_nd[j,i] = 0.0						
+					else:	
+						F1_nd[j,i] = AmpF_nd * (np.pi * y / (r0_nd * r_nd * b) * np.sin(np.pi * r_nd / r0_nd) - beta_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd)) / f_nd[j])
+						F2_nd[j,i] = - AmpF_nd * np.pi * x / (r0_nd * r_nd * a) * np.sin(np.pi * r_nd / r0_nd)
+					F3_nd[j,i] = AmpF_nd * f_nd[j] * (1.0 + np.cos(np.pi * r_nd / r0_nd))
+					mass = mass + F3_nd[j,i]
+		mass = mass / (N*Nx)
+		F3_nd = F3_nd - mass
+
+
 	# Lastly, Fourier transform the three forcings in the x-direction
 		
 	Ftilde1_nd = dx_nd * np.fft.hfft(F1_nd,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
