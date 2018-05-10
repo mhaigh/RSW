@@ -338,6 +338,16 @@ def EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd
 	return EEF_array;
 
 #====================================================
+
+# findCOM
+def findCOM(f):
+
+	from scipy.ndimage.measurements import center_of_mass
+
+	# For a function f, find the latitude at which its center of mass lies.
+	
+	return center_of_mass(f)
+	
 	
 	
 

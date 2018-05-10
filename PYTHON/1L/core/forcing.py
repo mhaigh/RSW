@@ -249,7 +249,7 @@ def forcing_cts2(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,beta_nd,d
 def forcing_ellipse(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,beta_nd,dx_nd,dy_nd,a):
 # The same as forcing_cts, but the momentum forcing is constant with latitude.
 
-	th = np.pi / 1.0
+	th = np.pi / 1
 	si = np.sin(th)
 	co = np.cos(th)
 

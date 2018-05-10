@@ -139,14 +139,14 @@ def RSW_main():
 		plt.colorbar()
 		plt.show()
 
-		uav = np.trapz(diagnostics.extend(Du),x_nd,dx_nd,axis=1)
-		vav = np.trapz(diagnostics.extend(Dv),x_nd,dx_nd,axis=1)
+		#uav = np.trapz(diagnostics.extend(Du),x_nd,dx_nd,axis=1)
+		#vav = np.trapz(diagnostics.extend(Dv),x_nd,dx_nd,axis=1)
 
-		plt.plot(uav,label='u')
-		plt.plot(vav,label='v')
+		#plt.plot(uav,label='u')
+		#plt.plot(vav,label='v')
 		#plt.plot(Curl_uD_av,label='full')	
-		plt.legend()
-		plt.show()
+		#plt.legend()
+		#plt.show()
 
 	#====================================================
 	
@@ -227,7 +227,7 @@ def RSW_main():
 	# Calculate PV fields, footprints and equivalent eddy fluxes (EEFs)
 	if doPV:
 		PV_prime, PV_full, PV_BG = PV.potentialVorticity(u,v,h,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
-		PV_prime1, PV_prime2, PV_prime3 = PV.potentialVorticity_linear(u,v,h,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+		#PV_prime1, PV_prime2, PV_prime3 = PV.potentialVorticity_linear(u,v,h,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
 		uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt);
 		# Keep these next two lines commented out unless testing effects of normalisation.
 		# uq, Uq, uQ, UQ, vq, vQ = uq/AmpF_nd**2, Uq/AmpF_nd**2, uQ/AmpF_nd**2, UQ/AmpF_nd**2, vq/AmpF_nd**2, vQ/AmpF_nd**2;
@@ -251,10 +251,14 @@ def RSW_main():
 					EEF_north = EEF[0]; EEF_south = EEF[1];
 					EEF = EEF_north - EEF_south;
 				print(EEF);
-
+			fm = PV.firstMoment(P_xav,y_nd,y0_nd,dy_nd,N)
+			print(fm)
+	np.save('P_xav.npy',P_xav)
 	#plt.plot((Nyy-Curl_uD_av)/np.max(np.abs(Nyy-Curl_uD_av)),label='both')
-	plt.plot(P_xav,label='full')
-	plt.plot(Nyy_av/H0[N//2],label='N')
+	plt.plot(y_nd,P_xav,label='full',linewidth=1.2)
+	#plt.plot(y_nd,Nyy_av/H0[N//2],label='N')
+	plt.axvline(x=y0_nd, ymin=-1, ymax =1,color='k')
+	#plt.ylim([-.002,.002])
 	plt.legend()
 	plt.show()
 

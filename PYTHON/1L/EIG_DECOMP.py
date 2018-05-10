@@ -14,7 +14,7 @@ import numpy as np
 import itertools as it
 
 from eig import eigSolver, eigDiagnostics
-from core import diagnostics, solver, forcing, energy
+from core import diagnostics, solver, forcing, energy, PV
 from output import output, output_read
 
 from inputFile import *
@@ -55,6 +55,8 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 		else:
 			sys.exit('ERROR: choose valid BC');
 
+	solution = solution / AmpF_nd
+
 	print('solved');
 
 	#====================================================
@@ -66,7 +68,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 	# Initisialastion steps
 	#====================================================
 
-	VEC = 'NEW';		# From FILE, requires pre-saved vectors which take up lots of memory.
+	VEC = 'FILE';		# From FILE, requires pre-saved vectors which take up lots of memory.
 	LOOP = 'FULL';		# FULL, PART
 
 	
@@ -213,9 +215,10 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 			cx[mi,i] = freq[dom_index[mi,i]] / k;	
 			if count[dom_index[mi,i]] != 0:
 				cy[mi,i] = freq[dom_index[mi,i]] / count[dom_index[mi,i]];
-	
-			# The projection.
-			proj[:,ii] = proj[:,ii] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
+			
+			if mi < 2:
+				# The projection.
+				proj[:,ii] = proj[:,ii] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
 		
 			# Scatter plot arrays.
 			scatter_k[i*Nm+mi] = k;	
@@ -249,7 +252,9 @@ U0_set = np.linspace(0.04,0.04,nn);
 
 # Define forcing. This is constant throughout if only BG flow varies.
 if FORCE_TYPE == 'CTS':
-	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd)
+elif FORCE_TYPE == 'CTS2':
+	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_cts2(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,bh,dx_nd,dy_nd);
 elif FORCE_TYPE == 'DCTS':
 	F1_nd, F2_nd, F3_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd = forcing.forcing_dcts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE,AmpF_nd,f_nd,f0_nd,dx_nd,dy_nd);
 else:
@@ -296,11 +301,10 @@ if __name__ == '__main__':
 
 
 theta_abs = np.absolute(theta[:,:,0])
-t = np.sum(theta_abs,0)
-plt.plot(t)
-plt.show()
+#plt.plot(theta_abs[:,50])
+#plt.show()
 
-sys.exit()
+#sys.exit()
 # Save data
 
 np.save('theta',theta);
@@ -313,26 +317,27 @@ np.save('p',p);
 # Plotting
 #====================================================
 
-#plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p[:,1,:]*U),label='zonal');
-plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p[:,0,:]*U),label='merid');
-plt.xlabel('k');
-plt.ylabel('Weighted phase speed');
-plt.legend();
-plt.grid();
-plt.show();
+if False:
+	#plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p[:,1,:]*U),label='zonal');
+	plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(p[:,0,:]*U),label='merid');
+	plt.xlabel('k');
+	plt.ylabel('Weighted phase speed');
+	plt.legend();
+	plt.grid();
+	plt.show();
 
 
-plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(mean[:,0]));
-plt.ylabel('MEAN ABS WEIGHT');
-plt.xlabel('WAVENUMBER');
-plt.show();
+	plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(mean[:,0]));
+	plt.ylabel('MEAN ABS WEIGHT');
+	plt.xlabel('WAVENUMBER');
+	plt.show();
 
-plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(var[:,0]));
-plt.ylabel('VARIANCE');
-plt.xlabel('WAVENUMBER');
-plt.show();
+	plt.plot(np.fft.fftshift(K_nd),np.fft.fftshift(var[:,0]));
+	plt.ylabel('VARIANCE');
+	plt.xlabel('WAVENUMBER');
+	plt.show();
 
-sys.exit();
+#sys.exit();
 
 #====================================================
 
@@ -341,6 +346,7 @@ utilde_proj = np.zeros((N,N),dtype=complex);
 vtilde_proj = np.zeros((N,N),dtype=complex);
 etatilde_proj = np.zeros((N,N),dtype=complex);
 
+proj = np.squeeze(proj,axis=2)
 # Now look at the solution given by the dominant modes
 if BC == 'FREE-SLIP':
 	for j in range(0,N):
@@ -358,33 +364,44 @@ if BC == 'NO-SLIP':
 
 u_proj, v_proj, eta_proj = solver.SPEC_TO_PHYS(utilde_proj,vtilde_proj,etatilde_proj,T_nd,dx_nd,omega_nd,N);
 
-u_proj = np.real(u_proj[:,:,ts]);
-v_proj = np.real(v_proj[:,:,ts]);
-eta_proj = np.real(eta_proj[:,:,ts]);
+u_proj = np.real(u_proj);
+v_proj = np.real(v_proj);
+eta_proj = np.real(eta_proj);
 
-u_full = np.zeros((N,N));
-h_full = np.zeros((N,N));
+u_full = np.zeros((N,N,Nt));
+h_full = np.zeros((N,N,Nt));
 for i in range(0,N):
-	u_full[:,i] = u_proj[:,i] + U0_nd[:];
-	h_full[:,i] = eta_proj[:,i] + H0_nd[:];
+	for ti in range(0,Nt):
+		u_full[:,i,ti] = u_proj[:,i,ti] + U0_nd[:];
+		h_full[:,i,ti] = eta_proj[:,i,ti] + H0_nd[:];
 
-utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(solution,N,N2,BC);
+
+utilde_nd, vtilde_nd, etatilde_nd = solver.extractSols(np.squeeze(solution,axis=2),N,N2,BC);
 u, v, h = solver.SPEC_TO_PHYS(utilde_nd,vtilde_nd,etatilde_nd,T_nd,dx_nd,omega_nd,N);
 
 u = np.real(u);
 v = np.real(v);
 h = np.real(h);
 
-#====================================================
-
-
-
-
-#====================================================
-
-eigDiagnostics.eigPlots(u_proj,v_proj,eta_proj,u[:,:,ts],v[:,:,ts],h[:,:,ts],x_nd,y_nd,x_grid,y_grid,True);
+error_norm = np.sum(u[:,:,ts]**2)
+error = np.sum((u[:,:,ts] - u_proj[:,:,ts])**2) / error_norm
+print(error)
 
 #====================================================
+
+eigDiagnostics.eigPlots(u_proj[:,:,ts],v_proj[:,:,ts],eta_proj[:,:,ts],u[:,:,ts],v[:,:,ts],h[:,:,ts],x_nd,y_nd,x_grid,y_grid,True);
+
+#====================================================
+
+# PV
+
+PV_prime, PV_full, PV_BG = PV.potentialVorticity(u_proj,v_proj,eta_proj,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+#PV_prime1, PV_prime2, PV_prime3 = PV.potentialVorticity_linear(u,v,h,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro);
+uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt);
+P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
+
+plt.plot(P_xav)
+plt.show()
 
 # We know that the selection of modes is dominated by factors other than the forcing freqeuncy.
 sys.exit();

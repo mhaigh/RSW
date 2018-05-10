@@ -5,7 +5,9 @@
 
 import os
 import numpy as np
+import multiprocessing as mp
 import time
+from scipy.ndimage.measurements import center_of_mass
 
 from core import solver, PV, momentum, diagnostics, BG_state
 
@@ -15,21 +17,20 @@ from inputFile import *
 
 start = time.time();
 
-filename = 'EEF_PV';
-
 # Can test against U0 or y0, or find the buoyancy vs U0 or y0.
 
 #=======================================================
 
-pe = 11		# Number of processors
+pe = 2		# Number of processors
 
 # Initialise tests
 
-Nu = 50;
-test_set = np.linspace(0.015,0.045,Nu) * 3840000.0
+Nu = 41;
+#test_set = np.linspace(0.015,0.045,Nu) * 3840000.0
+test_set = np.linspace(0.4,0.6,Nu)
 
-y0_min = y[0] + L/3;					# We want to keep the forcing at least one gridpoint away from the boundary
-y0_max = y[N-1] - L/3;
+y0_min = y[0] + L/3 + L/9;					# We want to keep the forcing at least one gridpoint away from the boundary
+y0_max = y[N-1] - L/3 - L/9;
 y0_set = [];						# Initialise an empty set of forcing latitudes
 y0_index_set = [];
 for j in range(0,N):
@@ -56,24 +57,25 @@ print(sets)
 
 #=======================================================
 
-def EEF_main(test_set,pi)
+def EEF_main(set_,pi):
 
 	NU = len(set_);
 	
 	EEF_array = np.zeros((NU,nn,2));
+	com = np.zeros((NU,nn));
 	
 	# Now start the loop over each forcing index.
 	for ui in range(0,NU):
 
 		# Redefine U0 and H0.
 		#sigma = test_set[ui]
-		Umag = test_set[ui]
+		Umag = set_[ui]
 		U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,L,N)
 		U0_nd = U0 / U;
 		H0_nd = H0 / chi; 
 		a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 	
-		for yi in range(0,nn):
+		for yi in range(0,0):
 
 			y0 = y0_set[yi];				# Redefine y0 and the forcing in each run.
 			y0_index = y0_index_set[yi];
@@ -108,16 +110,20 @@ def EEF_main(test_set,pi)
 			uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt)
 			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt)			
 			EEF_PV[ui,yi,:], l_PV = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N)
+			com[ui,yi] = center_of_mass(P_xav)
+
+	EEF_array[:,:,:] = pi
+	filename = 'EEF_array_' + str(pi);
+	np.save(filename,EEF_array)
+	
+	filename_com = 'com' + str(pi)
+	np.save(filename_com,com)
 
 
 if __name__ == '__main__':
 	jobs = [];
 	for pi in range(0,pe):
-		print(pi);
-		if TEST == 'y0':
-			p = mp.Process(target=EEF_main,args=(sets[pi],pi));
-		elif TEST == 'U0':
-			p = mp.Process(target=EEF_main,args=(sets[pi],pi));
+		p = mp.Process(target=EEF_main,args=(sets[pi],pi));
 		jobs.append(p);
 		p.start();
 
@@ -125,22 +131,27 @@ if __name__ == '__main__':
 		p.join();
 
 # Now collect the results by reloading them, and compile into one array
-EEF_array = np.zeros((Nn,));
+EEF_array = np.zeros((Nu,nn,2));
+com = np.zeros((Nu,nn))
 yn_count = 0;
 for pi in range(0,pe):
-	filename = 'EEF_array_' + str(pi) + '.npy';
-	exec('EEF_array_tmp = np.load(filename)');
+	filename = 'EEF_array_' + str(pi) + '.npy'
+	filename_com = 'com' + str(pi) + '.npy'
+
+	EEF_array_tmp = np.load(filename)
+	com_tmp = np.load(filename_com)	
+	
 	yn = np.shape(EEF_array_tmp)[0];
 	EEF_array[yn_count:yn_count+yn,:,:] = EEF_array_tmp[:,:,:];
+	com[yn_count:yn_count+yn,:] = com_tmp[:,:]
 	yn_count = yn_count + yn;
-	os.remove(filename);
-	
-np.save('EEF_array',EEF_array);
 
-elapsed = (time.time() - start);
-elapsed = np.ones(1) * elapsed;
-print(elapsed);
-	
+	os.remove(filename)
+	os.remove(filename_com)	
+		
+np.save('EEF_array',EEF_array)
+np.save('com',com)
+
 elapsed = time.time() - start;
 elapsed = np.ones(1) * elapsed;
 print(elapsed);

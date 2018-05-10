@@ -130,7 +130,7 @@ def EEF_y0(y0_set,pi):
 			EEF_array[yi,:], l_array[yi,:] = PV.EEF(P_xav[yi,:],y_nd,y0_nd,dy_nd,omega_nd,N);
 
 	filename = 'EEF_array_' + str(pi);
-	exec('np.save(filename,EEF_array)');
+	np.save(filename,EEF_array)
 
 #=======================================================
 
