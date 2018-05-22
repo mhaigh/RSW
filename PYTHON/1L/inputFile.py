@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP'			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-N = 129 			# Number of gridpoints
+N = 513 			# Number of gridpoints
 
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -44,15 +44,15 @@ nu = 100.			# Eddy viscosity (m2 s-1)
 
 # Keep the unused options commented out.
 
-BG = 'UNIFORM';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
+BG = 'GAUSSIAN';			# Options: UNIFORM, SHEAR, QUADRATIC, GAUSSIAN, LAPGAUSS, ZERO.
 
 # Uniform options
-Umag = 0.04 #0.0688, -0.0233, 0.0213
+Umag = 0.16 #0.0688, -0.0233, 0.0213
 
 # Gaussian jet options
-#Umag = 0.8		# Jet max speed
-#sigma = 0.02 * 3840000.0;	# Jet width
-#JET_POS = 'CENTER';
+Umag = 0.8				# Jet max speed
+sigma = 0.02 * 3840000.0;	# Jet width
+JET_POS = 'CENTER';
 
 # Shear options
 #Umag = 100.0;
@@ -96,7 +96,7 @@ doEEFs = True					# Calculate equivalent eddy fluxes, require findFootprints = T
 footprintComponents = False		# If true, calculates the footprint in terms of its components.
 doMomentum = False
 doThickness = False
-doCorr = True
+doCorr = False
 
 # Initialise all these variables as none; even if they are not calculated, they are still called by the ouput module.
 PV_prime = None; PV_full = None; PV_BG = None; Pq = None; Pq_xav = None; EEFq = None
@@ -159,13 +159,13 @@ f = f0 + beta * y;      # Coriolis frequency (s-1)
 #=======================================================
 
 if BG == 'UNIFORM':
-	U0, H0 = BG_state.BG_uniform(Umag,Hflat,f0,beta,g,y,N);	
+	U0, H0 = BG_state.BG_uniform(Umag,Hflat,f0,beta,g,y,N)
 elif BG == 'SHEAR':
-	U0, H0 = BG_state.BG_shear(Umag,shear,Hflat,f0,beta,g,y,Ly,N);
+	U0, H0 = BG_state.BG_shear(Umag,shear,Hflat,f0,beta,g,y,Ly,N)
 elif BG == 'GAUSSIAN':
-	U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N);
+	U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N)
 elif BG == 'LAPGAUSS':
-	U0, H0 = BG_state.BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N);
+	U0, H0 = BG_state.BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N)
 elif BG == 'ZERO':
 	U0, H0 = BG_state.BG_zero(Hflat,N);
 else:
@@ -181,7 +181,7 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2)+int(1.0*N*sigma/Ly);# - int(N/4); # - sigma * 25./16.
+	y0_index = int(N/2) - 10  #int(1.95*N*sigma/Ly);# - int(N/4); # - sigma * 25./16.
 y0 = y[y0_index];
 
 # Note that the forcing itself is defined in terms of dimensionless parameters, so is defined at the end of initialisation. Need to do the same for the background flow.
@@ -258,7 +258,7 @@ if nu != 0:
 	Re = L * U / nu				# Reynolds number: measures inertial forces relative to viscous ones.
 else:
 	Re = None					# Instead of defining it as infinity, define it as None.
-Ld = np.sqrt(g * H0_nd) / f_nd	# Rossby def radius.
+Ld = np.sqrt(g * H0) / f	# Rossby def radius.
 
 # Forcing
 #=======================================================
@@ -286,13 +286,14 @@ print('Ro = ' + str(Ro))
 print('Re = ' + str(Re))
 print('Ld = ' + str(Ld[0]))
 print('N = ' + str(N))
-print(y0/L)
+
+#print(y0/L)
 
 #U0y =  diff(U0_nd,2,0,dy_nd)
-#Q = (f_nd / Ro - U0y) / H0_nd
+#Q = (0./ Ro - U0y) / H0_nd
 #Qy = diff(Q,2,0,dy_nd)
 #Qyy = diff(Qy,2,0,dy_nd)
 #P=np.load('P_xav.npy')
 #from output.plotting import bgPV
-#bgPV(U0,Qy,y_nd)
+#bgPV(U0y,Q,y_nd)
 

@@ -20,8 +20,8 @@ from inputFile import *
 
 test = 'U0' # U0 or y0
 
-samples = ['08']
-#samples = ['-08','00','08','16']
+#samples = ['08']
+samples = ['-08','00','08','16']
 
 #samples = ['-1','0','1.5']
 #samples = ['-1','1.5'] 				# sigma samples
@@ -62,10 +62,15 @@ for si in range(0,ns):
 	
 	elif test == 'y0':
 		path = '/media/mike/Seagate Expansion Drive/Documents/GulfStream/RSW/DATA/1L/PAPER1/GAUSSIAN/'
-
-		u_tmp = np.load(path + 'u_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
-		v_tmp = np.load(path + 'v_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
-		h_tmp = np.load(path + 'eta_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
+		print(AmpF_nd)
+		if si == 1:
+			u_tmp = np.load(path + 'u_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
+			v_tmp = np.load(path + 'v_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
+			h_tmp = np.load(path + 'eta_y0='+sample+'.npy')[:,:,ts] / AmpF_nd
+		else:
+			u_tmp = np.load(path + 'u_y0='+sample+'.npy')[:,:,ts]
+			v_tmp = np.load(path + 'v_y0='+sample+'.npy')[:,:,ts]
+			h_tmp = np.load(path + 'eta_y0='+sample+'.npy')[:,:,ts]
 		P[:,:,si] = np.load(path + 'P_y0='+sample+'.npy')
 		P_xav[:,si] = np.trapz(P[:,:,si],x_nd,dx_nd,axis=1);
 
@@ -97,7 +102,8 @@ for si in range(0,ns):
 	q[:,:,si] = PV.PV_instant(np.real(u_tmp),np.real(v_tmp),np.real(h_tmp),u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
 
 	# Now we have snapshot of solution, snapshot of PV, and the footprint.
-	u[:,:,si] = u_tmp;	v[:,:,si] = v_tmp;	h[:,:,si] = h_tmp;
+	ff = 1.23
+	u[:,:,si] = ff*u_tmp; v[:,:,si] = ff*v_tmp; h[:,:,si] = ff*h_tmp;
 	
 print('Plotting...')
 

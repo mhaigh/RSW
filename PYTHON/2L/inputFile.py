@@ -3,6 +3,8 @@
 #=======================================================
 # File of input parameters for the 1L RSW plunger code
 
+import sys
+
 import numpy as np
 from scipy.special import erf
 
@@ -20,7 +22,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP';			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP.
 
-N = 2*128+1; 			# Number of gridpoints in each direction.
+N = 129 			# Number of gridpoints in each direction.
 	
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -61,9 +63,9 @@ BG2 = 'NONE';			# ONLY NONE FOR NOW
 # Forcing
 #=======================================================
 
-FORCE_TYPE = 'CTS'			# Continuous 'CTS' or discontinous 'DCTS' derivatives of F1 and F2.
+FORCE_TYPE = 'CTS2'			# Continuous 'CTS' or discontinous 'DCTS' derivatives of F1 and F2.
 
-FORCE1 = 'BALANCED';       	# 'BALANCED' for geostrophically balanced forcing, 
+FORCE1 = 'VORTICITY';       # 'BALANCED' for geostrophically balanced forcing, 
 							# 'VORTICITY' for forcing on the momentum eqautions only,
 							# 'BUOYANCY' for forcing on continuity equation only 'USER'.
 FORCE2 = 'NONE'				# NONE
@@ -215,7 +217,8 @@ U1 = U1 / U;
 H2 = H2 / chi;	
 U2 = U2 / U;
 
-f = f / f0;			# The same as: f_nd = f0_nd + beta_nd * y_nd   
+f = f / f0;			# The same as: f_nd = f0_nd + beta_nd * y_nd  
+bh = beta * L / f0; 
 
 gamma = gamma / f0			# Simply scaled by the base Coriolis frequency
 
@@ -233,6 +236,8 @@ AmpF_nd = AmpF * g / (f0 * U**2);
 
 if FORCE_TYPE == 'CTS':
 	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);
+if FORCE_TYPE == 'CTS2':
+	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts2(x,y,K,y0,r0,N,FORCE1,AmpF_nd,rho1_nd,rho2_nd,f,1,bh,dx,dy)
 elif FORCE_TYPE == 'DCTS':
 	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_dcts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);
 elif FORCE_TYPE == 'DELTA':
@@ -241,7 +246,7 @@ else:
 	sys.exit('ERROR: Invalid forcing option selected.');
 
 
-forcing.forcingTest(F1,F2,F3,F6,f,rho1_nd,rho2_nd,dy,dx,N)
+#forcing.forcingTest(F1,F2,F3,F6,f,rho1_nd,rho2_nd,dy,dx,N)
 
 
 # ======================================================

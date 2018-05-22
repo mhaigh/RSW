@@ -104,6 +104,97 @@ def forcing_cts(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE1,AmpF_nd,f_nd,U,L,rho1_nd,rho
 	return F1_nd, F2_nd, F3_nd, F4_nd, F5_nd, F6_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd, Ftilde4_nd, Ftilde5_nd, Ftilde6_nd;
 
 #=======================================================
+
+def forcing_cts2(x_nd,y_nd,K_nd,y0_nd,r0_nd,N,FORCE1,AmpF_nd,rho1_nd,rho2_nd,f_nd,f0_nd,beta_nd,dx_nd,dy_nd):
+# The same as forcing_cts, but the momentum forcing is constant with latitude.
+
+	I = np.complex(0,1);
+
+	Nx = N;		# This variable can be changed for testing purposes.
+
+	# Initialise empty forcing arrays.
+	# F4 and F5 are just empty arrays, and will be defined at the end.
+	F1_nd = np.zeros((N,Nx));	# u1
+	F2_nd = np.zeros((N,Nx));	# v1
+	F3_nd = np.zeros((N,Nx));	# h1
+	F6_nd = np.zeros((N,Nx));	# h2
+
+	#=======================================================
+
+	if FORCE1 == 'BALANCED':
+		mass = 0.0;
+		for i in range(0,Nx):
+			for j in range(0,N):
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
+					if r_nd == 0:
+						F1_nd[j,i] = 0.0;
+						F2_nd[j,i] = 0.0;						
+					else:	
+						F1_nd[j,i] = AmpF_nd * (np.pi * (y_nd[j]-y0_nd) / (r0_nd * r_nd) * np.sin(np.pi * r_nd / r0_nd) - beta_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd)) / f_nd[j])
+						F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (r0_nd * r_nd) * np.sin(np.pi * r_nd / r0_nd)
+					F3_nd[j,i] = 0.5 * AmpF_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd)) / rho2_nd;
+
+ 					mass = mass + F3_nd[j,i];
+		mass = mass / (N*Nx);
+
+		F3_nd = F3_nd - mass;
+
+		F6_nd = - rho1_nd * F3_nd;
+
+	#=======================================================
+			
+	# Buoyancy only.
+	if FORCE1 == 'BUOYANCY':
+		mass = 0.0;
+		for i in range(0,N):
+			for j in range(0,N):
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				if r_nd < r0_nd:
+					F3_nd[j,i] = 0.5 * AmpF_nd * (1.0 + np.cos(np.pi * r_nd  / r0_nd)) / rho2_nd;
+					mass = mass + F3[j,i];
+		mass = mass / (N*Nx);
+		F3_nd = F3_nd - mass;
+
+		F6_nd = - rho1_nd * F3_nd;
+		
+	#=======================================================
+
+	# Vorticity only.
+	if FORCE1 == 'VORTICITY':
+		for i in range(0,Nx):
+			for j in range(0,N):
+				r_nd = np.sqrt(x_nd[i]**2 + (y_nd[j]-y0_nd)**2);
+				#print(r_nd - r0_nd)
+				if r_nd < r0_nd:
+					if r_nd == 0:
+						F1_nd[j,i] = 0.0;
+						F2_nd[j,i] = 0.0;						
+					else:	
+						F1_nd[j,i] = AmpF_nd * (np.pi * (y_nd[j]-y0_nd) / (r0_nd * r_nd) * np.sin(np.pi * r_nd / r0_nd) - beta_nd * (1.0 + np.cos(np.pi * r_nd / r0_nd)) / f_nd[j])
+						F2_nd[j,i] = - AmpF_nd * np.pi * x_nd[i] / (r0_nd * r_nd) * np.sin(np.pi * r_nd / r0_nd)
+		
+	#=======================================================	
+	
+	# Lastly, Fourier transform the three forcings in the x-direction
+		
+	Ftilde1_nd = dx_nd * np.fft.hfft(F1_nd,N,axis=1);	# Multiply by dx_nd as FFT differs by this factor compared to FT.
+	Ftilde3_nd = dx_nd * np.fft.hfft(F3_nd,N,axis=1); 
+	Ftilde2_nd = dx_nd * np.fft.fft(F2_nd,axis=1);
+	Ftilde6_nd = - rho1_nd * Ftilde3_nd;
+
+	#=======================================================
+
+	# Define arrays of zeros.
+	F4_nd = np.zeros((N,Nx));
+	F5_nd = np.zeros((N,Nx));
+	Ftilde4_nd = np.zeros((N,Nx));
+	Ftilde5_nd = np.zeros((N,Nx));
+
+
+	return F1_nd, F2_nd, F3_nd, F4_nd, F5_nd, F6_nd, Ftilde1_nd, Ftilde2_nd, Ftilde3_nd, Ftilde4_nd, Ftilde5_nd, Ftilde6_nd;
+
+#=======================================================
 #=======================================================
 
 # forcing_dcts

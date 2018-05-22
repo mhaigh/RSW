@@ -21,16 +21,16 @@ start = time.time();
 
 #=======================================================
 
-pe = 2		# Number of processors
+pe = 16		# Number of processors
 
 # Initialise tests
 
-Nu = 41;
+Nu = 161;
 #test_set = np.linspace(0.015,0.045,Nu) * 3840000.0
-test_set = np.linspace(0.4,0.6,Nu)
+test_set = np.linspace(0.4,1.2,Nu)
 
-y0_min = y[0] + L/3 + L/9;					# We want to keep the forcing at least one gridpoint away from the boundary
-y0_max = y[N-1] - L/3 - L/9;
+y0_min = y[0] + L/3 					# We want to keep the forcing at least one gridpoint away from the boundary
+y0_max = y[N-1] - L/3
 y0_set = [];						# Initialise an empty set of forcing latitudes
 y0_index_set = [];
 for j in range(0,N):
@@ -68,14 +68,14 @@ def EEF_main(set_,pi):
 	for ui in range(0,NU):
 
 		# Redefine U0 and H0.
-		#sigma = test_set[ui]
+		#sigma = set_[ui]
 		Umag = set_[ui]
 		U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,L,N)
 		U0_nd = U0 / U;
 		H0_nd = H0 / chi; 
 		a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
 	
-		for yi in range(0,0):
+		for yi in range(0,nn):
 
 			y0 = y0_set[yi];				# Redefine y0 and the forcing in each run.
 			y0_index = y0_index_set[yi];
@@ -108,11 +108,19 @@ def EEF_main(set_,pi):
 			# Calculate PV fields and PV fluxes.
 			PV_prime, PV_full, PV_BG = PV.potentialVorticity(u,v,h,u_full,h_full,H0_nd,U0_nd,N,Nt,dx_nd,dy_nd,f_nd,Ro)
 			uq, Uq, uQ, UQ, vq, vQ = PV.fluxes(u,v,U0_nd,PV_prime,PV_BG,N,Nt)
-			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt)			
-			EEF_PV[ui,yi,:], l_PV = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N)
-			com[ui,yi] = center_of_mass(P_xav)
+			P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt)	
 
-	EEF_array[:,:,:] = pi
+			com[ui,yi] = center_of_mass(np.abs(P_xav))[0]
+			i1 = int(com[ui,yi]); i2 = int(i1 + 1); r = com[ui,yi] - i1
+	
+			# For Gaussian flows, need to calculate EEF about new center of mass.
+			# This requires calculation of EEF at two grid points to aid continuity.
+			EEF1, l_PV = PV.EEF(P_xav,y_nd,y_nd[i1],i1,dy_nd,N)
+			EEF2, l_PV = PV.EEF(P_xav,y_nd,y_nd[i2],i2,dy_nd,N)
+			EEF_array[ui,yi,:] = (1 - r) * EEF1 + r * EEF2			
+
+			#EEF_array[ui,yi,:], l_PV = PV.EEF(P_xav,y_nd,y_nd[iii],iii,dy_nd,N)
+
 	filename = 'EEF_array_' + str(pi);
 	np.save(filename,EEF_array)
 	
@@ -121,19 +129,19 @@ def EEF_main(set_,pi):
 
 
 if __name__ == '__main__':
-	jobs = [];
+	jobs = []
 	for pi in range(0,pe):
-		p = mp.Process(target=EEF_main,args=(sets[pi],pi));
-		jobs.append(p);
-		p.start();
+		p = mp.Process(target=EEF_main,args=(sets[pi],pi))
+		jobs.append(p)
+		p.start()
 
 	for p in jobs:
-		p.join();
+		p.join()
 
 # Now collect the results by reloading them, and compile into one array
-EEF_array = np.zeros((Nu,nn,2));
+EEF_array = np.zeros((Nu,nn,2))
 com = np.zeros((Nu,nn))
-yn_count = 0;
+yn_count = 0
 for pi in range(0,pe):
 	filename = 'EEF_array_' + str(pi) + '.npy'
 	filename_com = 'com' + str(pi) + '.npy'
@@ -141,10 +149,10 @@ for pi in range(0,pe):
 	EEF_array_tmp = np.load(filename)
 	com_tmp = np.load(filename_com)	
 	
-	yn = np.shape(EEF_array_tmp)[0];
-	EEF_array[yn_count:yn_count+yn,:,:] = EEF_array_tmp[:,:,:];
+	yn = np.shape(EEF_array_tmp)[0]
+	EEF_array[yn_count:yn_count+yn,:,:] = EEF_array_tmp[:,:,:]
 	com[yn_count:yn_count+yn,:] = com_tmp[:,:]
-	yn_count = yn_count + yn;
+	yn_count = yn_count + yn
 
 	os.remove(filename)
 	os.remove(filename_com)	
@@ -152,9 +160,9 @@ for pi in range(0,pe):
 np.save('EEF_array',EEF_array)
 np.save('com',com)
 
-elapsed = time.time() - start;
-elapsed = np.ones(1) * elapsed;
-print(elapsed);
+elapsed = time.time() - start
+elapsed = np.ones(1) * elapsed
+print(elapsed)
 
 	
 	

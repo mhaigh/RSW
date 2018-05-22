@@ -13,11 +13,15 @@ from inputFile import *
 
 
 path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EEFs/med_res/G/'
-file_ = 'EEF_sigma.npy'
+path = ''
+file_ = 'com_umag.npy'
 EEF = np.load(path + file_)
-EEF = 1e7 * (EEF[:,:,0] - EEF[:,:,1])
+#EEF = 1e7 * (EEF[:,:,0] - EEF[:,:,1])
 
-Ns = 151
+Ns = 241
+
+plt.plot(EEF[:,20])
+plt.show()
 
 sigma_set = np.linspace(0.015,0.045,Ns) * 3840000.0
 ds = sigma_set[1] - sigma_set[0]
@@ -37,8 +41,9 @@ y0_set = np.array(y0_set) / L;
 y0_index_set = np.array(y0_index_set);
 nn = np.shape(y0_set)[0]
 
-sigma_mesh, y0_mesh = np.mgrid[slice(sigma_set.min()/1000.0,(sigma_set.max()+ds)/1000.,ds/1000.),slice(y0_set.min(),y0_set.max()+dy_nd,dy_nd)];
+sigma_mesh, y0_mesh = np.mgrid[slice(sigma_set.min()/1000.0,(sigma_set.max())/1000.,ds/1000.),slice(y0_set.min(),y0_set.max()+dy_nd,dy_nd)];
 umag_mesh, y0_mesh = np.mgrid[slice(umag_set.min(),(umag_set.max()+du),du),slice(y0_set.min(),y0_set.max()+dy_nd,dy_nd)];
+#slice(sigma_set.min()/1000.0,(sigma_set.max()+ds)/1000.,ds/1000.)
 
 #========================================================
 
@@ -57,22 +62,23 @@ for ui in range(0,Ns):
 	Q = (f_nd[y0_index_set] / Ro - U0y) / H0
 	Qy[ui,:] = diff(Q,2,0,dy_nd)
 	
+
 #========================================================
 
 
 fs = 16
 cm = 'bwr'
-Elim = 3.#.8*np.max(np.abs(EEF))
+Elim = 2.#.8*np.max(np.abs(EEF))
 
-CS = plt.contour(y0_set,sigma_set,Qy,1,colors='k')
+CS = plt.contour(y0_set,umag_set,Qy,1,colors='k')
 plt.clabel(CS, fontsize=9, inline=1)
-plt.pcolormesh(y0_mesh,sigma_mesh,EEF,vmin=-Elim,vmax=Elim,cmap=cm)
+plt.pcolor(y0_mesh,umag_mesh,EEF,cmap=cm)#,vmin=-Elim,vmax=Elim)
 plt.colorbar()
 
 plt.grid()
 plt.xlabel('y0',fontsize=fs)
-plt.ylabel('Max jet speed (m/s)',fontsize=fs)
-#plt.ylabel('Jet width (km)',fontsize=fs)
+#plt.ylabel('Max jet speed (m/s)',fontsize=fs)
+plt.ylabel('Jet width (km)',fontsize=fs)
 plt.xticks(fontsize=fs-2)
 plt.yticks(fontsize=fs-2)
 plt.show()

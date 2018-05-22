@@ -162,7 +162,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 		elif VEC == 'FILE':	# Load eigenmodes and eigenvalues from file.
 	
 			# Low-res
-			path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/U0=04/';
+			path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/west/';
 			#path = '/home/mike/Documents/GulfStream/RSW/DATA/1L/EIG/128/nu='+str(int(nu))+'/';
 			ncFile = path + 'RSW1L_Eigenmodes_k' + str(int(k)) + '_N129.nc';
 		
@@ -216,7 +216,7 @@ def EIG_DECOMP_main(U0_nd,H0_nd,dim):
 			if count[dom_index[mi,i]] != 0:
 				cy[mi,i] = freq[dom_index[mi,i]] / count[dom_index[mi,i]];
 			
-			if mi < 2:
+			if mi < 95:
 				# The projection.
 				proj[:,ii] = proj[:,ii] + theta_tmp[dom_index_tmp[mi]] * vec[:,dom_index_tmp[mi]];	# 4.
 		
@@ -301,8 +301,11 @@ if __name__ == '__main__':
 
 
 theta_abs = np.absolute(theta[:,:,0])
-#plt.plot(theta_abs[:,50])
-#plt.show()
+plt.plot(theta_abs[:,10])
+plt.plot(theta_abs[:,40])
+plt.plot(theta_abs[:,80])
+plt.plot(theta_abs[:,120])
+plt.show()
 
 #sys.exit()
 # Save data

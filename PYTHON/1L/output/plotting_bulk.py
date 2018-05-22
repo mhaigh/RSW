@@ -41,10 +41,10 @@ def plotSolutions(u,v,eta,N,x_grid,y_grid,row,nrows,string):
 	grsp = gs.GridSpec(nrows,3,width_ratios=[1,1,1.2])
 	x_grid = x_grid[0:N]
 
-	#cmap = 'bwr'
-	cmap = 'jet'
+	cmap = 'bwr'
+	#cmap = 'jet'
 
-	lm = 0.5 
+	lm = 1.0 
 
 	# Now plots
 	#==========

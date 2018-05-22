@@ -37,7 +37,7 @@ def RSW_main():
 
 	#F1_nd, F2_nd, F3_nd = forcing.forcingInv(Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,x_nd,y_nd,dx_nd,N);
 	#F1_nd, F2_nd = forcing.F12_from_F3(F3_nd,f_nd,dx_nd,dy_nd,N,N);
-	plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
+	#plotting.forcingPlots(x_nd[0:N],y_nd,Ro*F1_nd,Ro*F2_nd,F3_nd,Ftilde1_nd,Ftilde2_nd,Ftilde3_nd,N);
 
 #	sys.exit();
 	
@@ -127,16 +127,12 @@ def RSW_main():
 		Nyy = diagnostics.diff(diagnostics.diff(N_,0,0,dy_nd),0,0,dy_nd)
 		Nyy_av = np.trapz(diagnostics.extend(Nyy),x_nd,dx_nd,axis=1)
 		Curl_uD_av = np.trapz(diagnostics.extend(Curl_uD),x_nd,dx_nd,axis=1)
-
-		plt.subplot(131)
-		plt.contourf(Du)
+		
+		plt.subplot(121)
+		plt.contourf(Nyy)
 		plt.colorbar()
-		plt.subplot(132)
-		plt.contourf(Dv)
-		plt.colorbar()
-		plt.subplot(133)
-		plt.contourf(Curl_uD)
-		plt.colorbar()
+		plt.subplot(122)
+		plt.plot(Nyy_av)
 		plt.show()
 
 		#uav = np.trapz(diagnostics.extend(Du),x_nd,dx_nd,axis=1)
@@ -220,7 +216,6 @@ def RSW_main():
 		
 		#print(EEF_u, EEF_v);
 
-
 	# PV and PV footprints
 	#====================================================
 
@@ -241,23 +236,43 @@ def RSW_main():
 			else: 
 				P, P_xav = PV.footprint(uq,Uq,uQ,UQ,vq,vQ,x_nd,T_nd,dx_nd,dy_nd,N,Nt);			
 			if doEEFs:
+
+				from scipy.ndimage.measurements import center_of_mass
+				iii = center_of_mass(np.abs(P_xav))[0]
+				i1 = int(iii); i2 = int(i1 + 1); r = iii - i1
+				print(iii,i1,i2,r)
+
+				com = y_nd[int(iii)]
+				print(com)
 				if footprintComponents:
 					EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 					# This returns EEF_array, an array with the following structure:
 					# EEF_array = ([EEF_north,EEF_south],[uq_north,uq_south],[Uq_north,Uq_south],[uQ_north,uQ_south],[vq_north,vq_south],[vQ_north,vQ_south]).
 					EEF_north = EEF_array[0,0]; EEF_south = EEF_array[0,1];
 				else:
-					EEF, l = PV.EEF(P_xav,y_nd,y0_nd,y0_index,dy_nd,N);
+					EEF, l = PV.EEF(P_xav,y_nd,com,int(iii),dy_nd,N)
+					EEF1, l = PV.EEF(P_xav,y_nd,y_nd[i1],i1,dy_nd,N)
+					EEF2, l = PV.EEF(P_xav,y_nd,y_nd[i2],i2,dy_nd,N)
+					EEF_ = (1 - r) * EEF1 + r * EEF2
 					EEF_north = EEF[0]; EEF_south = EEF[1];
+					print(EEF)
+					print(EEF_)
 					EEF = EEF_north - EEF_south;
 				print(EEF);
-			fm = PV.firstMoment(P_xav,y_nd,y0_nd,dy_nd,N)
-			print(fm)
+			#fm = PV.firstMoment(P_xav,y_nd,y0_nd,dy_nd,N)
+	
+
+
+	#fm1 = PV.firstMoment(P_xav,y_nd,com,dy_nd,N) / com
+	#print(fm1)
+	#fm2 = PV.firstMoment(P_xav,y_nd,y0_nd,dy_nd,N) / y0_nd
+	#print(fm2)
+
 	np.save('P_xav.npy',P_xav)
 	#plt.plot((Nyy-Curl_uD_av)/np.max(np.abs(Nyy-Curl_uD_av)),label='both')
 	plt.plot(y_nd,P_xav,label='full',linewidth=1.2)
 	#plt.plot(y_nd,Nyy_av/H0[N//2],label='N')
-	plt.axvline(x=y0_nd, ymin=-1, ymax =1,color='k')
+	plt.axvline(x=com, ymin=-1, ymax =1,color='k')
 	#plt.ylim([-.002,.002])
 	plt.legend()
 	plt.show()

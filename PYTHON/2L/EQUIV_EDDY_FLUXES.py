@@ -30,7 +30,7 @@ TEST = 'U0';
 if TEST == 'U0':
 	nn = 41;
 	U0_set = np.linspace(-0.1,0.1,nn);
-	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);
+	F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts2(x,y,K,y0,r0,N,'VORTICITY',AmpF_nd,rho1_nd,rho2_nd,f,1,bh,dx,dy)
 
 if TEST == 'y0':
 	y0_min = y[0] + r0;					# We want to keep the forcing at least one gridpoint away from the boundary
@@ -75,34 +75,32 @@ l = np.zeros((nn,2));
 for ii in range(0,nn):
 	print(ii);
 	
-	if EEF_PV[ii,0] == 0:
-
-		# If TEST==U0, linear problem has to be redefined each iteration.
-		if TEST == 'U0':
+	# If TEST==U0, linear problem has to be redefined each iteration.
+	if TEST == 'U0':
 		
-			# Redefine background state
-			Umag1 = U0_set[ii];
-			U1, U2, H1, H2 = BG_state.BG_uniform_none(Umag1,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,N);
-			U1 = U1 / U;	U2 = U2 / U
-			H1 = H1 / chi;	H2 = H2 / chi 
+		# Redefine background state
+		Umag1 = U0_set[ii];
+		U1, U2, H1, H2 = BG_state.BG_uniform_none(Umag1,H1_flat,H2_flat,rho1_nd,rho2_nd,f0,beta,g,y,N);
+		U1 = U1 / U;	U2 = U2 / U
+		H1 = H1 / chi;	H2 = H2 / chi 
 
-			# Solver coeffs depend on BG state
-			a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K,f,U1,U2,H1,H2,rho1_nd,rho2_nd,omega,gamma,dy,N)
+		# Solver coeffs depend on BG state
+		a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K,f,U1,U2,H1,H2,rho1_nd,rho2_nd,omega,gamma,dy,N)
 		
-		# If TEST==y0, matrix only needs to be defined once, but forcing must be defined each iteration.
-		if TEST == 'y0':
-			y0 = y0_set[ii];				# Redefine y0 and the forcing in each run.
-			y0_index = y0_index_set[ii];
-			y0_nd = y0 / L;
-			# Forcing redefined each iteration.
-			F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);	
+	# If TEST==y0, matrix only needs to be defined once, but forcing must be defined each iteration.
+	if TEST == 'y0':
+		y0 = y0_set[ii];				# Redefine y0 and the forcing in each run.
+		y0_index = y0_index_set[ii];
+		y0_nd = y0 / L;
+		# Forcing redefined each iteration.
+		F1, F2, F3, F4, F5, F6, Ftilde1, Ftilde2, Ftilde3, Ftilde4, Ftilde5, Ftilde6 = forcing.forcing_cts(x,y,K,y0,r0,N,FORCE1,AmpF_nd,f,U,L,rho1_nd,rho2_nd,dx,dy);	
 	
 	# Solver
 	if BC == 'NO-SLIP':
 		solution = solver.NO_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ro*Ftilde1,Ro*Ftilde2,Ftilde3,Ro*Ftilde4,Ro*Ftilde5,Ftilde6,N,N2)
 	if BC == 'FREE-SLIP':
 		solution = solver.FREE_SLIP_SOLVER(a1,a2,a3,a4,b1,b4,c1,c2,c3,c4,c5,d1,d3,d4,d5,e4,e5,f1,f2,f3,f4,Ro*Ftilde1,Ro*Ftilde2,Ftilde3,Ro*Ftilde4,Ro*Ftilde5,Ftilde6,N,N2)
-
+	
 	utilde, vtilde, htilde = solver.extractSols(solution,N,N2,BC)
 	u, v, h = solver.SPEC_TO_PHYS(utilde,vtilde,htilde,T,Nt,dx,omega,N)
 
@@ -111,7 +109,7 @@ for ii in range(0,nn):
 	u = np.real(u)
 	v = np.real(v)
 	h = np.real(h)
-	
+
 	# For use in PV and footprint calculations: the 'full' zonal velocities and interface thicknesses.
 	u_full = np.zeros((N,N,Nt,2))
 	h_full = np.zeros((N,N,Nt,2))
@@ -124,15 +122,14 @@ for ii in range(0,nn):
 	# Call function calculate PV in each layer.
 	q = np.zeros((N,N,Nt,2)); q_full = np.zeros((N,N,Nt,2)); Q = np.zeros((N,2))
 	q[:,:,:,0], q_full[:,:,:,0], Q[:,0] = PV.vort(u[:,:,:,0],v[:,:,:,0],h[:,:,:,0],u_full[:,:,:,0],h_full[:,:,:,0],H1,U1,N,Nt,dx,dy,f)
-
+	
 	# Calculate footprints using previously calculated PV. Most interseted in the upper layer.
 	P, P_xav = PV.footprint(u_full[:,:,:,0],v[:,:,:,0],q_full[:,:,:,0],x,y,dx,dy,T,Nt)
-
+	
 	# EEF
-	EEF_PV[ii,:], l_PV[ii,:] = PV.EEF(P_xav,y,y0,y0_index,dy,N)
+	EEF[ii,:], l = PV.EEF(P_xav,y,y0,y0_index,dy,N)
 
-plt.plot(EEF_PV[:,0]-EEF_PV[:,1])
-plt.show()
+np.save('EEF_PV',EEF)
 	
 elapsed = time.time() - start;
 elapsed = np.ones(1) * elapsed;
