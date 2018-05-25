@@ -21,16 +21,20 @@ start = time.time();
 
 #=======================================================
 
-pe = 16		# Number of processors
+pe = 1		# Number of processors
 
 # Initialise tests
 
-Nu = 161;
-#test_set = np.linspace(0.015,0.045,Nu) * 3840000.0
-test_set = np.linspace(0.4,1.2,Nu)
+Nu = 3;
 
-y0_min = y[0] + L/3 					# We want to keep the forcing at least one gridpoint away from the boundary
-y0_max = y[N-1] - L/3
+test_set = np.array((50.,60.,70.))
+#test_set = np.array((50.,100.,200.))
+#test_set = np.array((60000.,90000.,12000.)) # r0
+#test_set = np.linspace(0.015,0.045,Nu) * 3840000.0
+#test_set = np.linspace(0.4,1.2,Nu)
+
+y0_min = y[0] + r0# + L/3 					# We want to keep the forcing at least one gridpoint away from the boundary
+y0_max = y[N-1] - r0# - L/3
 y0_set = [];						# Initialise an empty set of forcing latitudes
 y0_index_set = [];
 for j in range(0,N):
@@ -69,12 +73,34 @@ def EEF_main(set_,pi):
 
 		# Redefine U0 and H0.
 		#sigma = set_[ui]
-		Umag = set_[ui]
-		U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,L,N)
-		U0_nd = U0 / U;
-		H0_nd = H0 / chi; 
+		#Umag = set_[ui]
+		#U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,L,N)
+		#U0_nd = U0 / U;
+		#H0_nd = H0 / chi; 
+
+		# r0
+		#r0 = set_[ui]
+		#r0_nd = r0 / L
+
+		# period
+		period_days = set_[ui]
+		period = 3600. * 24. * period_days;
+		omega = 1. / (period);          		
+		T = np.linspace(0,period,Nt+1);		
+		dt = T[1] - T[0];						
+		t = T[ts];		
+
+		omega_nd = omega * T_adv;      	
+		t_nd = t / T_adv;
+		T_nd = T / T_adv;
+		dt_nd = dt / T_adv;
+
+		# k
+		#nu = set_[ui]
+		#Re = L * U / nu	
+
 		a1,a2,a3,a4,b4,c1,c2,c3,c4 = solver.SOLVER_COEFFICIENTS(Ro,Re,K_nd,f_nd,U0_nd,H0_nd,omega_nd,gamma_nd,dy_nd,N);
-	
+
 		for yi in range(0,nn):
 
 			y0 = y0_set[yi];				# Redefine y0 and the forcing in each run.

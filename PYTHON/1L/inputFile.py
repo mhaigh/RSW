@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 BC = 'FREE-SLIP'			# Two boundary condition choices at north and south boundaries: NO-SLIP or FREE-SLIP 
 
-N = 513 			# Number of gridpoints
+N = 257 			# Number of gridpoints
 
 Lx = 3840000.		# Zonal lengthscale (m)
 Ly = 3840000.		# Meridional lengthscale (m)
@@ -67,7 +67,7 @@ FORCE = 'BALANCED'       	# 'BALANCED' for geostrophically balanced forcing,
 FORCE_TYPE = 'CTS2'			# 'DCTS' is the original forcing, in which F3 has a discontinous derivative,
 							# so that F1 and F2 are discontinous.
 
-Fpos = 'CENTER'				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
+Fpos = 'USER'				# 4 choices for positioning of plunger, 'NORTH', 'CENTER', 'SOUTH' and 'USER' (define this manually below)
 							
 r0 = 90.0 * 1000.0	 		# Forcing radius
 AmpF = 1.0e-7			# Forcing amplitude
@@ -166,6 +166,8 @@ elif BG == 'GAUSSIAN':
 	U0, H0 = BG_state.BG_Gaussian(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N)
 elif BG == 'LAPGAUSS':
 	U0, H0 = BG_state.BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N)
+elif BG == 'QUAD':
+	U0, H0 = BG_state.BG_quadratic(Umag,Hflat,f0,beta,g,y,Ly,N)
 elif BG == 'ZERO':
 	U0, H0 = BG_state.BG_zero(Hflat,N);
 else:
@@ -181,7 +183,7 @@ elif Fpos == 'CENTER':
 elif Fpos == 'SOUTH':
 	y0_index = int(N/4);
 elif Fpos == 'USER':
-	y0_index = int(N/2) - 10  #int(1.95*N*sigma/Ly);# - int(N/4); # - sigma * 25./16.
+	y0_index = int(N/2) - int(1.5*N*sigma/Ly);# - int(N/4); # - sigma * 25./16.
 y0 = y[y0_index];
 
 # Note that the forcing itself is defined in terms of dimensionless parameters, so is defined at the end of initialisation. Need to do the same for the background flow.
@@ -287,13 +289,13 @@ print('Re = ' + str(Re))
 print('Ld = ' + str(Ld[0]))
 print('N = ' + str(N))
 
-#print(y0/L)
+print(sigma/L)
+#print(r0_nd)
 
 #U0y =  diff(U0_nd,2,0,dy_nd)
-#Q = (0./ Ro - U0y) / H0_nd
+#Q = (f_nd/ Ro - U0y) / H0_nd
 #Qy = diff(Q,2,0,dy_nd)
 #Qyy = diff(Qy,2,0,dy_nd)
 #P=np.load('P_xav.npy')
 #from output.plotting import bgPV
-#bgPV(U0y,Q,y_nd)
-
+#bgPV(U0,Qyy,y_nd)

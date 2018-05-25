@@ -99,6 +99,24 @@ def BG_LapGauss(Umag,sigma,JET_POS,Hflat,f0,beta,g,y,Ly,N):
 	
 
 #=======================================================
+
+def BG_quadratic(Umag,Hflat,f0,beta,g,y,Ly,N):
+	"Quadratic background flow"
+
+	Umag = -1.
+	a = 1./Ly**2; b = 1/Ly; c = 0.5 - a * Ly**2 / 4
+	scale = 1#c - b**2 / (4 * a)
+
+	U0 = np.zeros(N)
+	H0 = np.zeros(N)
+
+	for j in range(0,N):
+		U0[j] = Umag * (a * y[j]**2 + b * y[j] + c) / scale
+		H0[j] = - Umag * ((a * beta / 4.0) * y[j]**4 + ((f0 * a + beta * b) / 3.0) * y[j]**3 + ((f0 * b + c * beta) / 2.0) * y[j]**2 + f0 * c * y[j]) / (g * scale) + Hflat
+
+	return U0, H0
+
+#=======================================================
 	
 def BG_zero(Hflat,chi,N):
 	"Zero BG flow"

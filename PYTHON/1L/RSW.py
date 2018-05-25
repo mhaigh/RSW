@@ -243,7 +243,7 @@ def RSW_main():
 				print(iii,i1,i2,r)
 
 				com = y_nd[int(iii)]
-				print(com)
+				print(y0_index-iii)
 				if footprintComponents:
 					EEF_array = PV.EEF_components(P_xav,P_uq_xav,P_uQ_xav,P_Uq_xav,P_vq_xav,P_vQ_xav,y_nd,y0_nd,y0_index,dy_nd,omega_nd,N);
 					# This returns EEF_array, an array with the following structure:
